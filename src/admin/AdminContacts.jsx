@@ -97,7 +97,7 @@ const AdminContacts = () => {
             <th>Email</th>
             <th>Subject</th>
             <th>Status</th>
-            <th className="w-10">Action</th>
+            <th className="w-40">Action</th>
           </tr>
         </thead>
 

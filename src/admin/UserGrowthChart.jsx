@@ -25,7 +25,7 @@ const UserGrowthChart = () => {
   const [chartData, setChartData] = useState(null);
 
   useEffect(() => {
-    fetch("http://localhost:5000/api/auth/users")
+    fetch("http://localhost:5000/api/user/allusers")
       .then((res) => res.json())
       .then((users) => {
         const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];

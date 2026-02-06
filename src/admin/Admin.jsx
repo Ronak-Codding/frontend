@@ -26,13 +26,6 @@ const Admin = () => {
   };
 
   
-//   const navigate = useNavigate();
-
-// const logout = () => {
-//   localStorage.removeItem("adminToken");
-//   localStorage.removeItem("admin");
-//   navigate("/admin-login", { replace: true });
-// };
 
   return (
     <div

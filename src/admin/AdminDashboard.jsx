@@ -6,7 +6,7 @@ const AdminDashboard = () => {
   const [users, setUsers] = useState([]);
 
   useEffect(() => {
-    fetch("http://localhost:5000/api/auth/users")
+    fetch("http://localhost:5000/api/user/allusers")
       .then((res) => res.json())
       .then((data) => setUsers(data));
   }, []);

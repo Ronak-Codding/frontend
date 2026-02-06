@@ -15,10 +15,9 @@ import AdminDashboard from "./admin/AdminDashboard";
 import Users from "./admin/AdminUsers";
 import AdminContacts from "./admin/AdminContacts";
 
+import User from "./user/User";
 
-import User from "./components/user/User";
-import FlightSearchForm from "./components/user/FlightSearchForm";
-import Dashboard from "./components/user/Dashboard";
+import Dashboard from "./user/Dashboard";
 
 function App() {
   return (
@@ -56,7 +55,6 @@ function App() {
         >
           <Route index element={<Navigate to="dashboard" replace />} />
           <Route path="dashboard" element={<Dashboard />} />
-          <Route path="flights" element={<FlightSearchForm />} />
         </Route>
 
         {/* Fallback */}

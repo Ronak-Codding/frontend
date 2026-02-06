@@ -59,7 +59,7 @@ const AdminLogin = () => {
           Forgot password?
         </p>
         <button type="submit">Login</button>
-        <div className="login-footer">
+        {/* <div className="login-footer">
           <p style={{ marginTop: "10px" }}>
             New user?{" "}
             <span
@@ -69,7 +69,7 @@ const AdminLogin = () => {
               Register here
             </span>
           </p>
-        </div>
+        </div> */}
       </form>
     </div>
   );

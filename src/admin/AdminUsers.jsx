@@ -347,7 +347,7 @@ const AdminUsers = () => {
             <th>Phone</th>
             <th>Role</th>
             <th>Status</th>
-            <th className="w-10">Action</th>
+            <th className="w-40">Action</th>
           </tr>
         </thead>
         <tbody>

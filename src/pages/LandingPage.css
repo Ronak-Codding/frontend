@@ -269,10 +269,10 @@
   border-radius: 20px;
   padding: 2.5rem;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
-  /* max-width: 500px; */
-  width: 100%;
+  max-width: 500px;
+  /* width: 100%; */
   margin-left: auto;
-  transform: translateX(-200px);
+  /* transform: translateX(-50px); */
   border: 1px solid rgba(255, 255, 255, 0.2);
   backdrop-filter: blur(10px);
   background: rgba(255, 255, 255, 0.95);

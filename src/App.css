@@ -1,38 +1,32 @@
-.App {
-  text-align: center;
+/* App.css में नीचे add करें */
+
+/* Mobile menu toggle button */
+.mobile-menu-toggle {
+  display: none;
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: #1e293b;
+  cursor: pointer;
+  margin-right: 15px;
+  padding: 5px;
+  border-radius: 6px;
+  background: #f1f5f9;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
+@media (max-width: 992px) {
+  .mobile-menu-toggle {
+    display: block;
   }
 }
 
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
-}
-
-.App-link {
-  color: #61dafb;
-}
-
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
+/* Additional responsive fixes */
+@media (max-width: 768px) {
+  .content-wrapper {
+    padding: 15px !important;
   }
-  to {
-    transform: rotate(360deg);
+  
+  .page-container {
+    padding: 20px !important;
   }
 }

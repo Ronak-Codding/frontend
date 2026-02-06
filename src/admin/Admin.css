@@ -1,0 +1,316 @@
+.chart-card {
+  background: #0f172a;
+  padding: 20px;
+  border-radius: 14px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+}
+
+body {
+  background-color: #f4f6f9; /* OR pure white */
+  font-family: "Segoe UI", sans-serif;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+}
+
+#wrapper {
+  display: flex;
+  min-height: 100vh;
+  width: 100%;
+  overflow-x: hidden;
+}
+
+/* =======================
+   Sidebar
+======================= */
+#sidebar-wrapper {
+  width: 260px;
+  background: #fff;
+  border-right: 1px solid #ddd;
+  transition: all 0.35s ease-in-out;
+  position: relative;
+  top: 0;
+  left: 0;
+  height: auto;
+  overflow-x: hidden;
+  overflow-y: auto;
+  z-index: 1040;
+}
+
+#wrapper.toggled #sidebar-wrapper {
+  margin-left: -260px;
+}
+
+#wrapper.toggled #page-content-wrapper {
+  margin-left: 0;
+}
+
+#sidebar-wrapper .list-group-item {
+  border: none;
+  padding: 15px 20px;
+  color: #555;
+}
+
+#sidebar-wrapper .list-group-item:hover {
+  background-color: #f1f1f1;
+  color: #0d6efd;
+}
+
+#sidebar-wrapper .active {
+  background-color: #0d6efd !important;
+  color: #fff !important;
+}
+
+/* =======================
+   Page Content
+======================= */
+#page-content-wrapper {
+  flex: 1;
+  margin-left: 0; /* 🔥 SAME AS SIDEBAR WIDTH */
+  background: linear-gradient(to left, #8b165c, #4e1e9c);
+  min-height: 100vh;
+  transition: all 0.35s ease-in-out;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+/* =======================
+   Navbar (MATCH PAGE CONTENT)
+======================= */
+.navbar {
+  background: linear-gradient(to left, #8b165c, #4e1e9c);
+  border-bottom: none;
+  position: sticky;
+  top: 0;
+  z-index: 1050;
+  backdrop-filter: blur(6px);
+  /* background: linear-gradient(to right, #141e30, #243b55); */
+}
+
+.list-group-item {
+  border: none;
+  padding: 15px 20px;
+  font-weight: 700;
+  background: transparent;
+}
+
+.list-group-item:hover,
+.list-group-item.active {
+  background: #0d6efd;
+  color: #fff;
+}
+
+.primary-text {
+  color: #0d6efd;
+}
+
+.second-text {
+  color: #6c757d;
+}
+
+/* =======================
+   Cards
+======================= */
+.shadow-sm {
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.shadow-sm:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* =======================
+   Table
+======================= */
+.table {
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.table thead {
+  background-color: #0d6efd;
+  color: rgb(255, 255, 255);
+}
+
+.table-hover tbody tr:hover {
+  background-color: #f2f6ff;
+}
+
+/* =======================
+   Buttons
+======================= */
+.btn {
+  border-radius: 6px;
+  transition: all 0.25s ease;
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+}
+
+.btn-info {
+  color: #fff;
+}
+
+/* Add User Button */
+.add-user-btn {
+  background: linear-gradient(135deg, #00c6ff, #0072ff);
+  border: none;
+  padding: 10px 18px;
+  font-weight: 600;
+  border-radius: 8px;
+  color: #fff;
+  transition: all 0.3s ease;
+}
+
+.add-user-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(0, 114, 255, 0.4);
+}
+
+.dark .add-user-btn {
+  background: linear-gradient(135deg, #7f00ff, #e100ff);
+}
+
+/* =======================
+   Badges
+======================= */
+.badge {
+  padding: 6px 10px;
+  font-size: 0.8rem;
+}
+
+/* =======================
+   Modal
+======================= */
+.modal-content {
+  border-radius: 10px;
+}
+
+/* =======================
+   Dark Mode
+======================= */
+.dark {
+  background-color: #121212;
+  color: #f1f1f1;
+  background: linear-gradient(to right, #141e30, #243b55);
+}
+
+.dark #page-content-wrapper {
+  background-color: #121212;
+  background: linear-gradient(to right, #141e30, #243b55);
+}
+
+.dark #sidebar-wrapper {
+  background-color: #1e1e1e;
+}
+
+.dark .navbar {
+  background-color: #1e1e1e;
+  border-bottom: 1px solid #333;
+}
+
+.dark .list-group-item {
+  color: #ccc;
+}
+
+.dark .list-group-item:hover {
+  background-color: #333;
+  color: #fff;
+}
+
+.dark .table {
+  background-color: #1e1e1e;
+  color: #fff;
+}
+
+.dark .table thead {
+  background-color: #333;
+}
+
+.dark .bg-white {
+  background-color: #1e1e1e !important;
+}
+
+/* =======================
+   Responsive
+======================= */
+@media (max-width: 768px) {
+  #sidebar-wrapper {
+    margin-left: -250px;
+  }
+
+  #wrapper.toggled #sidebar-wrapper {
+    margin-left: 0;
+  }
+
+  .navbar h2 {
+    font-size: 1.2rem;
+  }
+
+  .table {
+    font-size: 0.85rem;
+  }
+
+  .btn {
+    margin-bottom: 5px;
+  }
+  .add-user-btn {
+    width: 100%;
+  }
+}
+
+/* Toggle sidebar */
+#wrapper.toggled #sidebar-wrapper {
+  margin-left: -260px;
+}
+
+/* Dark mode */
+.dark #page-content-wrapper {
+  background: #121212;
+}
+
+.admin-navbar {
+  background: linear-gradient(90deg, #5b1fa6, #8e1467);
+  height: 60px;
+}
+
+/* Admin profile button */
+.admin-top-profile {
+  color: #dccccc;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.admin-top-profile i {
+  color: #fff;
+}
+
+/* Dropdown RIGHT SIDE */
+.admin-profile-dropdown-right {
+  position: absolute;
+  top: 60px;
+  right: 60px; /* dark mode button ke baju me */
+  background: #1e1e2f;
+  border-radius: 8px;
+  min-width: 200px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+  z-index: 999;
+  overflow: hidden;
+}
+
+.admin-profile-dropdown-right .dropdown-item {
+  color: #fff;
+  padding: 10px 16px;
+}
+
+.admin-profile-dropdown-right .dropdown-item:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.admin-profile-dropdown-right .dropdown-divider {
+  border-color: rgba(255, 255, 255, 0.15);
+}

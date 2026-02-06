@@ -1,0 +1,109 @@
+/* PAGE */
+.airlines-page {
+  padding: 20px;
+}
+
+/* SUMMARY ICON */
+.icon-circle {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+}
+
+/* TABLE */
+.table th,
+.table td {
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+/* SEARCH INPUT ICON ALIGN */
+.input-group-text {
+  background: #f8f9fa;
+}
+
+/* BADGES */
+.badge {
+  font-size: 0.85rem;
+  padding: 6px 10px;
+}
+
+/* ACTION BUTTONS */
+.btn-sm svg {
+  vertical-align: middle;
+}
+
+/* PAGINATION */
+.pagination .page-link {
+  cursor: pointer;
+}
+
+/* ============================= */
+/* 📱 MOBILE RESPONSIVE */
+/* ============================= */
+@media (max-width: 768px) {
+  .airlines-page {
+    padding: 10px;
+  }
+
+  /* HEADER */
+  .airlines-page h2 {
+    font-size: 1.3rem;
+  }
+
+  /* SUMMARY CARDS STACK */
+  .row.g-3 > div {
+    flex: 0 0 100%;
+    max-width: 100%;
+  }
+
+  /* SEARCH + FILTER STACK */
+  .card-body .row.g-3 {
+    flex-direction: column;
+  }
+
+  .card-body .col-md-8,
+  .card-body .col-md-4 {
+    width: 100%;
+  }
+
+  .form-select {
+    width: 100% !important;
+  }
+
+  /* TABLE SCROLL */
+  .table-responsive {
+    overflow-x: auto;
+  }
+
+  /* BUTTONS SMALLER */
+  .btn-sm {
+    padding: 4px 8px;
+  }
+}
+
+/* ============================= */
+/* 📱 EXTRA SMALL DEVICES */
+/* ============================= */
+@media (max-width: 480px) {
+  /* HIDE TEXT, SHOW ICONS ONLY */
+  .btn-outline-primary,
+  .btn-outline-danger {
+    padding: 4px 6px;
+  }
+
+  /* PAGINATION CENTER */
+  .pagination {
+    justify-content: center !important;
+  }
+
+  /* TABLE FONT SMALL */
+  .table {
+    font-size: 0.85rem;
+  }
+}

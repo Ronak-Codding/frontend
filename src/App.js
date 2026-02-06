@@ -8,8 +8,8 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import AdminLogin from "./pages/AdminLogin";
 import Admin from "./admin/Admin";
-import AdminRoute from "./pages/AdminRoute";
-import UserRoute from "./pages/UserRoute";
+import AdminRoute from "./components/AdminRoute";
+import UserRoute from "./components/UserRoute";
 
 import AdminDashboard from "./admin/AdminDashboard";
 import Users from "./admin/AdminUsers";

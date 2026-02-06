@@ -2,8 +2,8 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./LandingPage.css";
 import FlightSearchForm from "./FlightSearchForm";
-import Header from "./Header";
-import Footer from "./Footer";
+import Header from "../components/Header";
+import Footer from "../components/Footer";
 
 const NewLandingPage = () => {
   const navigate = useNavigate();

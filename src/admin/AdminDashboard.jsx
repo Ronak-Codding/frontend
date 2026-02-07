@@ -28,19 +28,6 @@ const AdminDashboard = () => {
             <UserGrowthChart />
           </div>
         </div>
-        {/* <div className="col-md-3">
-          <div className="p-3 bg-white shadow rounded">
-            <h3>{users.filter((u) => u.status === "active").length}</h3>
-            <p>Active</p>
-          </div>
-        </div> */}
-
-        {/* <div className="col-md-3">
-          <div className="p-3 bg-white shadow rounded">
-            <h3>{users.filter((u) => u.status === "blocked").length}</h3>
-            <p>Blocked</p>
-          </div>
-        </div> */}
       </div>
     </>
   );

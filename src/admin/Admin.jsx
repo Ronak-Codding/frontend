@@ -13,43 +13,7 @@ const Admin = () => {
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
-  const [notifications, setNotifications] = useState([
-    {
-      id: 1,
-      type: "info",
-      message: "New booking received for flight AI-202",
-      time: "2 mins ago",
-      read: false,
-    },
-    {
-      id: 2,
-      type: "success",
-      message: "Payment of $1,250 received",
-      time: "1 hour ago",
-      read: false,
-    },
-    {
-      id: 3,
-      type: "warning",
-      message: "Flight AI-301 delayed by 2 hours",
-      time: "3 hours ago",
-      read: true,
-    },
-    {
-      id: 4,
-      type: "info",
-      message: "New user registered: john.doe@email.com",
-      time: "5 hours ago",
-      read: true,
-    },
-    {
-      id: 5,
-      type: "success",
-      message: "System backup completed successfully",
-      time: "Yesterday",
-      read: true,
-    },
-  ]);
+  const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(false);
   const location = useLocation();
 

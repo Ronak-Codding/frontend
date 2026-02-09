@@ -18,6 +18,25 @@ const AdminContacts = () => {
       setLoading(false);
     }
   };
+  const handleReply = async (contact) => {
+    // Auto mark as read (only if new)
+    if (contact.status === "new") {
+      await fetch(`http://localhost:5000/api/contact/${contact._id}/status`, {
+        method: "PUT",
+      });
+      loadContacts();
+    }
+
+    // Open mail client
+    const subject = encodeURIComponent(
+      `Re: ${contact.subject || "Contact Message"}`,
+    );
+    const body = encodeURIComponent(
+      `Hello ${contact.fullName},\n\n\n---\nOriginal Message:\n${contact.message}`,
+    );
+
+    window.location.href = `mailto:${contact.email}?subject=${subject}&body=${body}`;
+  };
 
   useEffect(() => {
     loadContacts();
@@ -128,6 +147,14 @@ const AdminContacts = () => {
                 </span>
               </td>
               <td>
+                <button
+                  className="btn btn-sm btn-success me-2"
+                  title="Reply"
+                  onClick={() => handleReply(c)}
+                >
+                  <i className="fas fa-reply"></i>
+                </button>
+
                 <button
                   className="btn btn-sm btn-info me-2"
                   onClick={() => handleView(c)}

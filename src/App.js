@@ -14,6 +14,7 @@ import UserRoute from "./components/UserRoute";
 import AdminDashboard from "./admin/AdminDashboard";
 import Users from "./admin/AdminUsers";
 import AdminContacts from "./admin/AdminContacts";
+import Airlines from "./admin/Airlines";
 
 import User from "./user/User";
 
@@ -42,6 +43,7 @@ function App() {
           <Route path="dashboard" element={<AdminDashboard />} />
           <Route path="users" element={<Users />} />
           <Route path="contacts" element={<AdminContacts />} />
+          <Route path="airlines" element={<Airlines />} />
         </Route>
 
         {/* User */}

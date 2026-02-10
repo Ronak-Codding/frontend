@@ -15,6 +15,9 @@ import AdminDashboard from "./admin/AdminDashboard";
 import Users from "./admin/AdminUsers";
 import AdminContacts from "./admin/AdminContacts";
 import Airlines from "./admin/Airlines";
+import Airports from "./admin/Airports";
+import Flights from "./admin/Flights";
+import AdminBookings from "./admin/AdminBookings";
 
 import User from "./user/User";
 
@@ -44,6 +47,9 @@ function App() {
           <Route path="users" element={<Users />} />
           <Route path="contacts" element={<AdminContacts />} />
           <Route path="airlines" element={<Airlines />} />
+          <Route path="airports" element={<Airports />} />
+          <Route path="flights" element={<Flights />} />
+          <Route path="bookings" element={<AdminBookings />} />
         </Route>
 
         {/* User */}

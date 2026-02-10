@@ -4,72 +4,96 @@ const AirlineModal = ({ show, onClose, onSubmit, form, setForm, editId }) => {
   if (!show) return null;
 
   return (
-    <div
-      className="modal fade show d-block"
-      style={{ background: "#00000080" }}
-    >
-      <div className="modal-dialog modal-dialog-centered">
-        <div className="modal-content shadow">
-          <div className="modal-header">
-            <h5 className="modal-title">
-              {editId ? "Edit Airline" : "Add New Airline"}
-            </h5>
-            <button className="btn-close" onClick={onClose}></button>
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center">
+      {/* Backdrop */}
+      <div
+        className="absolute inset-0 bg-black bg-opacity-50"
+        onClick={onClose}
+      ></div>
+
+      {/* Modal */}
+      <div className="relative bg-white rounded-lg shadow-xl w-full max-w-md p-6">
+        {/* Header */}
+        <div className="flex justify-between items-center mb-4">
+          <h5 className="text-lg font-semibold text-gray-800">
+            {editId ? "Edit Airline" : "Add New Airline"}
+          </h5>
+          <button
+            onClick={onClose}
+            className="text-gray-400 hover:text-gray-600"
+          >
+            ✖
+          </button>
+        </div>
+
+        {/* Form */}
+        <form onSubmit={onSubmit} className="space-y-4">
+          {/* Airline Name */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Airline Name
+            </label>
+            <input
+              type="text"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              value={form.airline_name}
+              onChange={(e) =>
+                setForm({ ...form, airline_name: e.target.value })
+              }
+              required
+            />
           </div>
 
-          <form onSubmit={onSubmit}>
-            <div className="modal-body">
-              <div className="mb-3">
-                <label className="form-label">Airline Name</label>
-                <input
-                  className="form-control"
-                  value={form.airline_name}
-                  onChange={(e) =>
-                    setForm({ ...form, airline_name: e.target.value })
-                  }
-                  required
-                />
-              </div>
+          {/* Airline Code */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Airline Code
+            </label>
+            <input
+              type="text"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              value={form.airline_code}
+              onChange={(e) =>
+                setForm({ ...form, airline_code: e.target.value })
+              }
+              required
+            />
+          </div>
 
-              <div className="mb-3">
-                <label className="form-label">Airline Code</label>
-                <input
-                  className="form-control"
-                  value={form.airline_code}
-                  onChange={(e) =>
-                    setForm({ ...form, airline_code: e.target.value })
-                  }
-                  required
-                />
-              </div>
+          {/* Status */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Status
+            </label>
+            <select
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              value={form.status}
+              onChange={(e) =>
+                setForm({ ...form, status: e.target.value })
+              }
+            >
+              <option value="Publish">Publish</option>
+              <option value="Draft">Draft</option>
+            </select>
+          </div>
 
-              <div className="mb-3">
-                <label className="form-label">Status</label>
-                <select
-                  className="form-select"
-                  value={form.status}
-                  onChange={(e) => setForm({ ...form, status: e.target.value })}
-                >
-                  <option value="Publish">Publish</option>
-                  <option value="Draft">Draft</option>
-                </select>
-              </div>
-            </div>
-
-            <div className="modal-footer">
-              <button
-                type="button"
-                className="btn btn-secondary"
-                onClick={onClose}
-              >
-                Cancel
-              </button>
-              <button className="btn btn-primary">
-                {editId ? "Update" : "Add"}
-              </button>
-            </div>
-          </form>
-        </div>
+          {/* Footer */}
+          <div className="flex justify-end gap-3 pt-4">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-4 py-2 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-50"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="px-4 py-2 rounded-md bg-blue-600 text-white hover:bg-blue-700"
+            >
+              {editId ? "Update" : "Add"}
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   );

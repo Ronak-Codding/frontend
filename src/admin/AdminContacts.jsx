@@ -13,61 +13,15 @@ const AdminContacts = () => {
       const data = await res.json();
       setContacts(data);
     } catch (err) {
-      console.error("Fetch contacts error", err);
+      console.error(err);
     } finally {
       setLoading(false);
     }
-  };
-  const handleReply = async (contact) => {
-    // Auto mark as read (only if new)
-    if (contact.status === "new") {
-      await fetch(`http://localhost:5000/api/contact/${contact._id}/status`, {
-        method: "PUT",
-      });
-      loadContacts();
-    }
-
-    // Open mail client
-    const subject = encodeURIComponent(
-      `Re: ${contact.subject || "Contact Message"}`,
-    );
-    const body = encodeURIComponent(
-      `Hello ${contact.fullName},\n\n\n---\nOriginal Message:\n${contact.message}`,
-    );
-
-    window.location.href = `mailto:${contact.email}?subject=${subject}&body=${body}`;
   };
 
   useEffect(() => {
     loadContacts();
   }, []);
-
-  const handleView = async (contact) => {
-    setViewContact(contact);
-
-    if (contact.status === "new") {
-      await fetch(`http://localhost:5000/api/contact/${contact._id}/status`, {
-        method: "PUT",
-      });
-      loadContacts(); // refresh list & sidebar badge
-    }
-  };
-
-  const toggleStatus = async (id) => {
-    await fetch(`http://localhost:5000/api/contact/${id}/status`, {
-      method: "PUT",
-    });
-    loadContacts();
-  };
-
-  const deleteContact = async (id) => {
-    if (!window.confirm("Delete this message?")) return;
-
-    await fetch(`http://localhost:5000/api/contact/deleteContact/${id}`, {
-      method: "DELETE",
-    });
-    loadContacts();
-  };
 
   const filteredContacts = contacts.filter((c) => {
     const matchSearch =
@@ -75,160 +29,150 @@ const AdminContacts = () => {
       (c.subject || "").toLowerCase().includes(search.toLowerCase());
 
     const matchStatus = statusFilter === "" || c.status === statusFilter;
-
     return matchSearch && matchStatus;
   });
 
-  if (loading) return <p>Loading contacts...</p>;
+  if (loading) return <p className="p-6">Loading contacts...</p>;
 
   return (
-    <>
-      <h3 className="mb-4">📩 Contact Messages</h3>
+    <div className="p-6">
+      <h2 className="text-2xl font-semibold mb-6">📩 Contact Messages</h2>
 
-      <div className="row mb-3">
-        <div className="col-md-4">
-          <input
-            className="form-control"
-            placeholder="Search by email or subject..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-        </div>
+      {/* Filters */}
+      <div className="flex flex-wrap gap-4 mb-4 m-4">
+        <input
+          className="border rounded-lg px-3 py-2 w-full placeholder-gray-500  md:w-1/3"
+          placeholder="Search by email or subject..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
 
-        <div className="col-md-3">
-          <select
-            className="form-control"
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-          >
-            <option value="">All Status</option>
-            <option value="new">New</option>
-            <option value="read">Read</option>
-          </select>
-        </div>
+        <select
+          className="border rounded-lg px-3 py-2 w-full md:w-1/4"
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value)}
+        >
+          <option value="">All Status</option>
+          <option value="new">New</option>
+          <option value="read">Read</option>
+        </select>
       </div>
 
-      <table className="table table-hover shadow bg-white">
-        <thead className="fs-5">
-          <tr>
-            <th>No</th>
-            <th>Full Name</th>
-            <th>Email</th>
-            <th>Subject</th>
-            <th>Status</th>
-            <th className="w-40">Action</th>
-          </tr>
-        </thead>
-
-        <tbody>
-          {contacts.length === 0 && (
+      {/* Table */}
+      <div className="overflow-x-auto bg-white rounded-xl shadow">
+        <table className="min-w-full text-left">
+          <thead className="bg-gray-100 text-gray-700">
             <tr>
-              <td colSpan="6" className="text-center">
-                No messages found
-              </td>
+              <th className="px-4 py-3 text-left">No</th>
+              <th className="px-4 py-3 text-left">Full Name</th>
+              <th className="px-4 py-3 text-left">Email</th>
+              <th className="px-4 py-3 text-left">Subject</th>
+              <th className="px-4 py-3 text-left">Status</th>
+              <th className="px-4 py-3 text-left">Action</th>
             </tr>
-          )}
+          </thead>
 
-          {filteredContacts.map((c, i) => (
-            <tr key={c._id}>
-              <td>{i + 1}</td>
-              <td>{c.fullName}</td>
-              <td>{c.email}</td>
-              <td>{c.subject || "-"}</td>
-              <td>
-                <span
-                  className={`badge ${
-                    c.status === "new" ? "bg-warning" : "bg-success"
-                  }`}
-                  style={{ cursor: "pointer" }}
-                  onClick={() => toggleStatus(c._id)}
-                >
-                  {c.status}
-                </span>
-              </td>
-              <td>
-                <button
-                  className="btn btn-sm btn-success me-2"
-                  title="Reply"
-                  onClick={() => handleReply(c)}
-                >
-                  <i className="fas fa-reply"></i>
-                </button>
+          <tbody className="text-gray-700">
+            {filteredContacts.length === 0 && (
+              <tr>
+                <td colSpan="6" className="text-center py-6">
+                  No messages found
+                </td>
+              </tr>
+            )}
 
-                <button
-                  className="btn btn-sm btn-info me-2"
-                  onClick={() => handleView(c)}
-                >
-                  <i className="fas fa-eye"></i>
-                </button>
+            {filteredContacts.map((c, i) => (
+              <tr key={c._id} className="border-t hover:bg-gray-50 transition">
+                <td className="px-4 py-3">{i + 1}</td>
+                <td className="px-4 py-3">{c.fullName}</td>
+                <td className="px-4 py-3">{c.email}</td>
+                <td className="px-4 py-3">{c.subject || "-"}</td>
+                <td className="px-4 py-3">
+                  <span
+                    className={`px-3 py-1 rounded-full text-xs font-semibold cursor-pointer
+                      ${
+                        c.status === "new"
+                          ? "bg-yellow-500 text-white"
+                          : "bg-green-600 text-white"
+                      }`}
+                  >
+                    {c.status}
+                  </span>
+                </td>
+                <td className="px-4 py-3 space-x-2">
+                  <button
+                    className="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700"
+                    onClick={() => setViewContact(c)}
+                  >
+                    <i className="fas fa-eye"></i>
+                  </button>
+                  <button className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700">
+                    <i className="fas fa-trash"></i>
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
 
-                <button
-                  className="btn btn-sm btn-danger"
-                  onClick={() => deleteContact(c._id)}
-                >
-                  <i className="fas fa-trash"></i>
-                </button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-
+      {/* VIEW MODAL */}
       {viewContact && (
-        <div
-          className="modal fade show d-block"
-          style={{ background: "#00000080" }}
-        >
-          <div className="modal-dialog modal-lg">
-            <div className="modal-content">
-              <div className="modal-header">
-                <h5>Contact Message</h5>
-                <button
-                  className="btn-close"
-                  onClick={() => setViewContact(null)}
-                />
-              </div>
-
-              <div className="modal-body">
-                <p>
-                  <strong>Name:</strong> {viewContact.fullName}
-                </p>
-                <p>
-                  <strong>Email:</strong> {viewContact.email}
-                </p>
-                <p>
-                  <strong>Phone:</strong> {viewContact.phone || "-"}
-                </p>
-                <p>
-                  <strong>Subject:</strong> {viewContact.subject || "-"}
-                </p>
-                <hr />
-                <p>
-                  <strong>Message:</strong>
-                </p>
-                <p>{viewContact.message}</p>
-              </div>
-              {/* <a
-                href={`mailto:${viewContact.email}?subject=Re: ${viewContact.subject}`}
-                className="btn btn-primary"
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 p-4">
+          <div className="w-full max-w-2xl bg-white rounded-2xl shadow-xl overflow-hidden">
+            {/* Header */}
+            <div className="flex items-center justify-between px-5 py-4 border-b">
+              <h2 className="text-lg sm:text-xl font-semibold text-gray-800">
+                Contact Message
+              </h2>
+              <button
+                onClick={() => setViewContact(null)}
+                className="text-2xl text-gray-400 hover:text-gray-700"
               >
-                <i className="fas fa-reply me-1"></i> Reply by Email
-              </a> */}
+                ×
+              </button>
+            </div>
 
-              <div className="modal-footer">
-                <button
-                  className="btn btn-secondary"
-                  onClick={() => setViewContact(null)}
-                >
-                  Close
-                </button>
+            {/* Body */}
+            <div className="px-5 py-4 space-y-4 text-sm sm:text-base">
+              {/* Details grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-3 gap-x-6">
+                <Detail label="Name" value={viewContact.fullName} />
+                <Detail label="Email" value={viewContact.email} />
+                <Detail label="Phone" value={viewContact.phone || "-"} />
+                <Detail label="Subject" value={viewContact.subject || "-"} />
               </div>
+
+              {/* Message */}
+              <div>
+                <p className="font-medium text-gray-600 mb-1">Message</p>
+                <div className="bg-gray-50 border rounded-lg p-3 text-gray-800 whitespace-pre-wrap">
+                  {viewContact.message}
+                </div>
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div className="flex justify-end px-5 py-4 border-t">
+              <button
+                onClick={() => setViewContact(null)}
+                className="px-6 py-2 rounded-lg bg-gray-200 hover:bg-gray-300 text-sm sm:text-base"
+              >
+                Close
+              </button>
             </div>
           </div>
         </div>
       )}
-    </>
+    </div>
   );
 };
+
+const Detail = ({ label, value }) => (
+  <div className="flex justify-between">
+    <span className="font-medium text-gray-600">{label}</span>
+    <span>{value}</span>
+  </div>
+);
 
 export default AdminContacts;

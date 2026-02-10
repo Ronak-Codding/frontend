@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 // import axios from "axios";
-import "./AdminUsers.css";
+// import "./AdminUsers.css";
 
 const AdminUsers = () => {
   const [users, setUsers] = useState([]);
@@ -36,7 +36,6 @@ const AdminUsers = () => {
   useEffect(() => {
     loadUsers();
   }, []);
-
 
   /* ================= FILTER ================= */
   const filteredUsers = users.filter((user) => {
@@ -100,11 +99,14 @@ const AdminUsers = () => {
   const handleUpdate = async (e) => {
     e.preventDefault();
 
-    const res = await fetch(`http://localhost:5000/api/user/updateUser/${editId}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(formData),
-    });
+    const res = await fetch(
+      `http://localhost:5000/api/user/updateUser/${editId}`,
+      {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      },
+    );
 
     if (res.ok) {
       await loadUsers();
@@ -131,7 +133,6 @@ const AdminUsers = () => {
     const data = await res.json();
     setViewUser(data);
   };
- 
 
   const closeForm = () => {
     setShowForm(false);
@@ -148,26 +149,39 @@ const AdminUsers = () => {
       status: "active",
     });
   };
+  const Detail = ({ label, value }) => (
+    <div className="flex justify-between">
+      <span className="font-medium text-gray-600">{label}</span>
+      <span className="text-gray-800">{value}</span>
+    </div>
+  );
 
   return (
     <>
       {/* ================= ADD / EDIT MODAL ================= */}
       {showForm && (
-        <div
-          className="modal fade show d-block"
-          style={{ background: "#00000080" }}
-        >
-          <div className="modal-dialog modal-lg">
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60">
+          <div className="bg-white w-full max-w-4xl rounded-xl shadow-lg">
             <form
-              className="modal-content"
               onSubmit={editId ? handleUpdate : handleSubmit}
+              className="p-6"
             >
-              <div className="modal-header">
-                <h5>{editId ? "Edit User" : "Add User"}</h5>
-                <button className="btn-close" onClick={closeForm}></button>
+              {/* Header */}
+              <div className="flex justify-between items-center border-b pb-3">
+                <h2 className="text-xl font-semibold">
+                  {editId ? "Edit User" : "Add User"}
+                </h2>
+                <button
+                  type="button"
+                  onClick={closeForm}
+                  className="text-gray-500 hover:text-black text-xl"
+                >
+                  ✕
+                </button>
               </div>
 
-              <div className="modal-body row g-3">
+              {/* Body */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
                 {[
                   "firstName",
                   "middleName",
@@ -176,61 +190,59 @@ const AdminUsers = () => {
                   "phone",
                   "email",
                 ].map((field) => (
-                  <div className="col-md-4" key={field}>
-                    <input
-                      className="form-control"
-                      name={field}
-                      placeholder={field}
-                      value={formData[field]}
-                      onChange={handleChange}
-                      disabled={field === "email" && editId}
-                      required
-                    />
-                  </div>
+                  <input
+                    key={field}
+                    name={field}
+                    placeholder={field}
+                    value={formData[field]}
+                    onChange={handleChange}
+                    disabled={field === "email" && editId}
+                    required
+                    className="border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none"
+                  />
                 ))}
 
-                <div className="col-md-4">
-                  <input
-                    type="password"
-                    className="form-control"
-                    placeholder="Password"
-                    name="password"
-                    value={formData.password}
-                    onChange={handleChange}
-                    required={!editId}
-                  />
-                </div>
+                <input
+                  type="password"
+                  name="password"
+                  placeholder="Password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  required={!editId}
+                  className="border rounded-lg px-3 py-2"
+                />
 
-                <div className="col-md-4">
-                  <select
-                    className="form-control"
-                    name="role"
-                    value={formData.role}
-                    onChange={handleChange}
-                  >
-                    <option value="user">User</option>
-                    <option value="admin">Admin</option>
-                  </select>
-                </div>
+                <select
+                  name="role"
+                  value={formData.role}
+                  onChange={handleChange}
+                  className="border rounded-lg px-3 py-2"
+                >
+                  <option value="user">User</option>
+                  <option value="admin">Admin</option>
+                </select>
 
-                <div className="col-md-4">
-                  <select
-                    className="form-control"
-                    name="status"
-                    value={formData.status}
-                    onChange={handleChange}
-                  >
-                    <option value="active">Active</option>
-                    <option value="blocked">Blocked</option>
-                  </select>
-                </div>
+                <select
+                  name="status"
+                  value={formData.status}
+                  onChange={handleChange}
+                  className="border rounded-lg px-3 py-2"
+                >
+                  <option value="active">Active</option>
+                  <option value="blocked">Blocked</option>
+                </select>
               </div>
 
-              <div className="modal-footer">
-                <button className="btn btn-secondary" onClick={closeForm}>
+              {/* Footer */}
+              <div className="flex justify-end gap-3 mt-6">
+                <button
+                  type="button"
+                  onClick={closeForm}
+                  className="px-4 py-2 rounded-lg bg-gray-200 hover:bg-gray-300"
+                >
                   Cancel
                 </button>
-                <button className="btn btn-primary">
+                <button className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700">
                   {editId ? "Update" : "Add"}
                 </button>
               </div>
@@ -241,63 +253,50 @@ const AdminUsers = () => {
 
       {/* ================= VIEW USER MODAL ================= */}
       {viewUser && (
-        <div
-          className="modal fade show d-block"
-          style={{ background: "#00000080" }}
-        >
-          <div className="modal-dialog modal-md">
-            <div className="modal-content">
-              <div className="modal-header">
-                <h5 className="modal-title">User Details</h5>
-                <button
-                  type="button"
-                  className="btn-close"
-                  onClick={() => setViewUser(null)}
-                ></button>
-              </div>
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60">
+          <div className="relative w-full max-w-md mx-4 bg-white rounded-2xl shadow-xl">
+            {/* Header */}
+            <div className="flex items-center justify-between px-6 py-4 border-b">
+              <h2 className="text-lg font-semibold text-gray-800">
+                User Details
+              </h2>
+              <button
+                onClick={() => setViewUser(null)}
+                className="text-2xl text-gray-400 hover:text-gray-700"
+              >
+                ×
+              </button>
+            </div>
 
-              <div className="modal-body">
-                <p>
-                  <strong>First Name:</strong> {viewUser.firstName}
-                </p>
-                <p>
-                  <strong>Middle Name:</strong> {viewUser.middleName || "-"}
-                </p>
-                <p>
-                  <strong>Last Name:</strong> {viewUser.lastName}
-                </p>
-                <p>
-                  <strong>Username:</strong> {viewUser.username}
-                </p>
-                <p>
-                  <strong>Email:</strong> {viewUser.email}
-                </p>
-                <p>
-                  <strong>Phone:</strong> {viewUser.phone}
-                </p>
-                <p>
-                  <strong>Role:</strong> {viewUser.role}
-                </p>
-                <p>
-                  <strong>Status:</strong>
-                  <span
-                    className={`badge ${
-                      viewUser.status === "active" ? "bg-success" : "bg-danger"
-                    }`}
-                  >
-                    {viewUser.status}
-                  </span>
-                </p>
-              </div>
+            {/* Body */}
+            <div className="px-6 py-5 space-y-3 text-sm text-gray-700">
+              <Detail label="First Name" value={viewUser.firstName} />
+              <Detail label="Middle Name" value={viewUser.middleName || "-"} />
+              <Detail label="Last Name" value={viewUser.lastName} />
+              <Detail label="Username" value={viewUser.username} />
+              <Detail label="Email" value={viewUser.email} />
+              <Detail label="Phone" value={viewUser.phone} />
+              <Detail label="Role" value={viewUser.role} />
 
-              <div className="modal-footer">
-                <button
-                  className="btn btn-secondary"
-                  onClick={() => setViewUser(null)}
+              <div className="flex justify-between items-center">
+                <span className="font-medium text-gray-600">Status</span>
+                <span
+                  className={`px-3 py-1 rounded-full text-xs font-semibold text-white
+              ${viewUser.status === "active" ? "bg-green-600" : "bg-red-600"}`}
                 >
-                  Close
-                </button>
+                  {viewUser.status}
+                </span>
               </div>
+            </div>
+
+            {/* Footer */}
+            <div className="flex justify-end px-6 py-4 border-t">
+              <button
+                onClick={() => setViewUser(null)}
+                className="px-5 py-2 rounded-lg bg-gray-200 hover:bg-gray-300"
+              >
+                Close
+              </button>
             </div>
           </div>
         </div>
@@ -306,85 +305,81 @@ const AdminUsers = () => {
       {/* ================= USERS TABLE ================= */}
       <h3 className="mt-4">Users Data</h3>
 
-      <div className="row mb-3">
-        <div className="col-md-4">
-          <input
-            className="form-control"
-            placeholder="Search..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-        </div>
+      <div className="flex flex-wrap gap-3 mb-4">
+        <input
+          className="border rounded-lg px-3 py-2 w-full placeholder-gray-500  md:w-1/3"
+          placeholder="Search..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
 
-        <div className="col-md-3">
-          <select
-            className="form-control"
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-          >
-            <option value="">All Status</option>
-            <option value="active">Active</option>
-            <option value="blocked">Blocked</option>
-          </select>
-        </div>
+        <select
+          className="border rounded-lg px-3 py-2 w-full md:w-1/4"
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value)}
+        >
+          <option value="">All Status</option>
+          <option value="active">Active</option>
+          <option value="blocked">Blocked</option>
+        </select>
 
-        <div className="col-md-5 text-end">
+        <div className="flex-1 text-right">
           <button
-            className="btn add-user-btn"
             onClick={() => setShowForm(true)}
+            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700"
           >
-            ➕ Add User
+            + Add User
           </button>
         </div>
       </div>
 
-      <table className="table bg-white shadow table-hover">
-        <thead className="fs-5">
+      <table className="w-full bg-white rounded-xl shadow overflow-hidden">
+        <thead className="bg-gray-100 text-gray-700">
           <tr>
-            <th>No</th>
-            <th>Full Name</th>
-            <th>Email</th>
-            <th>Phone</th>
-            <th>Role</th>
-            <th>Status</th>
-            <th className="w-40">Action</th>
+            <th className="p-3 text-left">No</th>
+            <th className="p-3 text-left">Full Name</th>
+            <th className="p-3 text-left">Email</th>
+            <th className="p-3 text-left">Phone</th>
+            <th className="p-3 text-left">Role</th>
+            <th className="p-3 text-left">Status</th>
+            <th className="p-3 text-center">Action</th>
           </tr>
         </thead>
-        <tbody>
+        <tbody className="text-gray-600">
           {filteredUsers.map((user, i) => (
-            <tr key={user._id}>
-              <td>{i + 1}</td>
-              <td>
-                {user.firstName} {user.middleName || ""} {user.lastName}
+            <tr key={user._id} className="border-t hover:bg-gray-50">
+              <td className="p-3">{i + 1}</td>
+              <td className="p-3">
+                {user.firstName} {user.middleName} {user.lastName}
               </td>
-              <td>{user.email}</td>
-              <td>{user.phone}</td>
-              <td>{user.role}</td>
-              <td>
+              <td className="p-3">{user.email}</td>
+              <td className="p-3">{user.phone}</td>
+              <td className="p-3">{user.role}</td>
+              <td className="p-3">
                 <span
-                  className={`badge ${
-                    user.status === "active" ? "bg-success" : "bg-danger"
+                  className={`px-2 py-1 text-sm rounded-full text-white ${
+                    user.status === "active" ? "bg-green-500" : "bg-red-500"
                   }`}
                 >
                   {user.status}
                 </span>
               </td>
-              <td>
+              <td className="p-3 text-center space-x-2 ">
                 <button
-                  className="btn btn-sm btn-info me-2"
                   onClick={() => handleView(user._id)}
+                  className="px-2 py-1 bg-blue-500 text-white rounded "
                 >
                   <i className="fas fa-eye"></i>
                 </button>
                 <button
-                  className="btn btn-sm btn-warning me-2"
                   onClick={() => handleEdit(user)}
+                  className="px-2 py-1 bg-yellow-500 text-white rounded"
                 >
                   <i className="fas fa-edit"></i>
                 </button>
                 <button
-                  className="btn btn-sm btn-danger"
                   onClick={() => handleDelete(user._id)}
+                  className="px-2 py-1 bg-red-600 text-white rounded"
                 >
                   <i className="fas fa-trash"></i>
                 </button>

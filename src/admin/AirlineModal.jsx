@@ -66,7 +66,14 @@ const AirlineModal = ({ show, onClose, onSubmit, form, setForm, editId }) => {
               Status
             </label>
             <select
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="
+                w-full h-9 px-3 rounded-lg
+                border border-black dark:border-white
+                bg-white dark:bg-black
+                text-black dark:text-white
+                focus:ring-2 focus:ring-black dark:focus:ring-white
+                outline-none
+              "
               value={form.status}
               onChange={(e) =>
                 setForm({ ...form, status: e.target.value })

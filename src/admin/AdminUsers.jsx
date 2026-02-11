@@ -238,7 +238,8 @@ const AdminUsers = () => {
               text-black dark:text-white
               rounded-lg px-3 py-2
               focus:ring-2 focus:ring-black dark:focus:ring-white
-              outline-none" >
+              outline-none"
+                >
                   <option value="user">User</option>
                   <option value="admin">Admin</option>
                 </select>
@@ -253,8 +254,7 @@ const AdminUsers = () => {
               text-black dark:text-white
               rounded-lg px-3 py-2
               focus:ring-2 focus:ring-black dark:focus:ring-white
-              outline-none
-            "
+              outline-none"
                 >
                   <option value="active">Active</option>
                   <option value="blocked">Blocked</option>
@@ -280,7 +280,7 @@ const AdminUsers = () => {
                 <button
                   className="
               px-4 py-2 rounded-lg
-              bg-black dark:bg-white
+              bg-blue-600 dark:bg-blue-700
               text-white dark:text-black
               hover:opacity-80
             "
@@ -296,22 +296,39 @@ const AdminUsers = () => {
       {/* ================= VIEW USER MODAL ================= */}
       {viewUser && (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60">
-          <div className="relative w-full max-w-md mx-4 bg-white rounded-2xl shadow-xl">
+          <div
+            className="relative w-full max-w-md mx-4 
+                    bg-white dark:bg-black 
+                    border border-black dark:border-white/20
+                    rounded-2xl shadow-xl"
+          >
             {/* Header */}
-            <div className="flex items-center justify-between px-6 py-4 border-b">
-              <h2 className="text-lg font-semibold text-gray-800">
+            <div
+              className="flex items-center justify-between px-6 py-4 
+                      border-b border-black dark:border-white/20"
+            >
+              <h2
+                className="text-lg font-semibold 
+                       text-black dark:text-white"
+              >
                 User Details
               </h2>
+
               <button
                 onClick={() => setViewUser(null)}
-                className="text-2xl text-gray-400 hover:text-gray-700"
+                className="text-2xl 
+                     text-black dark:text-white
+                     hover:opacity-70 transition"
               >
                 ×
               </button>
             </div>
 
             {/* Body */}
-            <div className="px-6 py-5 space-y-3 text-sm text-gray-700">
+            <div
+              className="px-6 py-5 space-y-3 text-sm 
+                      text-black dark:text-white"
+            >
               <Detail label="First Name" value={viewUser.firstName} />
               <Detail label="Middle Name" value={viewUser.middleName || "-"} />
               <Detail label="Last Name" value={viewUser.lastName} />
@@ -320,8 +337,11 @@ const AdminUsers = () => {
               <Detail label="Phone" value={viewUser.phone} />
               <Detail label="Role" value={viewUser.role} />
 
-              <div className="flex justify-between items-center">
-                <span className="font-medium text-gray-600">Status</span>
+              <div className="flex justify-between items-center pt-2">
+                <span className="font-medium text-black dark:text-white">
+                  Status
+                </span>
+
                 <span
                   className={`px-3 py-1 rounded-full text-xs font-semibold text-white
               ${viewUser.status === "active" ? "bg-green-600" : "bg-red-600"}`}
@@ -332,10 +352,18 @@ const AdminUsers = () => {
             </div>
 
             {/* Footer */}
-            <div className="flex justify-end px-6 py-4 border-t">
+            <div
+              className="flex justify-end px-6 py-4 
+                      border-t border-black dark:border-white/20"
+            >
               <button
                 onClick={() => setViewUser(null)}
-                className="px-5 py-2 rounded-lg bg-gray-200 hover:bg-gray-300"
+                className="px-5 py-2 rounded-lg 
+                     border border-black dark:border-white
+                     text-black dark:text-white
+                     hover:bg-black hover:text-white
+                     dark:hover:bg-white dark:hover:text-black
+                     transition"
               >
                 Close
               </button>

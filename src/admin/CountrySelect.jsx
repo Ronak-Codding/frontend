@@ -13,7 +13,7 @@ const CountrySelect = ({ value, onChange }) => {
         setLoading(true);
 
         const res = await axios.get(
-          "https://restcountries.com/v3.1/all?fields=name,cca2"
+          "https://restcountries.com/v3.1/all?fields=name,cca2",
         );
 
         const formatted = res.data
@@ -55,12 +55,52 @@ const CountrySelect = ({ value, onChange }) => {
       placeholder={loading ? "Loading countries..." : "Select Country"}
       isSearchable
       isLoading={loading}
-
-      /* THIS IS THE FIX */
       menuPortalTarget={document.body}
       menuPosition="fixed"
-
+      classNamePrefix="country-select"
       styles={{
+        control: (base, state) => ({
+          ...base,
+          backgroundColor: "transparent",
+          borderColor: "black",
+          boxShadow: "none",
+          minHeight: "36px",
+          height: "36px",
+          "&:hover": {
+            borderColor: "black",
+          },
+        }),
+        valueContainer: (base) => ({
+          ...base,
+          height: "36px",
+          padding: "0 8px",
+        }),
+        input: (base) => ({
+          ...base,
+          margin: 0,
+          padding: 0,
+          color: "black",
+        }),
+        singleValue: (base) => ({
+          ...base,
+          color: "black",
+        }),
+        placeholder: (base) => ({
+          ...base,
+          color: "#666",
+        }),
+        indicatorSeparator: () => ({
+          display: "none",
+        }),
+        dropdownIndicator: (base) => ({
+          ...base,
+          color: "black",
+          padding: "4px",
+        }),
+        menu: (base) => ({
+          ...base,
+          zIndex: 99999,
+        }),
         menuPortal: (base) => ({
           ...base,
           zIndex: 99999,

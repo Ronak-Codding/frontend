@@ -148,23 +148,23 @@ const AdminContacts = () => {
 
       {/* VIEW MODAL */}
       {viewContact && (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 p-4">
-          <div className="w-full max-w-2xl bg-white rounded-2xl shadow-xl overflow-hidden">
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/70 p-4">
+          <div className="w-full max-w-2xl bg-white dark:bg-black rounded-2xl shadow-xl overflow-hidden border border-black dark:border-white">
             {/* Header */}
-            <div className="flex items-center justify-between px-5 py-4 border-b">
-              <h2 className="text-lg sm:text-xl font-semibold text-gray-800">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-black dark:border-white">
+              <h2 className="text-lg sm:text-xl font-semibold text-black dark:text-white">
                 Contact Message
               </h2>
               <button
                 onClick={() => setViewContact(null)}
-                className="text-2xl text-gray-400 hover:text-gray-700"
+                className="text-2xl text-black dark:text-white hover:opacity-70"
               >
                 ×
               </button>
             </div>
 
             {/* Body */}
-            <div className="px-5 py-4 space-y-4 text-sm sm:text-base">
+            <div className="px-5 py-4 space-y-4 text-sm sm:text-base text-black dark:text-white">
               {/* Details grid */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-3 gap-x-6">
                 <Detail label="Name" value={viewContact.fullName} />
@@ -175,18 +175,26 @@ const AdminContacts = () => {
 
               {/* Message */}
               <div>
-                <p className="font-medium text-gray-600 mb-1">Message</p>
-                <div className="bg-gray-50 border rounded-lg p-3 text-gray-800 whitespace-pre-wrap">
+                <p className="font-medium mb-1 text-black dark:text-white">
+                  Message
+                </p>
+                <div className="bg-gray-100 dark:bg-gray2800 border border-black dark:border-white rounded-lg p-3 whitespace-pre-wrap">
                   {viewContact.message}
                 </div>
               </div>
             </div>
 
             {/* Footer */}
-            <div className="flex justify-end px-5 py-4 border-t">
+            <div className="flex justify-end px-5 py-4 border-t border-black dark:border-white">
               <button
                 onClick={() => setViewContact(null)}
-                className="px-6 py-2 rounded-lg bg-gray-200 hover:bg-gray-300 text-sm sm:text-base"
+                className="
+            px-6 py-2 rounded-lg
+            border border-black dark:border-white
+            bg-white dark:bg-black
+            text-black dark:text-white
+            hover:opacity-70
+          "
               >
                 Close
               </button>
@@ -200,8 +208,8 @@ const AdminContacts = () => {
 
 const Detail = ({ label, value }) => (
   <div className="flex justify-between">
-    <span className="font-medium text-gray-600">{label}</span>
-    <span>{value}</span>
+    <span className="font-medium text-black dark:text-white">{label}</span>
+    <span className="text-gray-800">{value}</span>
   </div>
 );
 

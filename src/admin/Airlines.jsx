@@ -121,13 +121,13 @@ const Airlines = () => {
               setSearch(e.target.value);
               setCurrentPage(1);
             }}
-            className="md:col-span-2 border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 outline-none"
+            className="md:col-span-2 border border-gray-300 placeholder-gray-500 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 outline-none"
           />
 
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 outline-none"
+            className="border border-gray-300 rounded-lg px-4 py-2  text-black dark:text-white focus:ring-2 focus:ring-blue-500 outline-none"
           >
             <option value="All">All Status</option>
             <option value="Publish">Publish</option>

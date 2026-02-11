@@ -23,6 +23,32 @@ const AdminContacts = () => {
     loadContacts();
   }, []);
 
+  const handleView = async (contact) => {
+    setViewContact(contact);
+
+    if (contact.status === "new") {
+      await fetch(`http://localhost:5000/api/contact/${contact._id}/status`, {
+        method: "PUT",
+      });
+      loadContacts();
+    }
+  };
+  const toggleStatus = async (id) => {
+    await fetch(`http://localhost:5000/api/contact/${id}/status`, {
+      method: "PUT",
+    });
+    loadContacts();
+  };
+
+  const deleteContact = async (id) => {
+    if (!window.confirm("Delete this message?")) return;
+
+    await fetch(`http://localhost:5000/api/contact/deleteContact/${id}`, {
+      method: "DELETE",
+    });
+    loadContacts();
+  };
+
   const filteredContacts = contacts.filter((c) => {
     const matchSearch =
       c.email.toLowerCase().includes(search.toLowerCase()) ||
@@ -95,6 +121,7 @@ const AdminContacts = () => {
                           ? "bg-yellow-500 text-white"
                           : "bg-green-600 text-white"
                       }`}
+                    onClick={() => toggleStatus(c._id)}
                   >
                     {c.status}
                   </span>
@@ -102,11 +129,14 @@ const AdminContacts = () => {
                 <td className="px-4 py-3 space-x-2">
                   <button
                     className="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700"
-                    onClick={() => setViewContact(c)}
+                    onClick={() => handleView(c)}
                   >
                     <i className="fas fa-eye"></i>
                   </button>
-                  <button className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700">
+                  <button
+                    className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700"
+                    onClick={() => deleteContact(c._id)}
+                  >
                     <i className="fas fa-trash"></i>
                   </button>
                 </td>

@@ -34,13 +34,39 @@ const AdminBookings = () => {
     });
     fetchBookings();
   };
+  const handleEdit = async (booking) => {
+    const newPassengers = prompt(
+      "Enter passenger count",
+      booking.total_passengers,
+    );
+
+    if (!newPassengers) return;
+
+    const res = await fetch(
+      `http://localhost:5000/api/bookings/updateBooking/${booking._id}`,
+      {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          total_passengers: Number(newPassengers),
+        }),
+      },
+    );
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      alert(data.message);
+    } else {
+      fetchBookings();
+    }
+  };
 
   const deleteBooking = async (id) => {
     if (!window.confirm("Delete this booking?")) return;
-    await fetch(
-      `http://localhost:5000/api/bookings/deleteBooking/${id}`,
-      { method: "DELETE" },
-    );
+    await fetch(`http://localhost:5000/api/bookings/deleteBooking/${id}`, {
+      method: "DELETE",
+    });
     fetchBookings();
   };
 
@@ -100,9 +126,7 @@ const AdminBookings = () => {
           <tbody className="divide-y">
             {currentBookings.map((b) => (
               <tr key={b._id} className="hover:bg-gray-50">
-                <td className="px-4 py-3 font-medium">
-                  {b.bookingReference}
-                </td>
+                <td className="px-4 py-3 font-medium">{b.bookingReference}</td>
                 <td className="px-4 py-3">
                   {b.user_id?.firstName} {b.user_id?.lastName}
                 </td>
@@ -115,9 +139,7 @@ const AdminBookings = () => {
                   {b.flight_id?.to_airport?.airport_code}
                 </td>
                 <td className="px-4 py-3">{b.total_passengers}</td>
-                <td className="px-4 py-3 font-semibold">
-                  ₹{b.total_amount}
-                </td>
+                <td className="px-4 py-3 font-semibold">₹{b.total_amount}</td>
                 <td className="px-4 py-3">
                   <span
                     className={`px-3 py-1 rounded-full text-xs font-semibold ${
@@ -143,6 +165,7 @@ const AdminBookings = () => {
                   )}
                   <button
                     className="px-3 py-1 text-xs rounded bg-blue-600 text-white hover:bg-blue-700"
+                    onClick={() => handleEdit(b)}
                   >
                     <i className="fas fa-edit"></i>
                   </button>

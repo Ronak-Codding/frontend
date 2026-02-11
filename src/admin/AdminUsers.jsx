@@ -160,21 +160,21 @@ const AdminUsers = () => {
     <>
       {/* ================= ADD / EDIT MODAL ================= */}
       {showForm && (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60">
-          <div className="bg-white w-full max-w-4xl rounded-xl shadow-lg">
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/70">
+          <div className="bg-white dark:bg-black w-full max-w-4xl rounded-xl shadow-lg border border-black dark:border-white">
             <form
               onSubmit={editId ? handleUpdate : handleSubmit}
               className="p-6"
             >
               {/* Header */}
-              <div className="flex justify-between items-center border-b pb-3">
-                <h2 className="text-xl font-semibold">
+              <div className="flex justify-between items-center border-b border-black dark:border-white pb-3">
+                <h2 className="text-xl font-bold text-black dark:text-white">
                   {editId ? "Edit User" : "Add User"}
                 </h2>
                 <button
                   type="button"
                   onClick={closeForm}
-                  className="text-gray-500 hover:text-black text-xl"
+                  className="text-black dark:text-white hover:opacity-70 text-xl"
                 >
                   ✕
                 </button>
@@ -198,7 +198,15 @@ const AdminUsers = () => {
                     onChange={handleChange}
                     disabled={field === "email" && editId}
                     required
-                    className="border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none"
+                    className="
+                border border-black dark:border-white
+                bg-white dark:bg-black
+                text-black dark:text-white
+                placeholder:text-gray-500 dark:placeholder:text-gray-400
+                rounded-lg px-3 py-2
+                focus:ring-2 focus:ring-black dark:focus:ring-white
+                outline-none
+              "
                   />
                 ))}
 
@@ -209,15 +217,28 @@ const AdminUsers = () => {
                   value={formData.password}
                   onChange={handleChange}
                   required={!editId}
-                  className="border rounded-lg px-3 py-2"
+                  className="
+              border border-black dark:border-white
+              bg-white dark:bg-black
+              text-black dark:text-white
+              placeholder:text-gray-500 dark:placeholder:text-gray-400
+              rounded-lg px-3 py-2
+              focus:ring-2 focus:ring-black dark:focus:ring-white
+              outline-none
+            "
                 />
 
                 <select
                   name="role"
                   value={formData.role}
                   onChange={handleChange}
-                  className="border rounded-lg px-3 py-2"
-                >
+                  className="
+              border border-black dark:border-white
+              bg-white dark:bg-black
+              text-black dark:text-white
+              rounded-lg px-3 py-2
+              focus:ring-2 focus:ring-black dark:focus:ring-white
+              outline-none" >
                   <option value="user">User</option>
                   <option value="admin">Admin</option>
                 </select>
@@ -226,7 +247,14 @@ const AdminUsers = () => {
                   name="status"
                   value={formData.status}
                   onChange={handleChange}
-                  className="border rounded-lg px-3 py-2"
+                  className="
+              border border-black dark:border-white
+              bg-white dark:bg-black
+              text-black dark:text-white
+              rounded-lg px-3 py-2
+              focus:ring-2 focus:ring-black dark:focus:ring-white
+              outline-none
+            "
                 >
                   <option value="active">Active</option>
                   <option value="blocked">Blocked</option>
@@ -238,11 +266,25 @@ const AdminUsers = () => {
                 <button
                   type="button"
                   onClick={closeForm}
-                  className="px-4 py-2 rounded-lg bg-gray-200 hover:bg-gray-300"
+                  className="
+              px-4 py-2 rounded-lg
+              border border-black dark:border-white
+              bg-white dark:bg-black
+              text-black dark:text-white
+              hover:opacity-70
+            "
                 >
                   Cancel
                 </button>
-                <button className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700">
+
+                <button
+                  className="
+              px-4 py-2 rounded-lg
+              bg-black dark:bg-white
+              text-white dark:text-black
+              hover:opacity-80
+            "
+                >
                   {editId ? "Update" : "Add"}
                 </button>
               </div>

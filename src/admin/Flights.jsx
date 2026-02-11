@@ -14,8 +14,8 @@ const Flights = () => {
   const [airlines, setAirlines] = useState([]);
   const [airports, setAirports] = useState([]);
 
-  const [publishedCount, setPublishedCount] = useState(0);
-  const [draftCount, setDraftCount] = useState(0);
+  // const [publishedCount, setPublishedCount] = useState(0);
+  // const [draftCount, setDraftCount] = useState(0);
 
   const [newFlight, setNewFlight] = useState({
     flight_number: "",
@@ -69,12 +69,12 @@ const Flights = () => {
       const airportsData = await airportsRes.json();
       setAirports(airportsData);
 
-      setPublishedCount(
-        flightsData.filter((f) => f.admin_status === "Publish").length,
-      );
-      setDraftCount(
-        flightsData.filter((f) => f.admin_status === "Draft").length,
-      );
+      // setPublishedCount(
+      //   flightsData.filter((f) => f.admin_status === "Publish").length,
+      // );
+      // setDraftCount(
+      //   flightsData.filter((f) => f.admin_status === "Draft").length,
+      // );
 
       setLoading(false);
     } catch (err) {
@@ -252,20 +252,20 @@ const Flights = () => {
         </div>
       ),
     },
-    {
-      name: "Arrival",
-      cell: (row) => (
-        <div>
-          <div>{new Date(row.arrival_time).toLocaleDateString()}</div>
-          <div className="text-gray-500 text-sm">
-            {new Date(row.arrival_time).toLocaleTimeString([], {
-              hour: "2-digit",
-              minute: "2-digit",
-            })}
-          </div>
-        </div>
-      ),
-    },
+    // {
+    //   name: "Arrival",
+    //   cell: (row) => (
+    //     <div>
+    //       <div>{new Date(row.arrival_time).toLocaleDateString()}</div>
+    //       <div className="text-gray-500 text-sm">
+    //         {new Date(row.arrival_time).toLocaleTimeString([], {
+    //           hour: "2-digit",
+    //           minute: "2-digit",
+    //         })}
+    //       </div>
+    //     </div>
+    //   ),
+    // },
     {
       name: "Duration",
       selector: (row) => {
@@ -352,12 +352,12 @@ const Flights = () => {
 
   return (
     //  bg-gray-50
-    <div className="flights-container p-6  min-h-screen"> 
+    <div className="flights-container p-6  min-h-screen">
       {/* Header */}
       <div className="flex justify-between items-center mb-6">
         <div>
           <h2 className="text-2xl font-bold text-gray-800 mb-1">
-            Flights Management
+            Flights Data
           </h2>
           <p className="text-gray-600">Manage all flights in the system</p>
         </div>
@@ -370,7 +370,7 @@ const Flights = () => {
       </div>
 
       {/* Statistics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+      {/* <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
         <div className="bg-white rounded-lg shadow p-6">
           <div className="flex justify-between items-center">
             <div>
@@ -406,7 +406,7 @@ const Flights = () => {
             <i className="fas fa-file-alt text-3xl text-yellow-500"></i>
           </div>
         </div>
-      </div>
+      </div> */}
 
       {/* Search Bar */}
       <div className="bg-white rounded-lg shadow mb-6">
@@ -417,7 +417,7 @@ const Flights = () => {
             </div>
             <input
               type="text"
-              className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full pl-10 pr-4 py-2.5 border border-gray-300  placeholder-gray-400 rounded-lg focus:border-blue-500"
               placeholder="Search flights by flight number, airline, or airport code..."
               value={searchTerm}
               onChange={handleSearch}
@@ -454,382 +454,497 @@ const Flights = () => {
         </div>
       </div>
 
-      {/* Add Flight Modal */}
       {showAddModal && (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center">
           {/* Backdrop */}
           <div
-            className="absolute inset-0 bg-black bg-opacity-50"
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
             onClick={() => setShowAddModal(false)}
           ></div>
 
           {/* Modal */}
-          <div className="relative bg-white rounded-lg  w-full max-w-4xl max-h-[90vh] overflow-y-auto p-6">
-            <div className="flex justify-between items-center">
-              <h3 className="text-lg font-semibold">Add New Flight</h3>
-              <button onClick={() => setShowAddModal(false)}>
-                <i className="fas fa-times"></i>
+          <div
+            className="relative w-full max-w-4xl max-h-[90vh] overflow-y-auto p-6
+                    bg-white dark:bg-black
+                    border border-black dark:border-white
+                    rounded-lg shadow-2xl"
+          >
+            {/* Header */}
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-lg font-semibold text-black dark:text-white">
+                Add New Flight
+              </h3>
+              <button
+                onClick={() => setShowAddModal(false)}
+                className="text-black dark:text-white text-xl hover:scale-110 transition"
+              >
+                ✕
               </button>
             </div>
-           
-              <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-                <form onSubmit={handleAddFlight}>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Flight Number *
-                      </label>
-                      <input
-                        type="text"
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                        name="flight_number"
-                        value={newFlight.flight_number}
-                        onChange={handleNewFlightInputChange}
-                        required
-                      />
-                    </div>
 
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Airline *
-                      </label>
-                      <select
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                        name="airline"
-                        value={newFlight.airline}
-                        onChange={handleNewFlightInputChange}
-                        required
-                      >
-                        <option value="">Select Airline</option>
-                        {Array.isArray(airlines) &&
-                          airlines
-                            .filter((airline) => airline.status === "Publish")
-                            .map((airline) => (
-                              <option key={airline._id} value={airline._id}>
-                                {airline.airline_name} ({airline.airline_code})
-                              </option>
-                            ))}
-                      </select>
-                    </div>
+            <form onSubmit={handleAddFlight}>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Flight Number */}
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-black dark:text-white">
+                    Flight Number *
+                  </label>
+                  <input
+                    type="text"
+                    name="flight_number"
+                    value={newFlight.flight_number}
+                    onChange={handleNewFlightInputChange}
+                    required
+                    className="w-full px-3 py-2 border rounded-md
+                         bg-white dark:bg-black
+                         text-black dark:text-white
+                         border-black dark:border-white
+                         outline-none"
+                  />
+                </div>
 
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        From Airport *
-                      </label>
-                      <select
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                        name="from_airport"
-                        value={newFlight.from_airport}
-                        onChange={handleNewFlightInputChange}
-                        required
-                      >
-                        <option value="">Select Airport</option>
-                        {Array.isArray(airports) &&
-                          airports
-                            .filter((a) => a.status === "Publish")
-                            .map((airport) => (
-                              <option
-                                key={airport._id}
-                                value={airport._id}
-                                disabled={airport._id === newFlight.to_airport}
-                              >
-                                {airport.iata_code} - {airport.city}
-                              </option>
-                            ))}
-                      </select>
-                    </div>
+                {/* Airline */}
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-black dark:text-white">
+                    Airline *
+                  </label>
+                  <select
+                    name="airline"
+                    value={newFlight.airline}
+                    onChange={handleNewFlightInputChange}
+                    required
+                    className="w-full px-3 py-2 border rounded-md
+                         bg-white dark:bg-black
+                         text-black dark:text-white
+                         border-black dark:border-white
+                         outline-none"
+                  >
+                    <option value="">Select Airline</option>
+                    {Array.isArray(airlines) &&
+                      airlines
+                        .filter((airline) => airline.status === "Publish")
+                        .map((airline) => (
+                          <option key={airline._id} value={airline._id}>
+                            {airline.airline_name} ({airline.airline_code})
+                          </option>
+                        ))}
+                  </select>
+                </div>
 
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        To Airport *
-                      </label>
-                      <select
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                        name="to_airport"
-                        value={newFlight.to_airport}
-                        onChange={handleNewFlightInputChange}
-                        required
-                      >
-                        <option value="">Select Airport</option>
-                        {Array.isArray(airports) &&
-                          airports
-                            .filter((a) => a.status === "Publish")
-                            .map((airport) => (
-                              <option
-                                key={airport._id}
-                                value={airport._id}
-                                disabled={
-                                  airport._id === newFlight.from_airport
-                                }
-                              >
-                                {airport.iata_code} - {airport.city}
-                              </option>
-                            ))}
-                      </select>
-                    </div>
+                {/* From Airport */}
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-black dark:text-white">
+                    From Airport *
+                  </label>
+                  <select
+                    name="from_airport"
+                    value={newFlight.from_airport}
+                    onChange={handleNewFlightInputChange}
+                    required
+                    className="w-full px-3 py-2 border rounded-md
+                         bg-white dark:bg-black
+                         text-black dark:text-white
+                         border-black dark:border-white
+                         outline-none"
+                  >
+                    <option value="">Select Airport</option>
+                    {Array.isArray(airports) &&
+                      airports
+                        .filter((a) => a.status === "Publish")
+                        .map((airport) => (
+                          <option
+                            key={airport._id}
+                            value={airport._id}
+                            disabled={airport._id === newFlight.to_airport}
+                          >
+                            {airport.iata_code} - {airport.city}
+                          </option>
+                        ))}
+                  </select>
+                </div>
 
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Departure Time *
-                      </label>
-                      <input
-                        type="datetime-local"
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                        name="departure_time"
-                        value={newFlight.departure_time}
-                        onChange={handleNewFlightInputChange}
-                        required
-                      />
-                    </div>
+                {/* To Airport */}
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-black dark:text-white">
+                    To Airport *
+                  </label>
+                  <select
+                    name="to_airport"
+                    value={newFlight.to_airport}
+                    onChange={handleNewFlightInputChange}
+                    required
+                    className="w-full px-3 py-2 border rounded-md
+                         bg-white dark:bg-black
+                         text-black dark:text-white
+                         border-black dark:border-white
+                         outline-none"
+                  >
+                    <option value="">Select Airport</option>
+                    {Array.isArray(airports) &&
+                      airports
+                        .filter((a) => a.status === "Publish")
+                        .map((airport) => (
+                          <option
+                            key={airport._id}
+                            value={airport._id}
+                            disabled={airport._id === newFlight.from_airport}
+                          >
+                            {airport.iata_code} - {airport.city}
+                          </option>
+                        ))}
+                  </select>
+                </div>
 
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Arrival Time *
-                      </label>
-                      <input
-                        type="datetime-local"
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                        name="arrival_time"
-                        value={newFlight.arrival_time}
-                        onChange={handleNewFlightInputChange}
-                        required
-                      />
-                    </div>
+                {/* Departure Time */}
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-black dark:text-white">
+                    Departure Time *
+                  </label>
+                  <input
+                    type="datetime-local"
+                    name="departure_time"
+                    value={newFlight.departure_time}
+                    onChange={handleNewFlightInputChange}
+                    required
+                    className="w-full px-3 py-2 border rounded-md
+                         bg-white dark:bg-black
+                         text-black dark:text-white
+                         border-black dark:border-white
+                         outline-none"
+                  />
+                </div>
 
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Price ($) *
-                      </label>
-                      <input
-                        type="number"
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                        name="price"
-                        value={newFlight.price}
-                        onChange={handleNewFlightInputChange}
-                        required
-                        min="0"
-                      />
-                    </div>
+                {/* Arrival Time */}
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-black dark:text-white">
+                    Arrival Time *
+                  </label>
+                  <input
+                    type="datetime-local"
+                    name="arrival_time"
+                    value={newFlight.arrival_time}
+                    onChange={handleNewFlightInputChange}
+                    required
+                    className="w-full px-3 py-2 border rounded-md
+                         bg-white dark:bg-black
+                         text-black dark:text-white
+                         border-black dark:border-white
+                         outline-none"
+                  />
+                </div>
 
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Total Seats *
-                      </label>
-                      <input
-                        type="number"
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                        name="total_seats"
-                        value={newFlight.total_seats}
-                        onChange={handleNewFlightInputChange}
-                        required
-                        min="1"
-                      />
-                    </div>
+                {/* Price */}
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-black dark:text-white">
+                    Price ($) *
+                  </label>
+                  <input
+                    type="number"
+                    name="price"
+                    value={newFlight.price}
+                    onChange={handleNewFlightInputChange}
+                    required
+                    min="0"
+                    className="w-full px-3 py-2 border rounded-md
+                         bg-white dark:bg-black
+                         text-black dark:text-white
+                         border-black dark:border-white
+                         outline-none"
+                  />
+                </div>
 
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Seats Available
-                      </label>
-                      <input
-                        type="number"
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                        name="seats_available"
-                        value={newFlight.seats_available}
-                        onChange={handleNewFlightInputChange}
-                        min="0"
-                        max={newFlight.total_seats}
-                      />
-                    </div>
+                {/* Total Seats */}
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-black dark:text-white">
+                    Total Seats *
+                  </label>
+                  <input
+                    type="number"
+                    name="total_seats"
+                    value={newFlight.total_seats}
+                    onChange={handleNewFlightInputChange}
+                    required
+                    min="1"
+                    className="w-full px-3 py-2 border rounded-md
+                         bg-white dark:bg-black
+                         text-black dark:text-white
+                         border-black dark:border-white
+                         outline-none"
+                  />
+                </div>
 
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Aircraft Type
-                      </label>
-                      <input
-                        type="text"
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                        name="aircraft_type"
-                        value={newFlight.aircraft_type}
-                        onChange={handleNewFlightInputChange}
-                      />
-                    </div>
+                {/* Seats Available */}
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-black dark:text-white">
+                    Seats Available
+                  </label>
+                  <input
+                    type="number"
+                    name="seats_available"
+                    value={newFlight.seats_available}
+                    onChange={handleNewFlightInputChange}
+                    min="0"
+                    max={newFlight.total_seats}
+                    className="w-full px-3 py-2 border rounded-md
+                         bg-white dark:bg-black
+                         text-black dark:text-white
+                         border-black dark:border-white
+                         outline-none"
+                  />
+                </div>
 
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Status
-                      </label>
-                      <select
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                        name="status"
-                        value={newFlight.status}
-                        onChange={handleNewFlightInputChange}
-                      >
-                        <option value="Scheduled">Scheduled</option>
-                        <option value="Delayed">Delayed</option>
-                        <option value="Cancelled">Cancelled</option>
-                        <option value="Completed">Completed</option>
-                      </select>
-                    </div>
+                {/* Aircraft Type */}
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-black dark:text-white">
+                    Aircraft Type
+                  </label>
+                  <input
+                    type="text"
+                    name="aircraft_type"
+                    value={newFlight.aircraft_type}
+                    onChange={handleNewFlightInputChange}
+                    className="w-full px-3 py-2 border rounded-md
+                         bg-white dark:bg-black
+                         text-black dark:text-white
+                         border-black dark:border-white
+                         outline-none"
+                  />
+                </div>
 
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Admin Status
-                      </label>
-                      <select
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                        name="admin_status"
-                        value={newFlight.admin_status}
-                        onChange={handleNewFlightInputChange}
-                      >
-                        <option value="Publish">Publish</option>
-                        <option value="Draft">Draft</option>
-                      </select>
-                    </div>
-                  </div>
+                {/* Status */}
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-black dark:text-white">
+                    Status
+                  </label>
+                  <select
+                    name="status"
+                    value={newFlight.status}
+                    onChange={handleNewFlightInputChange}
+                    className="w-full px-3 py-2 border rounded-md
+                         bg-white dark:bg-black
+                         text-black dark:text-white
+                         border-black dark:border-white
+                         outline-none"
+                  >
+                    <option value="Scheduled">Scheduled</option>
+                    <option value="Delayed">Delayed</option>
+                    <option value="Cancelled">Cancelled</option>
+                    <option value="Completed">Completed</option>
+                  </select>
+                </div>
 
-                  <div className="mt-6 flex justify-end space-x-3 gap-3">
-                    <button
-                      type="button"
-                      className="px-4 py-2  bg-gray-400 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 "
-                      onClick={() => setShowAddModal(false)}
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      type="submit"
-                      className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-                    >
-                      Add Flight
-                    </button>
-                  </div>
-                </form>
+                {/* Admin Status */}
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-black dark:text-white">
+                    Admin Status
+                  </label>
+                  <select
+                    name="admin_status"
+                    value={newFlight.admin_status}
+                    onChange={handleNewFlightInputChange}
+                    className="w-full px-3 py-2 border rounded-md
+                         bg-white dark:bg-black
+                         text-black dark:text-white
+                         border-black dark:border-white
+                         outline-none"
+                  >
+                    <option value="Publish">Publish</option>
+                    <option value="Draft">Draft</option>
+                  </select>
+                </div>
               </div>
-            
+
+              {/* Buttons */}
+              <div className="mt-6 flex justify-end gap-3">
+                <button
+                  type="button"
+                  onClick={() => setShowAddModal(false)}
+                  className="px-4 py-2 border rounded-md
+                       border-black dark:border-white
+                       text-black dark:text-white
+                       hover:bg-black hover:text-white
+                       dark:hover:bg-white dark:hover:text-black
+                       transition"
+                >
+                  Cancel
+                </button>
+
+                <button
+                  type="submit"
+                  className="px-4 py-2 rounded-md
+                       bg-blue-600 dark:bg-blue-500
+                       text-white dark:text-black
+                       hover:opacity-80 transition"
+                >
+                  Add Flight
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
 
       {/* Edit Flight Modal */}
       {showEditModal && currentFlight && (
-        <div className="fixed inset-0 z-50 overflow-y-auto">
-          <div className="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-            <div
-              className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
-              onClick={() => setShowEditModal(false)}
-            ></div>
+        <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto">
+          {/* Backdrop */}
+          <div
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm"
+            onClick={() => setShowEditModal(false)}
+          ></div>
 
-            <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
-              <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-                <div className="flex justify-between items-center mb-4">
-                  <h3 className="text-lg font-medium text-gray-900">
-                    Edit Flight {currentFlight.flight_number}
-                  </h3>
-                  <button
-                    type="button"
-                    className="text-gray-400 hover:text-gray-500"
-                    onClick={() => setShowEditModal(false)}
-                  >
-                    <i className="fas fa-times"></i>
-                  </button>
+          {/* Modal Box */}
+          <div
+            className="relative z-50 w-full max-w-lg mx-4 rounded-2xl shadow-2xl p-6
+                    bg-white dark:bg-black
+                    border border-black dark:border-white
+                    animate-fadeIn"
+          >
+            {/* Header */}
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-xl font-semibold text-black dark:text-white">
+                Edit Flight {currentFlight.flight_number}
+              </h3>
+
+              <button
+                onClick={() => setShowEditModal(false)}
+                className="text-black dark:text-white text-xl transition hover:scale-110"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Form */}
+            <form onSubmit={handleEditSubmit}>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Flight Number */}
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-black dark:text-white">
+                    Flight Number
+                  </label>
+                  <input
+                    type="text"
+                    name="flight_number"
+                    value={editFlight.flight_number}
+                    onChange={handleEditInputChange}
+                    required
+                    className="w-full px-3 py-2 rounded-lg border
+                         bg-white dark:bg-black
+                         text-black dark:text-white
+                         border-black dark:border-white
+                         outline-none"
+                  />
                 </div>
 
-                <form onSubmit={handleEditSubmit}>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Flight Number
-                      </label>
-                      <input
-                        type="text"
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                        name="flight_number"
-                        value={editFlight.flight_number}
-                        onChange={handleEditInputChange}
-                        required
-                      />
-                    </div>
+                {/* Status */}
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-black dark:text-white">
+                    Status
+                  </label>
+                  <select
+                    name="status"
+                    value={editFlight.status}
+                    onChange={handleEditInputChange}
+                    className="w-full px-3 py-2 rounded-lg border
+                         bg-white dark:bg-black
+                         text-black dark:text-white
+                         border-black dark:border-white
+                         outline-none"
+                  >
+                    <option value="Scheduled">Scheduled</option>
+                    <option value="Delayed">Delayed</option>
+                    <option value="Cancelled">Cancelled</option>
+                    <option value="Completed">Completed</option>
+                  </select>
+                </div>
 
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Status
-                      </label>
-                      <select
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                        name="status"
-                        value={editFlight.status}
-                        onChange={handleEditInputChange}
-                      >
-                        <option value="Scheduled">Scheduled</option>
-                        <option value="Delayed">Delayed</option>
-                        <option value="Cancelled">Cancelled</option>
-                        <option value="Completed">Completed</option>
-                      </select>
-                    </div>
+                {/* Admin Status */}
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-black dark:text-white">
+                    Admin Status
+                  </label>
+                  <select
+                    name="admin_status"
+                    value={editFlight.admin_status}
+                    onChange={handleEditInputChange}
+                    className="w-full px-3 py-2 rounded-lg border
+                         bg-white dark:bg-black
+                         text-black dark:text-white
+                         border-black dark:border-white
+                         outline-none"
+                  >
+                    <option value="Publish">Publish</option>
+                    <option value="Draft">Draft</option>
+                  </select>
+                </div>
 
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Admin Status
-                      </label>
-                      <select
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                        name="admin_status"
-                        value={editFlight.admin_status}
-                        onChange={handleEditInputChange}
-                      >
-                        <option value="Publish">Publish</option>
-                        <option value="Draft">Draft</option>
-                      </select>
-                    </div>
+                {/* Price */}
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-black dark:text-white">
+                    Price ($)
+                  </label>
+                  <input
+                    type="number"
+                    name="price"
+                    value={editFlight.price}
+                    onChange={handleEditInputChange}
+                    min="0"
+                    required
+                    className="w-full px-3 py-2 rounded-lg border
+                         bg-white dark:bg-black
+                         text-black dark:text-white
+                         border-black dark:border-white
+                         outline-none"
+                  />
+                </div>
 
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Price ($)
-                      </label>
-                      <input
-                        type="number"
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                        name="price"
-                        value={editFlight.price}
-                        onChange={handleEditInputChange}
-                        required
-                        min="0"
-                      />
-                    </div>
-
-                    <div className="md:col-span-2">
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Seats Available
-                      </label>
-                      <input
-                        type="number"
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                        name="seats_available"
-                        value={editFlight.seats_available}
-                        onChange={handleEditInputChange}
-                        min="0"
-                        max={currentFlight.total_seats}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="mt-6 flex justify-end space-x-3">
-                    <button
-                      type="button"
-                      className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
-                      onClick={() => setShowEditModal(false)}
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      type="submit"
-                      className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-                    >
-                      Update Flight
-                    </button>
-                  </div>
-                </form>
+                {/* Seats Available */}
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium mb-1 text-black dark:text-white">
+                    Seats Available
+                  </label>
+                  <input
+                    type="number"
+                    name="seats_available"
+                    value={editFlight.seats_available}
+                    onChange={handleEditInputChange}
+                    min="0"
+                    max={currentFlight.total_seats}
+                    className="w-full px-3 py-2 rounded-lg border
+                         bg-white dark:bg-black
+                         text-black dark:text-white
+                         border-black dark:border-white
+                         outline-none"
+                  />
+                </div>
               </div>
-            </div>
+
+              {/* Buttons */}
+              <div className="mt-6 flex justify-end gap-3">
+                <button
+                  type="button"
+                  onClick={() => setShowEditModal(false)}
+                  className="px-4 py-2 rounded-lg border
+                       border-black dark:border-white
+                       text-black dark:text-white
+                       hover:bg-black hover:text-white
+                       dark:hover:bg-white dark:hover:text-black
+                       transition"
+                >
+                  Cancel
+                </button>
+
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-blue-600 dark:bg-blue-500
+                       text-white dark:text-black
+                       rounded-lg transition shadow-md
+                       hover:opacity-80"
+                >
+                  Update Flight
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

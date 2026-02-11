@@ -215,15 +215,15 @@ const Flights = () => {
   const columns = [
     {
       name: "Flight No",
-      selector: (row) => row.flight_number,
+      selector: (row) => <div className=" font-bold">{row.flight_number}</div>,
       sortable: true,
     },
     {
       name: "Airline",
       cell: (row) => (
         <div>
-          <div>{row.airline?.airline_name}</div>
-          <div className="text-gray-500 text-sm">
+          <div className=" font-medium">{row.airline?.airline_name}</div>
+          <div className="text-gray-500 text-sm font-medium">
             ({row.airline?.airline_code})
           </div>
         </div>
@@ -233,7 +233,7 @@ const Flights = () => {
     {
       name: "Route",
       cell: (row) => (
-        <span>
+        <span className="font-medium">
           {row.from_airport?.city} → {row.to_airport?.city}
         </span>
       ),
@@ -242,8 +242,8 @@ const Flights = () => {
       name: "Departure",
       cell: (row) => (
         <div>
-          <div>{new Date(row.departure_time).toLocaleDateString()}</div>
-          <div className="text-gray-500 text-sm">
+          <div className="font-medium">{new Date(row.departure_time).toLocaleDateString()}</div>
+          <div className="text-gray-500 text-sm font-medium">
             {new Date(row.departure_time).toLocaleTimeString([], {
               hour: "2-digit",
               minute: "2-digit",
@@ -268,21 +268,21 @@ const Flights = () => {
     // },
     {
       name: "Duration",
-      selector: (row) => {
+      selector: (row) => <div className="font-medium">{(() => {
         const h = Math.floor(row.duration / 60);
         const m = row.duration % 60;
         return `${h}h ${m}m`;
-      },
+      })()}</div>,
     },
     {
       name: "Price",
-      selector: (row) => `$${row.price}`,
+      selector: (row) => <div className="font-medium">${row.price}</div>,
       sortable: true,
     },
     {
       name: "Seats",
       cell: (row) => (
-        <div className="flex items-center">
+        <div className="flex items-center font-medium">
           <span
             className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium mr-2 ${
               row.seats_available < 10

@@ -43,14 +43,12 @@ const AddBookingModal = ({ onClose, onSuccess }) => {
     if (name === "flight_id") {
       const flight = flights.find((f) => f._id === value);
       if (flight)
-        updated.total_amount =
-          flight.price * updated.total_passengers;
+        updated.total_amount = flight.price * updated.total_passengers;
     }
 
     if (name === "total_passengers") {
       const flight = flights.find((f) => f._id === formData.flight_id);
-      if (flight)
-        updated.total_amount = flight.price * value;
+      if (flight) updated.total_amount = flight.price * value;
     }
 
     setFormData(updated);
@@ -86,21 +84,18 @@ const AddBookingModal = ({ onClose, onSuccess }) => {
   return (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center">
       {/* Backdrop */}
-      <div
-        className="absolute inset-0 bg-black/60"
-        onClick={onClose}
-      />
+      <div className="absolute inset-0 bg-black/70" onClick={onClose} />
 
       {/* Modal */}
-      <div className="relative w-full max-w-2xl bg-white rounded-xl shadow-xl p-6">
+      <div className="relative w-full max-w-2xl bg-white dark:bg-black border border-black dark:border-white rounded-xl shadow-xl p-6">
         {/* Header */}
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-lg font-semibold text-gray-800">
+        <div className="flex justify-between items-center border-b border-black dark:border-white pb-3">
+          <h2 className="text-lg font-semibold text-black dark:text-white">
             Add Booking
           </h2>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600"
+            className="text-black dark:text-white hover:opacity-70 text-xl"
           >
             ✕
           </button>
@@ -108,16 +103,16 @@ const AddBookingModal = ({ onClose, onSuccess }) => {
 
         {/* Error */}
         {error && (
-          <div className="mb-4 text-sm text-red-700 bg-red-100 px-4 py-2 rounded">
+          <div className="mt-4 text-sm text-red-600 border border-red-600 px-4 py-2 rounded">
             {error}
           </div>
         )}
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4 mt-4">
           {/* User */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-black dark:text-white mb-1">
               User *
             </label>
             <select
@@ -125,7 +120,15 @@ const AddBookingModal = ({ onClose, onSuccess }) => {
               value={formData.user_id}
               onChange={handleChange}
               required
-              className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500"
+              className="
+            w-full px-3 py-2
+            border border-black dark:border-white
+            bg-white dark:bg-black
+            text-black dark:text-white
+            rounded-lg
+            focus:ring-2 focus:ring-black dark:focus:ring-white
+            outline-none
+          "
             >
               <option value="">Select User</option>
               {users.map((u) => (
@@ -138,7 +141,7 @@ const AddBookingModal = ({ onClose, onSuccess }) => {
 
           {/* Flight */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-black dark:text-white mb-1">
               Flight *
             </label>
             <select
@@ -146,13 +149,20 @@ const AddBookingModal = ({ onClose, onSuccess }) => {
               value={formData.flight_id}
               onChange={handleChange}
               required
-              className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500"
+              className="
+            w-full px-3 py-2
+            border border-black dark:border-white
+            bg-white dark:bg-black
+            text-black dark:text-white
+            rounded-lg
+            focus:ring-2 focus:ring-black dark:focus:ring-white
+            outline-none
+          "
             >
               <option value="">Select Flight</option>
               {flights.map((f) => (
                 <option key={f._id} value={f._id}>
-                  {f.flight_number} |{" "}
-                  {f.from_airport?.airport_code} →
+                  {f.flight_number} | {f.from_airport?.airport_code} →{" "}
                   {f.to_airport?.airport_code} | ₹{f.price}
                 </option>
               ))}
@@ -161,7 +171,7 @@ const AddBookingModal = ({ onClose, onSuccess }) => {
 
           {/* Passengers */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-black dark:text-white mb-1">
               Passengers
             </label>
             <input
@@ -170,36 +180,63 @@ const AddBookingModal = ({ onClose, onSuccess }) => {
               name="total_passengers"
               value={formData.total_passengers}
               onChange={handleChange}
-              className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500"
+              className="
+            w-full px-3 py-2
+            border border-black dark:border-white
+            bg-white dark:bg-black
+            text-black dark:text-white
+            rounded-lg
+            focus:ring-2 focus:ring-black dark:focus:ring-white
+            outline-none
+          "
             />
           </div>
 
           {/* Amount */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-black dark:text-white mb-1">
               Total Amount
             </label>
             <input
               type="number"
               readOnly
               value={formData.total_amount}
-              className="w-full px-3 py-2 border rounded-md bg-gray-100"
+              className="
+            w-full px-3 py-2
+            border border-black dark:border-white
+            bg-white dark:bg-black
+            text-black dark:text-white
+            rounded-lg
+          "
             />
           </div>
 
           {/* Footer */}
-          <div className="flex justify-end gap-3 pt-4">
+          <div className="flex justify-end gap-3 pt-4 border-t border-black dark:border-white">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 border rounded-md hover:bg-gray-100"
+              className="
+            px-4 py-2 rounded-lg
+            border border-black dark:border-white
+            bg-gray-200 dark:bg-gray-500
+            text-black dark:text-white
+            hover:opacity-70
+          "
             >
               Cancel
             </button>
+
             <button
               type="submit"
               disabled={loading}
-              className="px-5 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-60"
+              className="
+            px-5 py-2 rounded-lg
+            bg-blue-600 dark:bg-blue-500
+            text-white dark:text-black
+            hover:opacity-80
+            disabled:opacity-60
+          "
             >
               {loading ? "Saving..." : "Add Booking"}
             </button>

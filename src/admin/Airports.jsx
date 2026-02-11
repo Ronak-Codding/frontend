@@ -220,43 +220,43 @@ const Airports = () => {
                 <tr>
                   <th
                     scope="col"
-                    className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider"
+                    className="px-6 py-3 text-left text-sm font-bold text-gray-500 uppercase tracking-wider"
                   >
                     Code
                   </th>
                   <th
                     scope="col"
-                    className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider"
+                    className="px-6 py-3 text-left text-sm font-bold text-gray-500 uppercase tracking-wider"
                   >
                     Airport Name
                   </th>
                   <th
                     scope="col"
-                    className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider"
+                    className="px-6 py-3 text-left text-sm font-bold text-gray-500 uppercase tracking-wider"
                   >
                     City
                   </th>
                   <th
                     scope="col"
-                    className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider"
+                    className="px-6 py-3 text-left text-sm font-bold text-gray-500 uppercase tracking-wider"
                   >
                     Country
                   </th>
                   <th
                     scope="col"
-                    className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider"
+                    className="px-6 py-3 text-left text-sm font-bold text-gray-500 uppercase tracking-wider"
                   >
                     Status
                   </th>
                   <th
                     scope="col"
-                    className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider"
+                    className="px-6 py-3 text-left text-sm font-bold text-gray-500 uppercase tracking-wider"
                   >
                     Created
                   </th>
                   <th
                     scope="col"
-                    className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider"
+                    className="px-6 py-3 text-left text-sm font-bold text-gray-500 uppercase tracking-wider"
                   >
                     Actions
                   </th>
@@ -274,10 +274,10 @@ const Airports = () => {
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                         {airport.airport_name}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                         {airport.city}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-500">
                         <span className="flag-icon">{airport.country}</span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
@@ -291,7 +291,7 @@ const Airports = () => {
                           {airport.status}
                         </span>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-500">
                         {new Date(airport.createdAt).toLocaleDateString()}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
@@ -372,7 +372,7 @@ const Airports = () => {
                     key={index}
                     className={`px-3 py-1.5 rounded-md text-sm font-medium ${
                       currentPage === index + 1
-                        ? "bg-blue-600 text-white"
+                        ? "bg-purple-600 text-white"
                         : "text-gray-700 hover:bg-gray-100"
                     }`}
                     onClick={() => setCurrentPage(index + 1)}
@@ -436,7 +436,7 @@ const Airports = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* Airport Code */}
                 <div>
-                  <label className="block text-sm mb-1 text-black dark:text-white">
+                  <label className="block text-sm font-medium mb-1 text-black dark:text-white">
                     Airport Code *
                   </label>
                   <input
@@ -463,7 +463,7 @@ const Airports = () => {
 
                 {/* Status */}
                 <div>
-                  <label className="block text-sm mb-1 text-black dark:text-white">
+                  <label className="block text-sm font-medium mb-1 text-black dark:text-white">
                     Status
                   </label>
                   <select
@@ -487,7 +487,7 @@ const Airports = () => {
 
                 {/* Airport Name */}
                 <div className="md:col-span-2">
-                  <label className="block text-sm mb-1 text-black dark:text-white">
+                  <label className="block text-sm font-medium mb-1 text-black dark:text-white">
                     Airport Name *
                   </label>
                   <input
@@ -510,7 +510,7 @@ const Airports = () => {
 
                 {/* City */}
                 <div>
-                  <label className="block text-sm mb-1 text-black dark:text-white">
+                  <label className="block text-sm font-medium mb-1 text-black dark:text-white">
                     City *
                   </label>
                   <input
@@ -533,19 +533,16 @@ const Airports = () => {
 
                 {/* Country */}
                 <div>
-                  <label className="block text-sm mb-1 text-black dark:text-white">
+                  <label className="block text-sm font-medium mb-1 text-black dark:text-white">
                     Country *
                   </label>
 
-                  {/* Wrap CountrySelect for styling consistency */}
-                 
-                    <CountrySelect
-                      value={formData.country}
-                      onChange={(country) =>
-                        setFormData({ ...formData, country })
-                      }
-                    />
-                 
+                  <CountrySelect
+                    value={formData.country}
+                    onChange={(country) =>
+                      setFormData({ ...formData, country })
+                    }
+                  />
                 </div>
               </div>
 
@@ -557,7 +554,7 @@ const Airports = () => {
                   className="
               px-4 py-2 rounded-md
               border border-black dark:border-white
-              bg-white dark:bg-black
+              bg-gray-200 dark:bg-gray-500
               text-black dark:text-white
               hover:opacity-70
             "

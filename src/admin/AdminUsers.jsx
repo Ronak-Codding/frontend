@@ -9,6 +9,8 @@ const AdminUsers = () => {
   const [editId, setEditId] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const usersPerPage = 5;
 
   const [formData, setFormData] = useState({
     firstName: "",
@@ -49,6 +51,11 @@ const AdminUsers = () => {
 
     return matchesSearch && matchesStatus;
   });
+  const totalPages = Math.ceil(filteredUsers.length / usersPerPage);
+
+  const indexOfLastUser = currentPage * usersPerPage;
+  const indexOfFirstUser = indexOfLastUser - usersPerPage;
+  const currentUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser);
 
   /* ================= HANDLE INPUT ================= */
   const handleChange = (e) => {
@@ -416,7 +423,7 @@ const AdminUsers = () => {
           </tr>
         </thead>
         <tbody className="text-gray-600">
-          {filteredUsers.map((user, i) => (
+          {currentUsers.map((user, i) => (
             <tr key={user._id} className="border-t hover:bg-gray-50">
               <td className="p-3">{i + 1}</td>
               <td className="p-3">
@@ -458,6 +465,66 @@ const AdminUsers = () => {
           ))}
         </tbody>
       </table>
+      {totalPages > 1 && (
+        <div className="flex justify-center items-center gap-2 mt-5 flex-wrap">
+          {/* Prev Button */}
+          <button
+            disabled={currentPage === 1}
+            onClick={() => setCurrentPage(currentPage - 1)}
+            className={`
+        px-3 py-1.5 text-sm rounded-lg border
+        transition-all duration-200
+        ${
+          currentPage === 1
+            ? "opacity-50 cursor-not-allowed border-gray-300 bg-white text-gray-400"
+            : "border-gray-300 bg-white hover:bg-gray-100 text-gray-700"
+        }
+      `}
+          >
+            ‹ Prev
+          </button>
+
+          {/* Page Numbers */}
+          {[...Array(totalPages)].map((_, i) => {
+            const page = i + 1;
+            const isActive = currentPage === page;
+
+            return (
+              <button
+                key={page}
+                onClick={() => setCurrentPage(page)}
+                className={`
+            px-3 py-1.5 text-sm rounded-lg border transition-all duration-200
+            ${
+              isActive
+                ? "bg-gradient-to-r from-indigo-600 to-purple-600 text-white border-transparent"
+                : "border-gray-300 bg-white text-gray-700 hover:bg-gray-100"
+            }
+          `}
+              >
+                {page}
+              </button>
+            );
+          })}
+
+          {/* Next Button */}
+          <button
+            disabled={currentPage === totalPages}
+            onClick={() => setCurrentPage(currentPage + 1)}
+            className={`
+        px-3 py-1.5 text-sm rounded-lg border
+        transition-all duration-200
+        ${
+          currentPage === totalPages
+            ? "opacity-50 cursor-not-allowed border-gray-300 bg-white text-gray-400"
+            : "border-gray-300 bg-white hover:bg-gray-100 text-gray-700"
+        }
+      `}
+          >
+            Next ›
+          </button>
+        </div>
+      )}
     </>
   );
 };

@@ -18,6 +18,7 @@ import Airlines from "./admin/Airlines";
 import Airports from "./admin/Airports";
 import Flights from "./admin/Flights";
 import AdminBookings from "./admin/AdminBookings";
+import Passengers from "./admin/Passengers";  
 
 import User from "./user/User";
 
@@ -50,6 +51,7 @@ function App() {
           <Route path="airports" element={<Airports />} />
           <Route path="flights" element={<Flights />} />
           <Route path="bookings" element={<AdminBookings />} />
+          <Route path="passengers" element={<Passengers />} />
         </Route>
 
         {/* User */}

@@ -111,8 +111,8 @@ const AdminBookings = () => {
           <thead className="bg-gray-100 text-gray-600 uppercase text-xs">
             <tr>
               <th className="px-4 py-3">Ref</th>
-              <th className="px-4 py-3">User</th>
-              <th className="px-4 py-3">Email</th>
+              {/* <th className="px-4 py-3">User</th>
+              <th className="px-4 py-3">Email</th> */}
               <th className="px-4 py-3">Flight</th>
               <th className="px-4 py-3">Route</th>
               <th className="px-4 py-3">Passengers</th>
@@ -123,14 +123,14 @@ const AdminBookings = () => {
             </tr>
           </thead>
 
-          <tbody className="divide-y">
+          <tbody className="divide-y text-gray-700 font-medium">
             {currentBookings.map((b) => (
               <tr key={b._id} className="hover:bg-gray-50">
                 <td className="px-4 py-3 font-medium">{b.bookingReference}</td>
-                <td className="px-4 py-3">
+                {/* <td className="px-4 py-3">
                   {b.user_id?.firstName} {b.user_id?.lastName}
                 </td>
-                <td className="px-4 py-3">{b.user_id?.email}</td>
+                <td className="px-4 py-3">{b.user_id?.email}</td> */}
                 <td className="px-4 py-3">
                   {b.flight_id?.flight_number || "-"}
                 </td>

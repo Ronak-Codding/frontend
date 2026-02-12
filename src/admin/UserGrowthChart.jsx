@@ -18,7 +18,7 @@ ChartJS.register(
   LineElement,
   Tooltip,
   Legend,
-  Filler
+  Filler,
 );
 
 const UserGrowthChart = () => {
@@ -28,7 +28,20 @@ const UserGrowthChart = () => {
     fetch("http://localhost:5000/api/user/allusers")
       .then((res) => res.json())
       .then((users) => {
-        const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+        const months = [
+          "Jan",
+          "Feb",
+          "Mar",
+          "Apr",
+          "May",
+          "Jun",
+          "Jul",
+          "Aug",
+          "Sep",
+          "Oct",
+          "Nov",
+          "Dec",
+        ];
 
         let monthlyUsers = new Array(12).fill(0);
 
@@ -70,29 +83,42 @@ const UserGrowthChart = () => {
   if (!chartData) return null;
 
   return (
-    <div className="chart-card mt-4">
-      <h5 className="text-white mb-3">User Growth</h5>
-      <Line
-        data={chartData}
-        options={{
-          responsive: true,
-          plugins: {
-            legend: {
-              labels: { color: "#cbd5f5" },
-            },
-          },
-          scales: {
-            x: {
-              ticks: { color: "#94a3b8" },
-              grid: { color: "rgba(255,255,255,0.05)" },
-            },
-            y: {
-              ticks: { color: "#94a3b8" },
-              grid: { color: "rgba(255,255,255,0.05)" },
-            },
-          },
-        }}
-      />
+    <div className="w-full lg:w-2/3 mt-6 ">
+      <div className="bg-[#1e293b] rounded-2xl p-4 sm:p-6 shadow-lg">
+        <h5 className="text-white text-lg sm:text-xl font-semibold mb-4">
+          User Growth
+        </h5>
+
+        {/* Chart Container with proper height */}
+        <div className="relative w-full h-[220px] sm:h-[280px]">
+          <Line
+            data={chartData}
+            options={{
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: {
+                legend: {
+                  labels: {
+                    color: "#cbd5f5",
+                    boxWidth: 15,
+                    font: { size: 12 }, // smaller legend text
+                  },
+                },
+              },
+              scales: {
+                x: {
+                  ticks: { color: "#94a3b8", font: { size: 11 } },
+                  grid: { color: "rgba(255,255,255,0.05)" },
+                },
+                y: {
+                  ticks: { color: "#94a3b8", font: { size: 11 } },
+                  grid: { color: "rgba(255,255,255,0.05)" },
+                },
+              },
+            }}
+          />
+        </div>
+      </div>
     </div>
   );
 };

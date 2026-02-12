@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import UserGrowthChart from "./UserGrowthChart";
-import { Ticket } from "lucide-react";
+import { Ticket, PlaneIcon, IndianRupee } from "lucide-react";
 
 const AnimatedCounter = ({ value }) => {
   const [count, setCount] = useState(0);
@@ -102,10 +102,15 @@ const AdminDashboard = () => {
     shadow-md hover:shadow-xl 
     transform hover:-translate-y-1 transition duration-300"
         >
-          <h3 className="text-3xl font-bold text-black dark:text-white">
-            <i className="fas fa-users"></i>{" "}
-            <AnimatedCounter value={users.length} />
-          </h3>
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-black dark:bg-white">
+              <i className="fas fa-users w-5 h-5 text-white dark:text-black"></i>
+            </div>
+
+            <h3 className="text-3xl font-bold text-black dark:text-white">
+              <AnimatedCounter value={users.length} />
+            </h3>
+          </div>
 
           <p className="mt-2 text-sm text-black dark:text-white">Total Users</p>
         </div>
@@ -113,7 +118,7 @@ const AdminDashboard = () => {
         {/* Bookings */}
         <div
           className="p-6 rounded-2xl border 
-  border-black dark:border-white
+   dark:border-white
   bg-white dark:bg-black 
   shadow-md hover:shadow-xl 
   transform hover:-translate-y-1 transition duration-300"
@@ -141,10 +146,14 @@ const AdminDashboard = () => {
     shadow-md hover:shadow-xl 
     transform hover:-translate-y-1 transition duration-300"
         >
-          <h3 className="text-3xl font-bold text-black dark:text-white">
-            <i className="fas fa-plane "></i>{" "}
-            <AnimatedCounter value={flights.length} />
-          </h3>
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-black dark:bg-white">
+              <PlaneIcon className="w-5 h-5 text-white dark:text-black" />
+            </div>
+            <h3 className="text-3xl font-bold text-black dark:text-white">
+              <AnimatedCounter value={flights.length} />
+            </h3>
+          </div>
 
           <p className="mt-2 text-sm text-black dark:text-white">
             Total Flights
@@ -159,9 +168,14 @@ const AdminDashboard = () => {
     shadow-md hover:shadow-xl 
     transform hover:-translate-y-1 transition duration-300"
         >
-          <h3 className="text-3xl font-bold text-black dark:text-white">
-            ₹ <AnimatedCounter value={revenue} />
-          </h3>
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-black dark:bg-white">
+              <IndianRupee className="w-5 h-5 text-white dark:text-black" />
+            </div>
+            <h3 className="text-3xl font-bold text-black dark:text-white">
+              <AnimatedCounter value={revenue} />
+            </h3>
+          </div>
 
           <p className="mt-2 text-sm text-black dark:text-white">
             Total Revenue
@@ -170,7 +184,7 @@ const AdminDashboard = () => {
       </div>
 
       {/* Chart Section */}
-      <div className="mt-12 p-6 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-neutral-900 shadow-sm">
+      <div className=" border-gray-200 dark:border-gray-700 ">
         <UserGrowthChart />
       </div>
     </div>

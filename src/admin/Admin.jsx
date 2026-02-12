@@ -131,7 +131,7 @@ const Admin = () => {
         {/* ========== SIDEBAR ========== */}
         <div id="sidebar-wrapper">
           <div className="sidebar-heading text-center py-3">
-            <h2>Flight Admin</h2>
+            <h2> Admin Panel</h2>
             <small className="text-muted">Management System</small>
           </div>
 
@@ -141,11 +141,11 @@ const Admin = () => {
             </NavLink>
 
             <NavLink to="/admin/flights" className="list-group-item">
-              <i className="fas fa-plane"></i>All Flights
+              <i className="fas fa-plane"></i> Flights
             </NavLink>
 
             <NavLink to="/admin/bookings" className="list-group-item">
-              <i className="fas fa-ticket-alt"></i>All Bookings
+              <i className="fas fa-ticket-alt"></i> Bookings
               <span className="badge bg-primary ms-auto">
                 {/* {quickStats.totalBookings} */}
               </span>

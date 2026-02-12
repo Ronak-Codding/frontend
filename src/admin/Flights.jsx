@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
-import DataTable from "react-data-table-component";
-import "./Flights.css";
+// import DataTable from "react-data-table-component";
 
 const Flights = () => {
   const [flights, setFlights] = useState([]);
@@ -13,6 +12,9 @@ const Flights = () => {
 
   const [airlines, setAirlines] = useState([]);
   const [airports, setAirports] = useState([]);
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const flightsPerPage = 5;
 
   // const [publishedCount, setPublishedCount] = useState(0);
   // const [draftCount, setDraftCount] = useState(0);
@@ -89,6 +91,8 @@ const Flights = () => {
 
     if (!value) {
       setFilteredFlights(flights);
+      setCurrentPage(1);
+
       return;
     }
 
@@ -186,6 +190,11 @@ const Flights = () => {
     fetchAllData();
   };
 
+  const indexOfLast = currentPage * flightsPerPage;
+  const indexOfFirst = indexOfLast - flightsPerPage;;
+  const currentFlights = filteredFlights.slice(indexOfFirst, indexOfLast);
+  const totalPages = Math.ceil(filteredFlights.length / flightsPerPage);
+
   const handleDelete = async (id) => {
     if (!window.confirm("Delete this flight?")) return;
     await fetch(`http://localhost:5000/api/flights/deleteFlight/${id}`, {
@@ -212,154 +221,16 @@ const Flights = () => {
     );
   }
 
-  const columns = [
-    {
-      name: "Flight No",
-      selector: (row) => <div className=" font-bold">{row.flight_number}</div>,
-      sortable: true,
-    },
-    {
-      name: "Airline",
-      cell: (row) => (
-        <div>
-          <div className=" font-medium">{row.airline?.airline_name}</div>
-          <div className="text-gray-500 text-sm font-medium">
-            ({row.airline?.airline_code})
-          </div>
-        </div>
-      ),
-      sortable: true,
-    },
-    {
-      name: "Route",
-      cell: (row) => (
-        <span className="font-medium">
-          {row.from_airport?.city} → {row.to_airport?.city}
-        </span>
-      ),
-    },
-    {
-      name: "Departure",
-      cell: (row) => (
-        <div>
-          <div className="font-medium">{new Date(row.departure_time).toLocaleDateString()}</div>
-          <div className="text-gray-500 text-sm font-medium">
-            {new Date(row.departure_time).toLocaleTimeString([], {
-              hour: "2-digit",
-              minute: "2-digit",
-            })}
-          </div>
-        </div>
-      ),
-    },
-    // {
-    //   name: "Arrival",
-    //   cell: (row) => (
-    //     <div>
-    //       <div>{new Date(row.arrival_time).toLocaleDateString()}</div>
-    //       <div className="text-gray-500 text-sm">
-    //         {new Date(row.arrival_time).toLocaleTimeString([], {
-    //           hour: "2-digit",
-    //           minute: "2-digit",
-    //         })}
-    //       </div>
-    //     </div>
-    //   ),
-    // },
-    {
-      name: "Duration",
-      selector: (row) => <div className="font-medium">{(() => {
-        const h = Math.floor(row.duration / 60);
-        const m = row.duration % 60;
-        return `${h}h ${m}m`;
-      })()}</div>,
-    },
-    {
-      name: "Price",
-      selector: (row) => <div className="font-medium">${row.price}</div>,
-      sortable: true,
-    },
-    {
-      name: "Seats",
-      cell: (row) => (
-        <div className="flex items-center font-medium">
-          <span
-            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium mr-2 ${
-              row.seats_available < 10
-                ? "bg-red-100 text-red-800"
-                : "bg-green-100 text-green-800"
-            }`}
-          >
-            {row.seats_available}
-          </span>
-          <span>/ {row.total_seats}</span>
-        </div>
-      ),
-    },
-    {
-      name: "Status",
-      cell: (row) => (
-        <span
-          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-            row.status === "Scheduled"
-              ? "bg-blue-100 text-blue-800"
-              : row.status === "Delayed"
-                ? "bg-yellow-100 text-yellow-800"
-                : row.status === "Cancelled"
-                  ? "bg-red-100 text-red-800"
-                  : "bg-green-100 text-green-800"
-          }`}
-        >
-          {row.status}
-        </span>
-      ),
-    },
-    {
-      name: "Admin",
-      cell: (row) => (
-        <span
-          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium cursor-pointer ${
-            row.admin_status === "Publish"
-              ? "bg-green-100 text-green-800 hover:bg-green-200"
-              : "bg-gray-100 text-gray-800 hover:bg-gray-200"
-          }`}
-          onClick={() => toggleFlightStatus(row._id, row.admin_status)}
-        >
-          {row.admin_status}
-        </span>
-      ),
-    },
-    {
-      name: "Actions",
-      cell: (row) => (
-        <div className="flex space-x-2">
-          <button
-            className="p-1.5 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded"
-            onClick={() => handleEditClick(row)}
-          >
-            <i className="fas fa-edit"></i>
-          </button>
-          <button
-            className="p-1.5 text-red-600 hover:text-red-800 hover:bg-red-50 rounded"
-            onClick={() => handleDelete(row._id)}
-          >
-            <i className="fas fa-trash"></i>
-          </button>
-        </div>
-      ),
-    },
-  ];
-
   return (
     //  bg-gray-50
     <div className="flights-container p-6  min-h-screen">
       {/* Header */}
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h2 className="text-2xl font-bold text-gray-800 mb-1">
+          <h2 className="text-2xl font-bold text-gray-800 mb-1"> 
             Flights Data
           </h2>
-          <p className="text-gray-600">Manage all flights in the system</p>
+          {/* <p className="text-gray-600">Manage all flights in the system</p> */}
         </div>
         <button
           className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-lg font-medium flex items-center"
@@ -421,6 +292,7 @@ const Flights = () => {
               placeholder="Search flights by flight number, airline, or airport code..."
               value={searchTerm}
               onChange={handleSearch}
+
             />
           </div>
         </div>
@@ -428,29 +300,198 @@ const Flights = () => {
 
       {/* Flights Table */}
       <div className="bg-white rounded-lg shadow">
-        <div className="p-4">
-          <div className="overflow-x-auto">
-            <DataTable
-              columns={columns}
-              data={filteredFlights}
-              pagination
-              highlightOnHover
-              striped
-              responsive
-              persistTableHead
-              noDataComponent={
-                <div className="py-12 text-center">
-                  <i className="fas fa-plane text-5xl text-gray-300 mb-4"></i>
-                  <h5 className="text-lg font-medium text-gray-800">
-                    No flights found
-                  </h5>
-                  <p className="text-gray-500 mt-1">
-                    Try adjusting your search criteria
-                  </p>
-                </div>
-              }
-            />
-          </div>
+        <div className="p-4 overflow-x-auto">
+          <table className="min-w-full text-sm text-left text-gray-700">
+            <thead className="bg-gray-100 text-xs uppercase text-gray-600">
+              <tr>
+                <th className="px-4 py-3">Flight</th>
+                <th className="px-4 py-3">Airline</th>
+                <th className="px-4 py-3">Route</th>
+                <th className="px-4 py-3">Departure</th>
+                <th className="px-4 py-3">Duration</th>
+                <th className="px-4 py-3">Price</th>
+                <th className="px-4 py-3">Seats</th>
+                <th className="px-4 py-3">Status</th>
+                <th className="px-4 py-3">Admin</th>
+                <th className="px-4 py-3 text-center">Actions</th>
+              </tr>
+            </thead>
+
+            <tbody className="divide-y">
+              {currentFlights.length > 0 ? (
+                currentFlights.map((row) => (
+                  <tr key={row._id} className="hover:bg-gray-50 transition">
+                    <td className="px-4 py-3 font-bold">{row.flight_number}</td>
+
+                    <td className="px-4 py-3">
+                      <div className="font-medium">
+                        {row.airline?.airline_name}
+                      </div>
+                      <div className="text-gray-500 text-xs">
+                        ({row.airline?.airline_code})
+                      </div>
+                    </td>
+
+                    <td className="px-4 py-3 font-medium">
+                      {row.from_airport?.city} → {row.to_airport?.city}
+                    </td>
+
+                    <td className="px-4 py-3">
+                      <div>
+                        {new Date(row.departure_time).toLocaleDateString()}
+                      </div>
+                      <div className="text-gray-500 text-xs">
+                        {new Date(row.departure_time).toLocaleTimeString([], {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                      </div>
+                    </td>
+
+                    <td className="px-4 py-3 font-medium">
+                      {Math.floor(row.duration / 60)}h {row.duration % 60}m
+                    </td>
+
+                    <td className="px-4 py-3 font-medium">${row.price}</td>
+
+                    <td className="px-4 py-3">
+                      <span
+                        className={`px-2 py-1 rounded-full text-xs font-medium ${
+                          row.seats_available < 10
+                            ? "bg-red-100 text-red-700"
+                            : "bg-green-100 text-green-700"
+                        }`}
+                      >
+                        {row.seats_available}
+                      </span>
+                      <span className="ml-1 text-gray-500 text-xs font-medium">
+                        / {row.total_seats}
+                      </span>
+                    </td>
+
+                    <td className="px-4 py-3">
+                      <span
+                        className={`px-2 py-1 rounded-full text-xs font-medium ${
+                          row.status === "Scheduled"
+                            ? "bg-blue-100 text-blue-700"
+                            : row.status === "Delayed"
+                              ? "bg-yellow-100 text-yellow-700"
+                              : row.status === "Cancelled"
+                                ? "bg-red-100 text-red-700"
+                                : "bg-green-100 text-green-700"
+                        }`}
+                      >
+                        {row.status}
+                      </span>
+                    </td>
+
+                    <td className="px-4 py-3">
+                      <span
+                        onClick={() =>
+                          toggleFlightStatus(row._id, row.admin_status)
+                        }
+                        className={`cursor-pointer px-2 py-1 rounded-full text-xs font-medium ${
+                          row.admin_status === "Publish"
+                            ? "bg-green-100 text-green-700 hover:bg-green-200"
+                            : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                        }`}
+                      >
+                        {row.admin_status}
+                      </span>
+                    </td>
+
+                    <td className="px-4 py-3 text-center">
+                      <div className="flex justify-center gap-2">
+                        <button
+                          onClick={() => handleEditClick(row)}
+                          className="text-blue-600 hover:bg-blue-50 p-2 rounded"
+                        >
+                          <i className="fas fa-edit"></i>
+                        </button>
+                        <button
+                          onClick={() => handleDelete(row._id)}
+                          className="text-red-600 hover:bg-red-50 p-2 rounded"
+                        >
+                          <i className="fas fa-trash"></i>
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="10" className="text-center py-10">
+                    <div className="text-gray-400">
+                      <i className="fas fa-plane text-4xl mb-3"></i>
+                      <p>No flights found</p>
+                    </div>
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="flex justify-center items-center gap-2 mt-5 flex-wrap">
+              {/* Prev Button */}
+              <button
+                disabled={currentPage === 1}
+                onClick={() => setCurrentPage(currentPage - 1)}
+                className={`
+        px-3 py-1.5 text-sm rounded-lg border
+        transition-all duration-200
+        ${
+          currentPage === 1
+            ? "opacity-50 cursor-not-allowed border-gray-300 bg-white text-gray-400"
+            : "border-gray-300 bg-white hover:bg-gray-100 text-gray-700"
+        }
+      `}
+              >
+                ‹ Prev
+              </button>
+
+              {/* Page Numbers */}
+              {[...Array(totalPages)].map((_, i) => {
+                const page = i + 1;
+                const isActive = currentPage === page;
+
+                return (
+                  <button
+                    key={page}
+                    onClick={() => setCurrentPage(page)}
+                    className={`
+            px-3 py-1.5 text-sm rounded-lg border transition-all duration-200
+            ${
+              isActive
+                ? "bg-gradient-to-r from-indigo-600 to-purple-600 text-white border-transparent"
+                : "border-gray-300 bg-white text-gray-700 hover:bg-gray-100"
+            }
+          `}
+                  >
+                    {page}
+                  </button>
+                );
+              })}
+
+              {/* Next Button */}
+              <button
+                disabled={currentPage === totalPages}
+                onClick={() => setCurrentPage(currentPage + 1)}
+                className={`
+        px-3 py-1.5 text-sm rounded-lg border
+        transition-all duration-200
+        ${
+          currentPage === totalPages
+            ? "opacity-50 cursor-not-allowed border-gray-300 bg-white text-gray-400"
+            : "border-gray-300 bg-white hover:bg-gray-100 text-gray-700"
+        }
+      `}
+              >
+                Next ›
+              </button>
+            </div>
+          )}
         </div>
       </div>
 

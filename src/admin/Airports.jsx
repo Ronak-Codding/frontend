@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
 import CountrySelect from "./CountrySelect";
-// import "./Airports.css";
 
 const Airports = () => {
   const [airports, setAirports] = useState([]);
@@ -166,9 +165,9 @@ const Airports = () => {
       <div className="flex justify-between items-center mb-6">
         <div>
           <h2 className="text-2xl font-bold text-gray-800">
-            Airport Management
+            Airport Data
           </h2>
-          <p className="text-gray-600">Manage airports data</p>
+          {/* <p className="text-gray-600">Manage airports data</p> */}
         </div>
         <button
           className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-lg font-medium flex items-center"

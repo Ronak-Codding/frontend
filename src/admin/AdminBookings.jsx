@@ -5,7 +5,7 @@ const AdminBookings = () => {
   const [bookings, setBookings] = useState([]);
   const [showAdd, setShowAdd] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 5;
+  const bookingsPerPage = 10;
   const [query, setQuery] = useState("");
 
   const fetchBookings = async () => {
@@ -70,10 +70,11 @@ const AdminBookings = () => {
     fetchBookings();
   };
 
-  const indexOfLast = currentPage * itemsPerPage;
-  const indexOfFirst = indexOfLast - itemsPerPage;
+  const totalPages = Math.ceil(bookings.length / bookingsPerPage);
+
+  const indexOfLast = currentPage * bookingsPerPage;
+  const indexOfFirst = indexOfLast - bookingsPerPage;
   const currentBookings = bookings.slice(indexOfFirst, indexOfLast);
-  const totalPages = Math.ceil(bookings.length / itemsPerPage);
 
   return (
     <div className="p-6 min-h-screen">
@@ -184,20 +185,63 @@ const AdminBookings = () => {
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="flex justify-center mt-6 gap-2">
-          {[...Array(totalPages)].map((_, i) => (
-            <button
-              key={i}
-              onClick={() => setCurrentPage(i + 1)}
-              className={`px-3 py-1 rounded ${
-                currentPage === i + 1
-                  ? "bg-blue-600 text-white"
-                  : "bg-gray-200 hover:bg-gray-300"
-              }`}
-            >
-              {i + 1}
-            </button>
-          ))}
+        <div className="flex justify-center items-center gap-2 mt-5 flex-wrap">
+          {/* Prev Button */}
+          <button
+            disabled={currentPage === 1}
+            onClick={() => setCurrentPage(currentPage - 1)}
+            className={`
+        px-3 py-1.5 text-sm rounded-lg border
+        transition-all duration-200
+        ${
+          currentPage === 1
+            ? "opacity-50 cursor-not-allowed border-gray-300 bg-white text-gray-400"
+            : "border-gray-300 bg-white hover:bg-gray-100 text-gray-700"
+        }
+      `}
+          >
+            ‹ Prev
+          </button>
+
+          {/* Page Numbers */}
+          {[...Array(totalPages)].map((_, i) => {
+            const page = i + 1;
+            const isActive = currentPage === page;
+
+            return (
+              <button
+                key={page}
+                onClick={() => setCurrentPage(page)}
+                className={`
+            px-3 py-1.5 text-sm rounded-lg border transition-all duration-200
+            ${
+              isActive
+                ? "bg-gradient-to-r from-indigo-600 to-purple-600 text-white border-transparent"
+                : "border-gray-300 bg-white text-gray-700 hover:bg-gray-100"
+            }
+          `}
+              >
+                {page}
+              </button>
+            );
+          })}
+
+          {/* Next Button */}
+          <button
+            disabled={currentPage === totalPages}
+            onClick={() => setCurrentPage(currentPage + 1)}
+            className={`
+        px-3 py-1.5 text-sm rounded-lg border
+        transition-all duration-200
+        ${
+          currentPage === totalPages
+            ? "opacity-50 cursor-not-allowed border-gray-300 bg-white text-gray-400"
+            : "border-gray-300 bg-white hover:bg-gray-100 text-gray-700"
+        }
+      `}
+          >
+            Next ›
+          </button>
         </div>
       )}
 

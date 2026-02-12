@@ -6,6 +6,8 @@ const AdminContacts = () => {
   const [viewContact, setViewContact] = useState(null);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const contactsPerPage = 10;
 
   const loadContacts = async () => {
     try {
@@ -58,6 +60,15 @@ const AdminContacts = () => {
     return matchSearch && matchStatus;
   });
 
+  const totalPages = Math.ceil(filteredContacts.length / contactsPerPage);
+
+  const indexOfLastContact = currentPage * contactsPerPage;
+  const indexOfFirstContact = indexOfLastContact - contactsPerPage;
+  const currentContacts = filteredContacts.slice(
+    indexOfFirstContact,
+    indexOfLastContact,
+  );
+
   if (loading) return <p className="p-6">Loading contacts...</p>;
 
   return (
@@ -107,7 +118,7 @@ const AdminContacts = () => {
               </tr>
             )}
 
-            {filteredContacts.map((c, i) => (
+            {currentContacts.map((c, i) => (
               <tr key={c._id} className="border-t hover:bg-gray-50 transition">
                 <td className="px-4 py-3">{i + 1}</td>
                 <td className="px-4 py-3">{c.fullName}</td>
@@ -144,6 +155,66 @@ const AdminContacts = () => {
             ))}
           </tbody>
         </table>
+        {totalPages > 1 && (
+          <div className="flex justify-center items-center gap-2 mt-5 flex-wrap">
+            {/* Prev Button */}
+            <button
+              disabled={currentPage === 1}
+              onClick={() => setCurrentPage(currentPage - 1)}
+              className={`
+        px-3 py-1.5 text-sm rounded-lg border
+        transition-all duration-200
+        ${
+          currentPage === 1
+            ? "opacity-50 cursor-not-allowed border-gray-300 bg-white text-gray-400"
+            : "border-gray-300 bg-white hover:bg-gray-100 text-gray-700"
+        }
+      `}
+            >
+              ‹ Prev
+            </button>
+
+            {/* Page Numbers */}
+            {[...Array(totalPages)].map((_, i) => {
+              const page = i + 1;
+              const isActive = currentPage === page;
+
+              return (
+                <button
+                  key={page}
+                  onClick={() => setCurrentPage(page)}
+                  className={`
+            px-3 py-1.5 text-sm rounded-lg border transition-all duration-200
+            ${
+              isActive
+                ? "bg-gradient-to-r from-indigo-600 to-purple-600 text-white border-transparent"
+                : "border-gray-300 bg-white text-gray-700 hover:bg-gray-100"
+            }
+          `}
+                >
+                  {page}
+                </button>
+              );
+            })}
+
+            {/* Next Button */}
+            <button
+              disabled={currentPage === totalPages}
+              onClick={() => setCurrentPage(currentPage + 1)}
+              className={`
+        px-3 py-1.5 text-sm rounded-lg border
+        transition-all duration-200
+        ${
+          currentPage === totalPages
+            ? "opacity-50 cursor-not-allowed border-gray-300 bg-white text-gray-400"
+            : "border-gray-300 bg-white hover:bg-gray-100 text-gray-700"
+        }
+      `}
+            >
+              Next ›
+            </button>
+          </div>
+        )}
       </div>
 
       {/* VIEW MODAL */}

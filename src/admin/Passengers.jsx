@@ -1,5 +1,4 @@
 import React, { useEffect, useState, useMemo } from "react";
-import DataTable from "react-data-table-component";
 import axios from "axios";
 import { toast } from "react-toastify";
 import PassengerModal from "./PassengerModal";
@@ -10,6 +9,8 @@ const Passengers = () => {
   const [search, setSearch] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [selectedPassenger, setSelectedPassenger] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const passengersPerPage = 5;
 
   // ================= FETCH =================
   const fetchPassengers = async () => {
@@ -54,85 +55,17 @@ const Passengers = () => {
     );
   }, [passengers, search]);
 
-  // ================= COLUMNS =================
-  const columns = [
-    {
-      name: <div className="font-semibold text-lg">NO</div>,
-      selector: (row, index) => <div className="text-center font-medium">{index + 1}</div>,
-      width: "70px",
-    },
-    {
-      name: <div className="font-semibold text-lg">Name</div>,
-      selector: (row) => <div className="font-medium">{row.name}</div>,
-      sortable: true,
-    },
-    {
-      name: <div className="font-semibold text-lg">Age</div>,
-      selector: (row) => <div className="font-medium">{row.age}</div>,
-      sortable: true,
-      width: "80px",
-    },
-    {
-      name: <div className="font-semibold text-lg">Gender</div>,
-      selector: (row) => <div className="font-medium">{row.gender}</div>,
-      width: "100px",
-    },
-    {
-      name: <div className="font-semibold text-lg">Seat</div>,
-      selector: (row) => <div className="font-medium">{row.seat_number}</div>,
-      width: "90px",
-    },
-    {
-      name: <div className="font-semibold text-lg">Booking Ref</div>,
-      selector: (row) => <div className="font-medium">{row.booking_id?.bookingReference}</div>,
-    },
-    {
-      name: <div className="font-semibold text-lg">Actions</div>,
-      width: "180px", 
-      cell: (row) => (
-        <div className="flex gap-2 items-center whitespace-nowrap">
-          <button
-            className="px-4 py-1 text-xs font-semibold text-white bg-yellow-500 rounded hover:bg-yellow-600"
-            onClick={() => {
-              setSelectedPassenger(row);
-              setShowModal(true);
-            }}
-          >
-            <i className="fas fa-edit"></i>
-          </button>
+  // ================= PAGINATION =================
+  const indexOfLast = currentPage * passengersPerPage;
+  const indexOfFirst = indexOfLast - passengersPerPage;
+  const currentPassengers = filteredPassengers.slice(indexOfFirst, indexOfLast);
+  const totalPages = Math.ceil(filteredPassengers.length / passengersPerPage);
 
-          <button
-            className="px-4 py-1 text-xs font-semibold text-white bg-red-500 rounded hover:bg-red-600"
-            onClick={() => handleDelete(row._id)}
-          >
-           <i className="fas fa-trash"></i>
-          </button>
-        </div>
-      ),
-      ignoreRowClick: true,
-      button: true,
-    },
-  ];
-
-  // ================= CUSTOM TABLE STYLES =================
-  const customStyles = {
-    headCells: {
-      style: {
-        fontSize: "14px",
-        fontWeight: "600",
-        backgroundColor: "#f1f2f1",
-      },
-    },
-    rows: {
-      style: {
-        minHeight: "56px",
-      },
-    },
-  };
 
   return (
     <div className="p-6 min-h-screen">
-      <div className="rounded-lg  p-6">
+      <div>
+        {/* HEADER */}
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-bold text-gray-800">Passengers Data</h2>
 
@@ -147,25 +80,145 @@ const Passengers = () => {
           </button>
         </div>
 
+        {/* SEARCH */}
         <input
           type="text"
           placeholder="Search by Name / Booking Ref"
-          className="mb-4 w-1/3 px-4 py-2 border border-gray-300 rounded-md text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm"
+          className="mb-4 w-1/3 px-4 py-2 border border-gray-300 rounded-md text-sm  placeholder-gray-400 "
           value={search}
-          onChange={(e) => setSearch(e.target.value)}
+          onChange={(e) => {
+            setSearch(e.target.value);
+            setCurrentPage(1);
+          }}
         />
 
-        <DataTable
-          columns={columns}
-          data={filteredPassengers}
-          progressPending={loading}
-          pagination
-          highlightOnHover
-          striped
-          responsive
-          customStyles={customStyles}
-          noDataComponent="No passengers found"
-        />
+        {/* TABLE */}
+        <div className="overflow-x-auto">
+          <table className="min-w-full bg-white border border-gray-200 rounded-lg">
+            <thead className="bg-gray-100 text-xs uppercase text-gray-600">
+              <tr>
+                <th className="px-4 py-3">NO</th>
+                <th className="px-4 py-3">Name</th>
+                <th className="px-4 py-3">Age</th>
+                <th className="px-4 py-3">Gender</th>
+                <th className="px-4 py-3">Seat</th>
+                <th className="px-4 py-3">Booking Ref</th>
+                <th className="px-4 py-3">Actions</th>
+              </tr>
+            </thead>
+
+            <tbody className="text-gray-600">
+              {loading ? (
+                <tr>
+                  <td colSpan="7" className="text-center py-6">
+                    Loading...
+                  </td>
+                </tr>
+              ) : currentPassengers.length > 0 ? (
+                currentPassengers.map((row, index) => (
+                  <tr key={row._id} className="hover:bg-gray-50 transition">
+                    <td className="px-4 py-3">{indexOfFirst + index + 1}</td>
+                    <td className="px-4 py-3 font-sm">{row.name}</td>
+                    <td className="px-4 py-3">{row.age}</td>
+                    <td className="px-4 py-3">{row.gender}</td>
+                    <td className="px-4 py-3">{row.seat_number}</td>
+                    <td className="px-4 py-3">
+                      {row.booking_id?.bookingReference}
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="flex gap-2">
+                        <button
+                          className="px-3 py-1 text-xs text-white bg-yellow-500 rounded hover:bg-yellow-600"
+                          onClick={() => {
+                            setSelectedPassenger(row);
+                            setShowModal(true);
+                          }}
+                        >
+                          <i className="fas fa-edit"></i>
+                        </button>
+
+                        <button
+                          className="px-3 py-1 text-xs text-white bg-red-500 rounded hover:bg-red-600"
+                          onClick={() => handleDelete(row._id)}
+                        >
+                          <i className="fas fa-trash"></i>
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="7" className="text-center py-6">
+                    No passengers found
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        {/* PAGINATION */}
+        {totalPages > 1 && (
+          <div className="flex justify-center items-center gap-2 mt-5 flex-wrap">
+            {/* Prev Button */}
+            <button
+              disabled={currentPage === 1}
+              onClick={() => setCurrentPage(currentPage - 1)}
+              className={`
+        px-3 py-1.5 text-sm rounded-lg border
+        transition-all duration-200
+        ${
+          currentPage === 1
+            ? "opacity-50 cursor-not-allowed border-gray-300 bg-white text-gray-400"
+            : "border-gray-300 bg-white hover:bg-gray-100 text-gray-700"
+        }
+      `}
+            >
+              ‹ Prev
+            </button>
+
+            {/* Page Numbers */}
+            {[...Array(totalPages)].map((_, i) => {
+              const page = i + 1;
+              const isActive = currentPage === page;
+
+              return (
+                <button
+                  key={page}
+                  onClick={() => setCurrentPage(page)}
+                  className={`
+            px-3 py-1.5 text-sm rounded-lg border transition-all duration-200
+            ${
+              isActive
+                ? "bg-gradient-to-r from-indigo-600 to-purple-600 text-white border-transparent"
+                : "border-gray-300 bg-white text-gray-700 hover:bg-gray-100"
+            }
+          `}
+                >
+                  {page}
+                </button>
+              );
+            })}
+
+            {/* Next Button */}
+            <button
+              disabled={currentPage === totalPages}
+              onClick={() => setCurrentPage(currentPage + 1)}
+              className={`
+        px-3 py-1.5 text-sm rounded-lg border
+        transition-all duration-200
+        ${
+          currentPage === totalPages
+            ? "opacity-50 cursor-not-allowed border-gray-300 bg-white text-gray-400"
+            : "border-gray-300 bg-white hover:bg-gray-100 text-gray-700"
+        }
+      `}
+            >
+              Next ›
+            </button>
+          </div>
+        )}
       </div>
 
       {showModal && (

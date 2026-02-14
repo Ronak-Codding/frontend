@@ -61,36 +61,54 @@ const Passengers = () => {
   const currentPassengers = filteredPassengers.slice(indexOfFirst, indexOfLast);
   const totalPages = Math.ceil(filteredPassengers.length / passengersPerPage);
 
-
   return (
     <div className="p-6 min-h-screen">
       <div>
-        {/* HEADER */}
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-bold text-gray-800">Passengers Data</h2>
+        {/* Page Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+          <h2 className="text-sm font-semibold text-gray-800">
+            Passengers Data
+          </h2>
 
           <button
-            className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700"
             onClick={() => {
               setSelectedPassenger(null);
               setShowModal(true);
             }}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-lg font-medium flex items-center"
           >
             + Add Passenger
           </button>
         </div>
+        {/* Search bar */}
+        <div className="bg-white dark:bg-black rounded-md shadow-sm border border-gray-200 dark:border-gray-800 mb-5 transition-colors">
+          <div className="p-3">
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <i className="fas fa-search text-gray-400 dark:text-gray-500 text-sm"></i>
+              </div>
 
-        {/* SEARCH */}
-        <input
-          type="text"
-          placeholder="Search by Name / Booking Ref"
-          className="mb-4 w-1/3 px-4 py-2 border border-gray-300 rounded-md text-sm  placeholder-gray-400 "
-          value={search}
-          onChange={(e) => {
-            setSearch(e.target.value);
-            setCurrentPage(1);
-          }}
-        />
+              <input
+                type="text"
+                className="w-full pl-9 pr-3 py-2 text-sm
+                   border border-gray-300 dark:border-gray-700
+                   rounded-md
+                   bg-gray-50 dark:bg-neutral-100
+                   text-black dark:text-white
+                   placeholder-gray-400 dark:placeholder-gray-500
+                   focus:bg-white dark:focus:bg-neutral-100
+                   focus:ring-1 focus:ring-black dark:focus:ring-white
+                   outline-none transition"
+                placeholder="Search by Name / Booking Ref"
+                value={search}
+                onChange={(e) => {
+                  setSearch(e.target.value);
+                  setCurrentPage(1);
+                }}
+              />
+            </div>
+          </div>
+        </div>
 
         {/* TABLE */}
         <div className="overflow-x-auto">
@@ -128,7 +146,7 @@ const Passengers = () => {
                     <td className="px-4 py-3">
                       <div className="flex gap-2">
                         <button
-                          className="px-3 py-1 text-xs text-white bg-yellow-500 rounded hover:bg-yellow-600"
+                          className="text-blue-600 hover:bg-blue-50 p-2 rounded"
                           onClick={() => {
                             setSelectedPassenger(row);
                             setShowModal(true);
@@ -138,7 +156,7 @@ const Passengers = () => {
                         </button>
 
                         <button
-                          className="px-3 py-1 text-xs text-white bg-red-500 rounded hover:bg-red-600"
+                          className="text-red-600 hover:bg-red-50 p-2 rounded"
                           onClick={() => handleDelete(row._id)}
                         >
                           <i className="fas fa-trash"></i>

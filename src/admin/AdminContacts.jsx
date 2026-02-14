@@ -75,30 +75,46 @@ const AdminContacts = () => {
     <div className="p-6">
       <h2 className="text-2xl font-semibold mb-6">📩 Contact Messages</h2>
 
-      {/* Filters */}
-      <div className="flex flex-wrap gap-4 mb-4 m-4">
-        <input
-          className="border rounded-lg px-3 py-2 w-full placeholder-gray-500  md:w-1/3"
-          placeholder="Search by email or subject..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
+      {/* Search & Filter Card */}
+      <div className="bg-white rounded-lg shadow mb-6">
+        <div className="p-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Search Input */}
+            <div>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <i className="fas fa-search text-gray-400"></i>
+                </div>
+                <input
+                  type="text"
+                  placeholder="Search by email or subject..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2.5 border border-gray-300 placeholder-gray-500 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                />
+              </div>
+            </div>
 
-        <select
-          className="border rounded-lg px-3 py-2 w-full md:w-1/4"
-          value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}
-        >
-          <option value="">All Status</option>
-          <option value="new">New</option>
-          <option value="read">Read</option>
-        </select>
+            {/* Status Filter */}
+            <div>
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className="w-full px-3 py-2.5 border border-gray-300 text-black dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+              >
+                <option value="">All Status</option>
+                <option value="new">New</option>
+                <option value="read">Read</option>
+              </select>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Table */}
       <div className="overflow-x-auto bg-white rounded-xl shadow">
         <table className="min-w-full text-left">
-          <thead className="bg-gray-100 text-gray-700">
+          <thead className="bg-gray-100 text-gray-600 uppercase text-xs">
             <tr>
               <th className="px-4 py-3 text-left">No</th>
               <th className="px-4 py-3 text-left">Full Name</th>
@@ -139,13 +155,13 @@ const AdminContacts = () => {
                 </td>
                 <td className="px-4 py-3 space-x-2">
                   <button
-                    className="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700"
+                    className="p-1.5 text-yellow-600 hover:text-yellow-800 hover:bg-yellow-50 rounded"
                     onClick={() => handleView(c)}
                   >
                     <i className="fas fa-eye"></i>
                   </button>
                   <button
-                    className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700"
+                    className="p-1.5 text-red-600 hover:text-red-800 hover:bg-red-50 rounded"
                     onClick={() => deleteContact(c._id)}
                   >
                     <i className="fas fa-trash"></i>

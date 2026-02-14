@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 // import axios from "axios";
 
-
 const AdminUsers = () => {
   const [users, setUsers] = useState([]);
   const [showForm, setShowForm] = useState(false);
@@ -380,38 +379,71 @@ const AdminUsers = () => {
       )}
 
       {/* ================= USERS TABLE ================= */}
-      <h3 className="mt-4">Users Data</h3>
 
-      <div className="flex flex-wrap gap-3 mb-4">
-        <input
-          className="border rounded-lg px-3 py-2 w-full placeholder-gray-500  md:w-1/3"
-          placeholder="Search..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-        />
+      {/* Page Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+        <div>
+          <h2 className="text-sm font-semibold text-gray-800">Users Data</h2>
+        </div>
 
-        <select
-          className="border rounded-lg px-3 py-2 w-full md:w-1/4"
-          value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}
+        <button
+          onClick={() => setShowForm(true)}
+          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-lg font-medium flex items-center"
         >
-          <option value="">All Status</option>
-          <option value="active">Active</option>
-          <option value="blocked">Blocked</option>
-        </select>
+          + Add New User
+        </button>
+      </div>
 
-        <div className="flex-1 text-right">
-          <button
-            onClick={() => setShowForm(true)}
-            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700"
-          >
-            + Add User
-          </button>
+      {/* Search & Filter Card */}
+      <div className="bg-white dark:bg-black rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-4 mb-6 transition-colors">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Search Input */}
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <i className="fas fa-search text-gray-400 dark:text-gray-500 text-sm"></i>
+            </div>
+
+            <input
+              type="text"
+              placeholder="Search users..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-9 pr-3 py-2 text-sm
+                   border border-gray-300 dark:border-gray-700
+                   rounded-lg
+                   bg-gray-50 dark:bg-neutral-100
+                   text-black dark:text-white
+                   placeholder-gray-400 dark:placeholder-gray-500
+                   focus:bg-white dark:focus:bg-neutral-100
+                   focus:ring-1 focus:ring-black dark:focus:ring-white
+                   outline-none transition"
+            />
+          </div>
+
+          {/* Status Filter */}
+          <div>
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="w-full px-3 py-2 text-sm
+                   border border-gray-300 dark:border-gray-700
+                   rounded-lg
+                   bg-gray-50 dark:bg-neutral-100
+                   text-black dark:text-white
+                   focus:bg-white dark:focus:bg-neutral-100
+                   focus:ring-1 focus:ring-black dark:focus:ring-white
+                   outline-none transition"
+            >
+              <option value="">All Status</option>
+              <option value="active">Active</option>
+              <option value="blocked">Blocked</option>
+            </select>
+          </div>
         </div>
       </div>
 
       <table className="w-full bg-white rounded-xl shadow overflow-hidden">
-        <thead className="bg-gray-100 text-gray-700">
+        <thead className="bg-gray-100 text-gray-600 uppercase text-xs">
           <tr>
             <th className="p-3 text-left">No</th>
             <th className="p-3 text-left">Full Name</th>
@@ -422,7 +454,7 @@ const AdminUsers = () => {
             <th className="p-3 text-center">Action</th>
           </tr>
         </thead>
-        <tbody className="text-gray-600">
+        <tbody className="text-gray-600 text-sm">
           {currentUsers.map((user, i) => (
             <tr key={user._id} className="border-t hover:bg-gray-50">
               <td className="p-3">{i + 1}</td>
@@ -444,19 +476,19 @@ const AdminUsers = () => {
               <td className="p-3 text-center space-x-2 ">
                 <button
                   onClick={() => handleView(user._id)}
-                  className="px-2 py-1 bg-blue-500 text-white rounded "
+                  className="p-1.5 text-yellow-600 hover:text-yellow-800 hover:bg-yellow-50 rounded "
                 >
                   <i className="fas fa-eye"></i>
                 </button>
                 <button
                   onClick={() => handleEdit(user)}
-                  className="px-2 py-1 bg-yellow-500 text-white rounded"
+                  className="p-1.5 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded"
                 >
                   <i className="fas fa-edit"></i>
                 </button>
                 <button
                   onClick={() => handleDelete(user._id)}
-                  className="px-2 py-1 bg-red-600 text-white rounded"
+                  className="p-1.5 text-red-600 hover:text-red-800 hover:bg-red-50 rounded"
                 >
                   <i className="fas fa-trash"></i>
                 </button>

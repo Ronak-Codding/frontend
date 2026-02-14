@@ -164,9 +164,7 @@ const Airports = () => {
       {/* Header */}
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h2 className="text-2xl font-bold text-gray-800">
-            Airport Data
-          </h2>
+          <h2 className="text-2xl font-bold text-gray-800">Airport Data</h2>
           {/* <p className="text-gray-600">Manage airports data</p> */}
         </div>
         <button
@@ -350,50 +348,63 @@ const Airports = () => {
 
           {/* Pagination */}
           {totalPages > 1 && (
-            <div className="mt-6 flex justify-end">
-              <nav className="flex items-center space-x-2">
-                <button
-                  className={`px-3 py-1.5 rounded-md text-sm font-medium ${
-                    currentPage === 1
-                      ? "text-gray-400 cursor-not-allowed"
-                      : "text-gray-700 hover:bg-gray-100"
-                  }`}
-                  onClick={() =>
-                    currentPage > 1 && setCurrentPage(currentPage - 1)
-                  }
-                  disabled={currentPage === 1}
-                >
-                  Previous
-                </button>
+            <div className="flex justify-center items-center gap-2 mt-5 flex-wrap">
+              {/* Prev Button */}
+              <button
+                disabled={currentPage === 1}
+                onClick={() => setCurrentPage(currentPage - 1)}
+                className={`
+        px-3 py-1.5 text-sm rounded-lg border
+        transition-all duration-200
+        ${
+          currentPage === 1
+            ? "opacity-50 cursor-not-allowed border-gray-300 bg-white text-gray-400"
+            : "border-gray-300 bg-white hover:bg-gray-100 text-gray-700"
+        }
+      `}
+              >
+                ‹ Prev
+              </button>
 
-                {[...Array(totalPages)].map((_, index) => (
+              {/* Page Numbers */}
+              {[...Array(totalPages)].map((_, i) => {
+                const page = i + 1;
+                const isActive = currentPage === page;
+
+                return (
                   <button
-                    key={index}
-                    className={`px-3 py-1.5 rounded-md text-sm font-medium ${
-                      currentPage === index + 1
-                        ? "bg-purple-600 text-white"
-                        : "text-gray-700 hover:bg-gray-100"
-                    }`}
-                    onClick={() => setCurrentPage(index + 1)}
+                    key={page}
+                    onClick={() => setCurrentPage(page)}
+                    className={`
+            px-3 py-1.5 text-sm rounded-lg border transition-all duration-200
+            ${
+              isActive
+                ? "bg-gradient-to-r from-indigo-600 to-purple-600 text-white border-transparent"
+                : "border-gray-300 bg-white text-gray-700 hover:bg-gray-100"
+            }
+          `}
                   >
-                    {index + 1}
+                    {page}
                   </button>
-                ))}
+                );
+              })}
 
-                <button
-                  className={`px-3 py-1.5 rounded-md text-sm font-medium ${
-                    currentPage === totalPages
-                      ? "text-gray-400 cursor-not-allowed"
-                      : "text-gray-700 hover:bg-gray-100"
-                  }`}
-                  onClick={() =>
-                    currentPage < totalPages && setCurrentPage(currentPage + 1)
-                  }
-                  disabled={currentPage === totalPages}
-                >
-                  Next
-                </button>
-              </nav>
+              {/* Next Button */}
+              <button
+                disabled={currentPage === totalPages}
+                onClick={() => setCurrentPage(currentPage + 1)}
+                className={`
+        px-3 py-1.5 text-sm rounded-lg border
+        transition-all duration-200
+        ${
+          currentPage === totalPages
+            ? "opacity-50 cursor-not-allowed border-gray-300 bg-white text-gray-400"
+            : "border-gray-300 bg-white hover:bg-gray-100 text-gray-700"
+        }
+      `}
+              >
+                Next ›
+              </button>
             </div>
           )}
         </div>

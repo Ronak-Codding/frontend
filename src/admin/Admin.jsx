@@ -44,15 +44,18 @@ const Admin = () => {
     handleResize(); // Initial check
 
     return () => window.removeEventListener("resize", handleResize);
-  },  [toggle]);
+  }, [toggle]);
 
   const fetchDashboardData = async () => {
     try {
-      const contactsRes = await fetch("http://localhost:5000/api/contact/allContact", {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
+      const contactsRes = await fetch(
+        "http://localhost:5000/api/contact/allContact",
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
+          },
         },
-      });
+      );
       const contacts = await contactsRes.json();
 
       const unread = contacts.filter((c) => c.status === "new").length;
@@ -140,6 +143,28 @@ const Admin = () => {
               <i className="fas fa-tachometer-alt"></i>Dashboard
             </NavLink>
 
+            <NavLink to="/admin/users" className="list-group-item">
+              <i className="fas fa-users"></i>Users
+              <span className="badge bg-success ms-auto">
+                {/* {quickStats.activeUsers} */}
+              </span>
+            </NavLink>
+
+            <NavLink to="/admin/contacts" className="list-group-item">
+              <i className="fas fa-envelope"></i>Contact Messages
+              {unreadCount > 0 && (
+                <span className="badge bg-danger ms-auto">{unreadCount}</span>
+              )}
+            </NavLink>
+
+            <NavLink to="/admin/airlines" className="list-group-item">
+              <i className="fas fa-plane-departure"></i>Airlines
+            </NavLink>
+
+            <NavLink to="/admin/airports" className="list-group-item">
+              <i className="fas fa-map-marker-alt"></i>Airports
+            </NavLink>
+            
             <NavLink to="/admin/flights" className="list-group-item">
               <i className="fas fa-plane"></i> Flights
             </NavLink>
@@ -157,28 +182,6 @@ const Admin = () => {
 
             <NavLink to="/admin/payments" className="list-group-item">
               <i className="fas fa-money-bill-wave"></i>Payments
-            </NavLink>
-
-            <NavLink to="/admin/airlines" className="list-group-item">
-              <i className="fas fa-plane-departure"></i>Airlines
-            </NavLink>
-
-            <NavLink to="/admin/airports" className="list-group-item">
-              <i className="fas fa-map-marker-alt"></i>Airports
-            </NavLink>
-
-            <NavLink to="/admin/users" className="list-group-item">
-              <i className="fas fa-users"></i>Users
-              <span className="badge bg-success ms-auto">
-                {/* {quickStats.activeUsers} */}
-              </span>
-            </NavLink>
-
-            <NavLink to="/admin/contacts" className="list-group-item">
-              <i className="fas fa-envelope"></i>Contact Messages
-              {unreadCount > 0 && (
-                <span className="badge bg-danger ms-auto">{unreadCount}</span>
-              )}
             </NavLink>
 
             <NavLink to="/admin/reports" className="list-group-item">

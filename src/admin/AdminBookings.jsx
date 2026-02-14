@@ -18,10 +18,9 @@ const AdminBookings = () => {
     fetchBookings();
   }, []);
 
-  const handleSearch = async () => {
-    if (!query.trim()) return;
+  const handleSearch = async (searchValue) => {
     const res = await fetch(
-      `http://localhost:5000/api/bookings/search?q=${query}`,
+      `http://localhost:5000/api/bookings/search?q=${searchValue}`,
     );
     const data = await res.json();
     setBookings(data);
@@ -75,6 +74,13 @@ const AdminBookings = () => {
   const indexOfLast = currentPage * bookingsPerPage;
   const indexOfFirst = indexOfLast - bookingsPerPage;
   const currentBookings = bookings.slice(indexOfFirst, indexOfLast);
+  useEffect(() => {
+    if (!query.trim()) {
+      fetchBookings();
+    } else {
+      handleSearch(query);
+    }
+  }, [query]);
 
   return (
     <div className="p-6 min-h-screen">
@@ -83,27 +89,39 @@ const AdminBookings = () => {
         <h3 className="text-xl font-semibold text-gray-800">All Bookings</h3>
         <button
           onClick={() => setShowAdd(true)}
-          className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg"
+          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg"
         >
           + Add Booking
         </button>
       </div>
 
       {/* Search */}
-      <div className="flex gap-2 mb-4">
-        <input
-          type="text"
-          className="w-72 px-4 py-2 border rounded-lg  placeholder-gray-500 focus:ring-2 focus:ring-blue-500"
-          placeholder="Search by Ref / Name / Email"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-        />
-        <button
-          onClick={handleSearch}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg"
-        >
-          Search
-        </button>
+      {/* Search & Filter Card */}
+      <div className="bg-white dark:bg-black rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-4 mb-6 transition-colors">
+        <div className="relative">
+          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <i className="fas fa-search text-gray-400 dark:text-gray-500 text-sm"></i>
+          </div>
+
+          <input
+            type="text"
+            placeholder="Search by Ref / Name / Email"
+            value={query}
+            onChange={(e) => {
+              setQuery(e.target.value);
+              setCurrentPage(1);
+            }}
+            className="w-full pl-9 pr-3 py-2 text-sm
+                 border border-gray-300 dark:border-gray-700
+                 rounded-lg
+                 bg-gray-50 dark:bg-neutral-100
+                 text-black dark:text-white
+                 placeholder-gray-400 dark:placeholder-gray-500
+                 focus:bg-white dark:focus:bg-neutral-100
+                 focus:ring-1 focus:ring-black dark:focus:ring-white
+                 outline-none transition"
+          />
+        </div>
       </div>
 
       {/* Table */}
@@ -111,9 +129,9 @@ const AdminBookings = () => {
         <table className="min-w-full text-sm">
           <thead className="bg-gray-100 text-gray-600 uppercase text-xs">
             <tr>
-              <th className="px-4 py-3">Ref</th>
-              {/* <th className="px-4 py-3">User</th>
-              <th className="px-4 py-3">Email</th> */}
+              <th className="px-4 py-3">Booking Ref</th>
+              <th className="px-4 py-3">User</th>
+              <th className="px-4 py-3">Email</th>
               <th className="px-4 py-3">Flight</th>
               <th className="px-4 py-3">Route</th>
               <th className="px-4 py-3">Passengers</th>
@@ -128,10 +146,10 @@ const AdminBookings = () => {
             {currentBookings.map((b) => (
               <tr key={b._id} className="hover:bg-gray-50">
                 <td className="px-4 py-3 font-medium">{b.bookingReference}</td>
-                {/* <td className="px-4 py-3">
+                <td className="px-4 py-3">
                   {b.user_id?.firstName} {b.user_id?.lastName}
                 </td>
-                <td className="px-4 py-3">{b.user_id?.email}</td> */}
+                <td className="px-4 py-3">{b.user_id?.email}</td>
                 <td className="px-4 py-3">
                   {b.flight_id?.flight_number || "-"}
                 </td>
@@ -165,14 +183,14 @@ const AdminBookings = () => {
                     </button>
                   )}
                   <button
-                    className="px-3 py-1 text-xs rounded bg-blue-600 text-white hover:bg-blue-700"
+                    className="p-1.5 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded"
                     onClick={() => handleEdit(b)}
                   >
                     <i className="fas fa-edit"></i>
                   </button>
                   <button
                     onClick={() => deleteBooking(b._id)}
-                    className="px-3 py-1 text-xs rounded bg-red-600 text-white hover:bg-red-700"
+                    className="p-1.5 text-red-600 hover:text-red-800 hover:bg-red-50 rounded"
                   >
                     <i className="fas fa-trash"></i>
                   </button>

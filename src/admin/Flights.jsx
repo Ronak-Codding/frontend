@@ -191,7 +191,7 @@ const Flights = () => {
   };
 
   const indexOfLast = currentPage * flightsPerPage;
-  const indexOfFirst = indexOfLast - flightsPerPage;;
+  const indexOfFirst = indexOfLast - flightsPerPage;
   const currentFlights = filteredFlights.slice(indexOfFirst, indexOfLast);
   const totalPages = Math.ceil(filteredFlights.length / flightsPerPage);
 
@@ -227,7 +227,7 @@ const Flights = () => {
       {/* Header */}
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h2 className="text-2xl font-bold text-gray-800 mb-1"> 
+          <h2 className="text-2xl font-bold text-gray-800 mb-1">
             Flights Data
           </h2>
           {/* <p className="text-gray-600">Manage all flights in the system</p> */}
@@ -280,26 +280,35 @@ const Flights = () => {
       </div> */}
 
       {/* Search Bar */}
-      <div className="bg-white rounded-lg shadow mb-6">
+      <div className="bg-white dark:bg-black rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 mb-6 transition-colors">
         <div className="p-4">
           <div className="relative">
+            {/* Icon */}
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <i className="fas fa-search text-gray-400"></i>
+              <i className="fas fa-search text-gray-400 dark:text-gray-500 text-sm"></i>
             </div>
+
             <input
               type="text"
-              className="w-full pl-10 pr-4 py-2.5 border border-gray-300  placeholder-gray-400 rounded-lg focus:border-blue-500"
+              className="w-full pl-9 pr-3 py-2 text-sm
+                   border border-gray-300 dark:border-gray-700
+                   rounded-lg
+                   bg-gray-50 dark:bg-neutral-100
+                   text-black dark:text-white
+                   placeholder-gray-400 dark:placeholder-gray-500
+                   focus:bg-white dark:focus:bg-neutral-100
+                   focus:ring-1 focus:ring-black dark:focus:ring-white
+                   outline-none transition"
               placeholder="Search flights by flight number, airline, or airport code..."
               value={searchTerm}
               onChange={handleSearch}
-
             />
           </div>
         </div>
       </div>
 
       {/* Flights Table */}
-      <div className="bg-white rounded-lg shadow">
+      <div className="bg-white rounded-lg shadow">                          
         <div className="p-4 overflow-x-auto">
           <table className="min-w-full text-sm text-left text-gray-700">
             <thead className="bg-gray-100 text-xs uppercase text-gray-600">
@@ -317,7 +326,7 @@ const Flights = () => {
               </tr>
             </thead>
 
-            <tbody className="divide-y">
+            <tbody className="divide-y text-gray-700">
               {currentFlights.length > 0 ? (
                 currentFlights.map((row) => (
                   <tr key={row._id} className="hover:bg-gray-50 transition">

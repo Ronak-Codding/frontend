@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { NavLink, Outlet, useLocation } from "react-router-dom";
+import { NavLink, Outlet, useLocation,  useNavigate } from "react-router-dom";
 import "./Admin.css";
 
 const Admin = () => {
@@ -12,6 +12,7 @@ const Admin = () => {
   const [profileOpen, setProfileOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const navigate = useNavigate();
 
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -66,18 +67,40 @@ const Admin = () => {
     }
   };
 
-  const handleSearch = (e) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      setLoading(true);
-      // Implement search functionality
-      setTimeout(() => {
-        setLoading(false);
-        console.log("Searching for:", searchQuery);
-        // Here you would typically navigate to search results
-      }, 1000);
+ const handleSearch = (e) => {
+  e.preventDefault();
+
+  const query = searchQuery.toLowerCase().trim();
+  if (!query) return;
+
+  setLoading(true);
+
+  const routes = [
+    { keywords: ["user", "users"], path: "/admin/users" },
+    { keywords: ["flight", "flights"], path: "/admin/flights" },
+    { keywords: ["booking", "bookings"], path: "/admin/bookings" },
+    { keywords: ["passenger", "passengers"], path: "/admin/passengers" },
+    { keywords: ["payment", "payments"], path: "/admin/payments" },
+    { keywords: ["airline", "airlines"], path: "/admin/airlines" },
+    { keywords: ["airport", "airports"], path: "/admin/airports" },
+    { keywords: ["contact", "message", "messages"], path: "/admin/contacts" },
+  ];
+
+  const matchedRoute = routes.find((route) =>
+    route.keywords.some((key) => query.includes(key))
+  );
+
+  setTimeout(() => {
+    setLoading(false);
+    setSearchQuery("");
+
+    if (matchedRoute) {
+      navigate(matchedRoute.path);
+    } else {
+      alert("No matching page found. Please try a different search term.");
     }
-  };
+  }, 400);
+};
 
   const clearSearch = () => {
     setSearchQuery("");

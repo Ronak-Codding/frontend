@@ -91,7 +91,7 @@ const AdminBookings = () => {
           onClick={() => setShowAdd(true)}
           className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg"
         >
-          + Add Booking
+        <i className="fas fa-plus mr-2"></i>Add Booking
         </button>
       </div>
 

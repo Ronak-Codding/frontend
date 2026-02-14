@@ -77,7 +77,7 @@ const Passengers = () => {
             }}
             className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-lg font-medium flex items-center"
           >
-            + Add Passenger
+            <i className="fas fa-plus mr-2"></i>Add Passenger
           </button>
         </div>
         {/* Search bar */}
@@ -111,8 +111,8 @@ const Passengers = () => {
         </div>
 
         {/* TABLE */}
-        <div className="overflow-x-auto">
-          <table className="min-w-full bg-white border border-gray-200 rounded-lg">
+        <div className="overflow-x-auto  rounded-lg shadow">
+          <table className="min-w-full bg-white border border-gray-200 rounded">
             <thead className="bg-gray-100 text-xs uppercase text-gray-600">
               <tr>
                 <th className="px-4 py-3">NO</th>

@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { FaEdit, FaTrash } from "react-icons/fa";
 import AirlineModal from "./AirlineModal";
 
 const Airlines = () => {
@@ -99,19 +98,20 @@ const Airlines = () => {
           }}
           className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
         >
-          + Add Airline
+         <i className="fas fa-plus mr-2"></i>Add Airline
         </button>
       </div>
 
       {/* Search + Filter Card */}
-      <div className="bg-white rounded-lg shadow mb-6">
+      <div className="bg-white dark:bg-black rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 mb-6 transition-colors">
         <div className="p-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Search Input */}
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <i className="fas fa-search text-gray-400"></i>
+                <i className="fas fa-search text-gray-400 dark:text-gray-500 text-sm"></i>
               </div>
+
               <input
                 type="text"
                 placeholder="Search airline..."
@@ -120,7 +120,15 @@ const Airlines = () => {
                   setSearch(e.target.value);
                   setCurrentPage(1);
                 }}
-                className="w-full pl-10 pr-4 py-2.5 border border-gray-300 placeholder-gray-500 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                className="w-full pl-9 pr-3 py-2 text-sm
+                     border border-gray-300 dark:border-gray-700
+                     rounded-lg
+                     bg-gray-50 dark:bg-neutral-100
+                     text-black dark:text-white
+                     placeholder-gray-400 dark:placeholder-gray-500
+                     focus:bg-white dark:focus:bg-neutral-100
+                     focus:ring-1 focus:ring-black dark:focus:ring-white
+                     outline-none transition"
               />
             </div>
 
@@ -132,7 +140,14 @@ const Airlines = () => {
                   setStatusFilter(e.target.value);
                   setCurrentPage(1);
                 }}
-                className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-black dark:text-white focus:ring-2 focus:ring-blue-500 outline-none"
+                className="w-full px-3 py-2 text-sm
+                     border border-gray-300 dark:border-gray-700
+                     rounded-lg
+                     bg-gray-50 dark:bg-neutral-100
+                     text-black dark:text-white
+                     focus:bg-white dark:focus:bg-neutral-100
+                     focus:ring-1 focus:ring-black dark:focus:ring-white
+                     outline-none transition"
               >
                 <option value="All">All Status</option>
                 <option value="Publish">Publish</option>
@@ -155,7 +170,7 @@ const Airlines = () => {
             </tr>
           </thead>
 
-          <tbody className="divide-y">
+          <tbody className="divide-y  text-gray-700">
             {currentAirlines.map((a) => (
               <tr key={a._id} className="hover:bg-gray-50">
                 <td className="px-4 py-3">{a.airline_name}</td>
@@ -174,15 +189,15 @@ const Airlines = () => {
                 <td className="px-4 py-3 flex justify-center gap-2">
                   <button
                     onClick={() => handleEdit(a)}
-                    className="p-2 border rounded text-blue-600"
+                    className="p-1.5 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded"
                   >
-                    <FaEdit />
+                    <i className="fas fa-edit"></i>
                   </button>
                   <button
                     onClick={() => handleDelete(a._id)}
-                    className="p-2 border rounded text-red-600"
+                    className="p-1.5 text-red-600 hover:text-red-800 hover:bg-red-50 rounded"
                   >
-                    <FaTrash />
+                    <i className="fas fa-trash"></i>
                   </button>
                 </td>
               </tr>
@@ -222,7 +237,7 @@ const Airlines = () => {
                 onClick={() => setCurrentPage(page)}
                 className={`px-3 py-1.5 text-sm rounded-lg border ${
                   currentPage === page
-                    ? "bg-indigo-600 text-white"
+                    ? "bg-gradient-to-r from-indigo-600 to-purple-600 text-white border-transparent"
                     : "hover:bg-gray-100"
                 }`}
               >

@@ -19,10 +19,11 @@ import Airports from "./admin/Airports";
 import Flights from "./admin/Flights";
 import AdminBookings from "./admin/AdminBookings";
 import Passengers from "./admin/Passengers";  
+import Payment from "./admin/Payment";
 
 import User from "./user/User";
-
 import Dashboard from "./user/Dashboard";
+
 
 function App() {
   return (
@@ -52,6 +53,7 @@ function App() {
           <Route path="flights" element={<Flights />} />
           <Route path="bookings" element={<AdminBookings />} />
           <Route path="passengers" element={<Passengers />} />
+          <Route path="payments" element={<Payment/>}/>
         </Route>
 
         {/* User */}

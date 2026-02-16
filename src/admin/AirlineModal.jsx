@@ -102,13 +102,10 @@ const AirlineModal = ({ show, onClose, onSubmit, form, setForm, editId }) => {
             <button
               type="button"
               onClick={onClose}
-              className="
-                px-4 py-2 rounded-lg
-                border border-black dark:border-white
-                bg-white dark:bg-black
-                text-black dark:text-white
-                hover:opacity-70
-              "
+               className="px-4 py-2 rounded-lg
+              bg-gray-100 dark:bg-zinc-500
+              text-black dark:text-white
+              hover:opacity-80 transition"
             >
               Cancel
             </button>

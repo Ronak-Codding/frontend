@@ -84,7 +84,7 @@ const Airlines = () => {
     <div className="p-6 min-h-screen">
       {/* Header */}
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold text-gray-800">Airline Data</h2>
+        <h2 className="text-2xl font-bold text-gray-800">Airlines Data</h2>
 
         <button
           onClick={() => {

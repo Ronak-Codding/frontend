@@ -164,7 +164,7 @@ const Airports = () => {
       {/* Header */}
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h2 className="text-2xl font-bold text-gray-800">Airport Data</h2>
+          <h2 className="text-2xl font-bold text-gray-800">Airports Data</h2>
           {/* <p className="text-gray-600">Manage airports data</p> */}
         </div>
         <button

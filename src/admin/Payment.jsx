@@ -318,7 +318,7 @@ const Payment = () => {
                 value={formData.booking_id}
                 onChange={(e) => handleBookingSelect(e)}
                 required
-                className="w-full px-4 py-2 rounded-lg
+                className="w-full px-4 py-2  mb-3 rounded-lg
             bg-white dark:bg-zinc-900
             text-black dark:text-white
             border border-gray-300 dark:border-gray-600
@@ -339,7 +339,7 @@ const Payment = () => {
                 placeholder="Amount"
                 value={formData.amount}
                 readOnly
-                className="w-full px-4 py-2 rounded-lg
+                className="w-full px-3 py-2 mb-3 rounded-lg
             bg-gray-100 dark:bg-white-400
             text-black dark:text-white
             border border-gray-300 dark:border-gray-600
@@ -351,7 +351,7 @@ const Payment = () => {
                 name="payment_status"
                 value={formData.payment_status}
                 onChange={handleChange}
-                className="w-full px-4 py-2 rounded-lg
+                className="w-full px-4 py-2 mb-3 rounded-lg
             bg-white dark:bg-zinc-900
             text-black dark:text-white
             border border-gray-300 dark:border-gray-600

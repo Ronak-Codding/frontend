@@ -1,0 +1,83 @@
+.spotlight-service-card {
+  position: relative;
+  padding: 32px 28px;
+  border-radius: 22px;
+
+  /* 🔥 DARK PREMIUM GRADIENT */
+  background: linear-gradient(
+    135deg,
+    rgba(35, 18, 65, 0.95),
+    rgba(15, 10, 30, 0.98)
+  );
+
+  color: #ffffff;
+  overflow: hidden;
+  isolation: isolate;
+  cursor: pointer;
+
+  backdrop-filter: blur(20px);
+
+  box-shadow:
+    0 25px 70px rgba(0, 0, 0, 0.65),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+
+  transition: transform 0.35s ease, box-shadow 0.35s ease;
+}
+
+
+/* Floating effect */
+.spotlight-service-card:hover {
+  transform: translateY(-10px) scale(1.02);
+  box-shadow:
+    0 35px 80px rgba(0, 0, 0, 0.6),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.12);
+}
+
+/* SPOTLIGHT */
+.spotlight-service-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    450px circle at var(--x) var(--y),
+    var(--spotlight-color),
+    transparent 40%
+  );
+  opacity: 0;
+  transition: opacity 0.35s ease;
+  pointer-events: none;
+}
+
+.spotlight-service-card:hover::after {
+  opacity: 1;
+}
+
+/* Icon */
+.ssc-icon {
+  width: 54px;
+  height: 54px;
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+  margin-bottom: 18px;
+
+  background: rgba(255, 255, 255, 0.12);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.15);
+}
+
+.ssc-icon i {
+  font-size: 22px;
+  color: #e8ddff;
+}
+
+.spotlight-service-card h3 {
+  font-size: 1.2rem;
+  margin-bottom: 10px;
+  font-weight: 600;
+}
+
+.spotlight-service-card p {
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.75);
+  line-height: 1.6;
+}

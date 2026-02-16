@@ -6,11 +6,12 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import NewLandingPage from "./pages/LandingPage";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import FAQs from "./components/FAQs";
+import Services from "./components/Services";
+
 import AdminLogin from "./pages/AdminLogin";
 import Admin from "./admin/Admin";
 import AdminRoute from "./components/AdminRoute";
-import UserRoute from "./components/UserRoute";
-
 import AdminDashboard from "./admin/AdminDashboard";
 import Users from "./admin/AdminUsers";
 import AdminContacts from "./admin/AdminContacts";
@@ -21,6 +22,7 @@ import AdminBookings from "./admin/AdminBookings";
 import Passengers from "./admin/Passengers";  
 import Payment from "./admin/Payment";
 
+import UserRoute from "./components/UserRoute";
 import User from "./user/User";
 import Dashboard from "./user/Dashboard";
 
@@ -33,6 +35,8 @@ function App() {
         <Route path="/" element={<NewLandingPage />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/services" element={<Services />} />
+        <Route path="/faqs" element={<FAQs />} />
         <Route path="/admin-login" element={<AdminLogin />} />
 
         {/* Admin */}

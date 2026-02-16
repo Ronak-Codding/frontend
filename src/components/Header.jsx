@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
+
 const Header = ({ scrollToSection }) => {
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -28,15 +29,15 @@ const Header = ({ scrollToSection }) => {
             <div className={`new-nav-menu ${mobileMenuOpen ? "active" : ""}`}>
               <ul className="new-nav-list">
                 <li>
-                  <button onClick={() => scrollToSection("home")}>Home</button>
+                  <button onClick={() => navigate("/")}>Home</button>
                 </li>
-                <li>
+                {/* <li>
                   <button onClick={() => scrollToSection("destinations")}>
                     Destinations
                   </button>
-                </li>
+                </li> */}
                 <li>
-                  <button onClick={() => scrollToSection("services")}>
+                  <button onClick={() => navigate("/services")}>
                     Services
                   </button>
                 </li>
@@ -46,7 +47,7 @@ const Header = ({ scrollToSection }) => {
                   </button>
                 </li>
                 <li>
-                  <button onClick={() => scrollToSection("faqs")}>FAQs</button>
+                  <button onClick={() => navigate("/faqs")}>FAQs</button>
                 </li>
                 <li>
                   <button onClick={() => scrollToSection("contact")}>

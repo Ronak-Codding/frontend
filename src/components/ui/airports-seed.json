@@ -1,0 +1,163 @@
+[
+  {
+    "airport_name": "Indira Gandhi International Airport",
+    "city": "Delhi",
+    "country": "India",
+    "airport_code": "DEL",
+    "type": "International",
+    "status": "Publish"
+  },
+  {
+    "airport_name": "Chhatrapati Shivaji Maharaj International Airport",
+    "city": "Mumbai",
+    "country": "India",
+    "airport_code": "BOM",
+    "type": "International",
+    "status": "Publish"
+  },
+  {
+    "airport_name": "Kempegowda International Airport",
+    "city": "Bangalore",
+    "country": "India",
+    "airport_code": "BLR",
+    "type": "International",
+    "status": "Publish"
+  },
+  {
+    "airport_name": "Rajiv Gandhi International Airport",
+    "city": "Hyderabad",
+    "country": "India",
+    "airport_code": "HYD",
+    "type": "International",
+    "status": "Publish"
+  },
+  {
+    "airport_name": "Chennai International Airport",
+    "city": "Chennai",
+    "country": "India",
+    "airport_code": "MAA",
+    "type": "International",
+    "status": "Publish"
+  },
+  {
+    "airport_name": "Netaji Subhas Chandra Bose International Airport",
+    "city": "Kolkata",
+    "country": "India",
+    "airport_code": "CCU",
+    "type": "International",
+    "status": "Publish"
+  },
+  {
+    "airport_name": "Cochin International Airport",
+    "city": "Kochi",
+    "country": "India",
+    "airport_code": "COK",
+    "type": "International",
+    "status": "Publish"
+  },
+  {
+    "airport_name": "Sardar Vallabhbhai Patel International Airport",
+    "city": "Ahmedabad",
+    "country": "India",
+    "airport_code": "AMD",
+    "type": "International",
+    "status": "Publish"
+  },
+  {
+    "airport_name": "Jaipur International Airport",
+    "city": "Jaipur",
+    "country": "India",
+    "airport_code": "JAI",
+    "type": "International",
+    "status": "Publish"
+  },
+  {
+    "airport_name": "Goa International Airport",
+    "city": "Goa",
+    "country": "India",
+    "airport_code": "GOI",
+    "type": "International",
+    "status": "Publish"
+  },
+
+  {
+    "airport_name": "Surat Airport",
+    "city": "Surat",
+    "country": "India",
+    "airport_code": "STV",
+    "type": "Domestic",
+    "status": "Publish"
+  },
+  {
+    "airport_name": "Dehradun Airport",
+    "city": "Dehradun",
+    "country": "India",
+    "airport_code": "DED",
+    "type": "Domestic",
+    "status": "Publish"
+  },
+  {
+    "airport_name": "Ranchi Airport",
+    "city": "Ranchi",
+    "country": "India",
+    "airport_code": "IXR",
+    "type": "Domestic",
+    "status": "Publish"
+  },
+  {
+    "airport_name": "Madurai Airport",
+    "city": "Madurai",
+    "country": "India",
+    "airport_code": "IXM",
+    "type": "Domestic",
+    "status": "Publish"
+  },
+  {
+    "airport_name": "Gwalior Airport",
+    "city": "Gwalior",
+    "country": "India",
+    "airport_code": "GWL",
+    "type": "Domestic",
+    "status": "Publish"
+  },
+  {
+    "airport_name": "Kolhapur Airport",
+    "city": "Kolhapur",
+    "country": "India",
+    "airport_code": "KLH",
+    "type": "Domestic",
+    "status": "Publish"
+  },
+  {
+    "airport_name": "Hubli Airport",
+    "city": "Hubli",
+    "country": "India",
+    "airport_code": "HBX",
+    "type": "Domestic",
+    "status": "Publish"
+  },
+  {
+    "airport_name": "Jabalpur Airport",
+    "city": "Jabalpur",
+    "country": "India",
+    "airport_code": "JLR",
+    "type": "Domestic",
+    "status": "Publish"
+  },
+  {
+    "airport_name": "Mysore Airport",
+    "city": "Mysore",
+    "country": "India",
+    "airport_code": "MYQ",
+    "type": "Domestic",
+    "status": "Publish"
+  },
+  {
+    "airport_name": "Kullu–Manali Airport",
+    "city": "Kullu",
+    "country": "India",
+    "airport_code": "KUU",
+    "type": "Domestic",
+    "status": "Publish"
+  }
+]

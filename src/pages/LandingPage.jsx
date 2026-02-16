@@ -7,7 +7,6 @@ import Footer from "../components/Footer";
 
 const NewLandingPage = () => {
   const navigate = useNavigate();
-  const [activeFaq, setActiveFaq] = useState(null);
   const [contactForm, setContactForm] = useState({
     name: "",
     email: "",
@@ -32,9 +31,6 @@ const NewLandingPage = () => {
     scrollToSection("destinations");
   };
 
-  const handleExploreServices = () => {
-    scrollToSection("services");
-  };
 
   const handleNavigationClick = (e, action) => {
     e.preventDefault();
@@ -49,17 +45,12 @@ const NewLandingPage = () => {
       case "explore":
         handleExploreDestinations();
         break;
-      case "services":
-        handleExploreServices();
-        break;
+
       default:
         break;
     }
   };
 
-  const toggleFaq = (index) => {
-    setActiveFaq(activeFaq === index ? null : index);
-  };
 
   const handleContactChange = (e) => {
     const { name, value } = e.target;
@@ -111,39 +102,6 @@ const NewLandingPage = () => {
     }
   };
 
-  const faqs = [
-    {
-      question: "How do I book a flight on SkyJet?",
-      answer:
-        "You can book flights directly through our website, mobile app, or by contacting our customer service at +1 (800) 123-4567. Simply enter your travel details, select your preferred flight, and complete the payment process.",
-    },
-    {
-      question: "What is your baggage policy?",
-      answer:
-        "Economy class passengers can check one bag up to 23kg. Business class passengers can check two bags up to 32kg each. All passengers can carry one cabin bag and one personal item. Additional baggage can be purchased during booking or at the airport.",
-    },
-    {
-      question: "Can I change or cancel my booking?",
-      answer:
-        "Yes, you can change or cancel your booking through our website or mobile app. Changes made more than 24 hours before departure are free for Business class and have a fee for Economy. Cancellation policies vary by fare type - please check your booking details.",
-    },
-    {
-      question: "What payment methods do you accept?",
-      answer:
-        "We accept all major credit cards (Visa, MasterCard, American Express), PayPal, bank transfers, and Apple Pay. We also offer installment payment options for selected bookings.",
-    },
-    {
-      question:
-        "Do you offer special assistance for passengers with disabilities?",
-      answer:
-        "Yes, we provide comprehensive assistance for passengers with disabilities including wheelchair service, priority boarding, and assistance with mobility devices. Please inform us of your needs at least 48 hours before your flight.",
-    },
-    {
-      question: "What COVID-19 safety measures are in place?",
-      answer:
-        "We follow strict COVID-19 protocols including enhanced cleaning of aircraft, HEPA air filtration systems, mandatory mask requirements (where applicable), and flexible booking policies. Please check current travel requirements for your destination.",
-    },
-  ];
 
   return (
     <div className="new-landing-page">
@@ -237,105 +195,6 @@ const NewLandingPage = () => {
         </div>
       </section>
 
-      {/* Destinations Section */}
-      {/* <section className="new-destinations" id="destinations">
-        <div className="new-container">
-          <div className="new-section-header">
-            <h6 className="new-section-subtitle">Popular Destinations</h6>
-            <h2 className="new-section-title">Explore Amazing Places</h2>
-            <p className="new-section-description">
-              Discover our most sought-after destinations with exclusive deals
-              and premium service.
-            </p>
-          </div>
-
-          <div className="new-destinations-grid">
-            <div className="new-destination-card">
-              <div className="new-destination-image nyc">
-                <div className="new-destination-overlay">
-                  <span className="new-destination-tag">USA</span>
-                  <span className="new-destination-price">From $499</span>
-                </div>
-              </div>
-              <div className="new-destination-content">
-                <h3>New York City</h3>
-                <p>The city that never sleeps</p>
-                <div className="new-destination-info">
-                  <span>
-                    <i className="fas fa-clock"></i> 8h flight
-                  </span>
-                  <span>
-                    <i className="fas fa-star"></i> 4.8/5
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            <div className="new-destination-card">
-              <div className="new-destination-image paris">
-                <div className="new-destination-overlay">
-                  <span className="new-destination-tag">France</span>
-                  <span className="new-destination-price">From $599</span>
-                </div>
-              </div>
-              <div className="new-destination-content">
-                <h3>Paris</h3>
-                <p>City of Light & Love</p>
-                <div className="new-destination-info">
-                  <span>
-                    <i className="fas fa-clock"></i> 7h flight
-                  </span>
-                  <span>
-                    <i className="fas fa-star"></i> 4.9/5
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            <div className="new-destination-card">
-              <div className="new-destination-image tokyo">
-                <div className="new-destination-overlay">
-                  <span className="new-destination-tag">Japan</span>
-                  <span className="new-destination-price">From $899</span>
-                </div>
-              </div>
-              <div className="new-destination-content">
-                <h3>Tokyo</h3>
-                <p>Modern meets traditional</p>
-                <div className="new-destination-info">
-                  <span>
-                    <i className="fas fa-clock"></i> 14h flight
-                  </span>
-                  <span>
-                    <i className="fas fa-star"></i> 4.7/5
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            <div className="new-destination-card">
-              <div className="new-destination-image dubai">
-                <div className="new-destination-overlay">
-                  <span className="new-destination-tag">UAE</span>
-                  <span className="new-destination-price">From $699</span>
-                </div>
-              </div>
-              <div className="new-destination-content">
-                <h3>Dubai</h3>
-                <p>City of Gold</p>
-                <div className="new-destination-info">
-                  <span>
-                    <i className="fas fa-clock"></i> 12h flight
-                  </span>
-                  <span>
-                    <i className="fas fa-star"></i> 4.8/5
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section> */}
       {/* About Section */}
       <section className="new-about" id="about">
         <div className="new-container">
@@ -417,143 +276,6 @@ const NewLandingPage = () => {
         </div>
       </section>
 
-      {/* Services Section */}
-      <section className="new-services" id="services">
-        <div className="new-container">
-          <div className="new-section-header">
-            <h6 className="new-section-subtitle">Our Services</h6>
-            <h2 className="new-section-title">Why Choose SkyJet</h2>
-            <p className="new-section-description">
-              Experience world-class service with our premium offerings.
-            </p>
-          </div>
-
-          <div className="new-services-grid">
-            <div className="new-service-card">
-              <div className="new-service-icon">
-                <i className="fas fa-shield-alt"></i>
-              </div>
-              <h3>Maximum Safety</h3>
-              <p>
-                State-of-the-art safety measures with certified crew and
-                advanced aircraft.
-              </p>
-            </div>
-
-            <div className="new-service-card">
-              <div className="new-service-icon">
-                <i className="fas fa-couch"></i>
-              </div>
-              <h3>Premium Comfort</h3>
-              <p>
-                Luxurious seating with extra legroom and adjustable headrests.
-              </p>
-            </div>
-
-            <div className="new-service-card">
-              <div className="new-service-icon">
-                <i className="fas fa-wifi"></i>
-              </div>
-              <h3>Free Wi-Fi</h3>
-              <p>High-speed internet access on all international flights.</p>
-            </div>
-
-            <div className="new-service-card">
-              <div className="new-service-icon">
-                <i className="fas fa-utensils"></i>
-              </div>
-              <h3>Gourmet Dining</h3>
-              <p>
-                Chef-prepared meals with premium ingredients and local flavors.
-              </p>
-            </div>
-
-            <div className="new-service-card">
-              <div className="new-service-icon">
-                <i className="fas fa-headset"></i>
-              </div>
-              <h3>24/7 Support</h3>
-              <p>Round-the-clock customer service for all your travel needs.</p>
-            </div>
-
-            <div className="new-service-card">
-              <div className="new-service-icon">
-                <i className="fas fa-luggage-cart"></i>
-              </div>
-              <h3>Extra Baggage</h3>
-              <p>Generous baggage allowance with priority handling.</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* FAQs Section */}
-      <section className="new-faqs" id="faqs">
-        <div className="new-container">
-          <div className="new-section-header">
-            <h6 className="new-section-subtitle">Frequently Asked Questions</h6>
-            <h2 className="new-section-title">
-              Have Questions? We Have Answers
-            </h2>
-            <p className="new-section-description">
-              Find quick answers to common questions about booking, travel, and
-              our services.
-            </p>
-          </div>
-
-          <div className="new-faqs-container">
-            <div className="new-faqs-list">
-              {faqs.map((faq, index) => (
-                <div
-                  key={index}
-                  className={`new-faq-item ${activeFaq === index ? "active" : ""}`}
-                >
-                  <button
-                    className="new-faq-question"
-                    onClick={() => toggleFaq(index)}
-                  >
-                    <span>{faq.question}</span>
-                    <i
-                      className={`fas ${activeFaq === index ? "fa-chevron-up" : "fa-chevron-down"}`}
-                    ></i>
-                  </button>
-                  <div className="new-faq-answer">
-                    <p>{faq.answer}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            <div className="new-faqs-sidebar">
-              <div className="new-faqs-help">
-                <div className="new-faqs-help-icon">
-                  <i className="fas fa-headset"></i>
-                </div>
-                <h3>Need More Help?</h3>
-                <p>
-                  Our customer support team is available 24/7 to assist you with
-                  any questions or concerns.
-                </p>
-                <div className="new-faqs-contact-info">
-                  <p>
-                    <i className="fas fa-phone"></i> +1 (800) 123-4567
-                  </p>
-                  <p>
-                    <i className="fas fa-envelope"></i> support@skyjet.com
-                  </p>
-                  <p>
-                    <i className="fas fa-clock"></i> Available 24/7
-                  </p>
-                </div>
-                <button className="new-btn new-btn-primary">
-                  Live Chat Support
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* Contact Us Section */}
       <section className="new-contact" id="contact">
         <div className="new-container">
@@ -582,7 +304,7 @@ const NewLandingPage = () => {
               <form className="new-contact-form" onSubmit={handleContactSubmit}>
                 <div className="new-form-row">
                   <div className="new-form-group">
-                    <label htmlFor="name">Full Name *</label>
+                    <label className="name">Full Name *</label>
                     <input
                       type="text"
                       id="name"
@@ -594,7 +316,7 @@ const NewLandingPage = () => {
                     />
                   </div>
                   <div className="new-form-group">
-                    <label htmlFor="email">Email Address *</label>
+                    <label className="email">Email Address *</label>
                     <input
                       type="email"
                       id="email"
@@ -609,7 +331,7 @@ const NewLandingPage = () => {
 
                 <div className="new-form-row">
                   <div className="new-form-group">
-                    <label htmlFor="phone">Phone Number</label>
+                    <label className="phone">Phone Number</label>
                     <input
                       type="tel"
                       id="phone"
@@ -620,7 +342,7 @@ const NewLandingPage = () => {
                     />
                   </div>
                   <div className="new-form-group">
-                    <label htmlFor="subject">Subject *</label>
+                    <label className="subject">Subject *</label>
                     <select
                       id="subject"
                       name="subject"
@@ -640,7 +362,7 @@ const NewLandingPage = () => {
                 </div>
 
                 <div className="new-form-group">
-                  <label htmlFor="message">Message *</label>
+                  <label className="message">Message *</label>
                   <textarea
                     id="message"
                     name="message"

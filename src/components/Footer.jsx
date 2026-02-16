@@ -1,7 +1,8 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const Footer = ({ scrollToSection }) => {
+  const navigate = useNavigate();
   return (
     <>
       {/* Footer */}
@@ -61,15 +62,15 @@ const Footer = ({ scrollToSection }) => {
               <h3>Quick Links</h3>
               <ul>
                 <li>
-                  <button onClick={() => scrollToSection("home")}>Home</button>
+                  <button onClick={() => navigate("/")}>Home</button>
                 </li>
-                <li>
+                {/* <li>
                   <button onClick={() => scrollToSection("destinations")}>
                     Destinations
                   </button>
-                </li>
+                </li> */}
                 <li>
-                  <button onClick={() => scrollToSection("services")}>
+                  <button onClick={() => navigate("/services")}>
                     Services
                   </button>
                 </li>
@@ -79,7 +80,7 @@ const Footer = ({ scrollToSection }) => {
                   </button>
                 </li>
                 <li>
-                  <button onClick={() => scrollToSection("faqs")}>FAQs</button>
+                  <button onClick={() => navigate("/faqs")}>FAQs</button>
                 </li>
                 <li>
                   <button onClick={() => scrollToSection("contact")}>

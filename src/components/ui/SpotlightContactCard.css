@@ -1,0 +1,59 @@
+.spotlight-contact-card {
+  position: relative;
+  padding: 32px;
+  border-radius: 22px;
+  background: linear-gradient(135deg, #661683, #681271);
+  color: #fff;
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.spotlight-contact-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    350px circle at var(--x) var(--y),
+    var(--spotlight-color, rgba(120, 80, 255, 0.35)),
+    transparent 60%
+  );
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.spotlight-contact-card:hover::before {
+  opacity: 1;
+}
+
+.spotlight-contact-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.45);
+}
+
+/* Icon */
+.scc-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 18px;
+}
+
+.scc-icon i {
+  font-size: 20px;
+  color: #fff;
+}
+
+.spotlight-contact-card h3 {
+  font-size: 18px;
+  margin-bottom: 12px;
+}
+
+.scc-content p {
+  margin: 4px 0;
+  font-size: 14px;
+  opacity: 0.85;
+}

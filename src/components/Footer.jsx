@@ -64,18 +64,8 @@ const Footer = ({ scrollToSection }) => {
                 <li>
                   <button onClick={() => navigate("/")}>Home</button>
                 </li>
-                {/* <li>
-                  <button onClick={() => scrollToSection("destinations")}>
-                    Destinations
-                  </button>
-                </li> */}
                 <li>
-                  <button onClick={() => navigate("/services")}>
-                    Services
-                  </button>
-                </li>
-                <li>
-                  <button onClick={() => scrollToSection("about")}>
+                  <button onClick={() => navigate("/about")}>
                     About Us
                   </button>
                 </li>
@@ -83,8 +73,11 @@ const Footer = ({ scrollToSection }) => {
                   <button onClick={() => navigate("/faqs")}>FAQs</button>
                 </li>
                 <li>
-                  <button onClick={() => scrollToSection("contact")}>
-                    Contact
+                  <button onClick={() => navigate("/contact")}>Contact</button>
+                </li>
+                <li>
+                  <button onClick={() => navigate("/services")}>
+                    Services
                   </button>
                 </li>
               </ul>

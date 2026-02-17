@@ -8,6 +8,8 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import FAQs from "./components/FAQs";
 import Services from "./components/Services";
+import About from "./components/About";
+import Contact from "./components/ContactUs";
 
 import AdminLogin from "./pages/AdminLogin";
 import Admin from "./admin/Admin";
@@ -19,13 +21,12 @@ import Airlines from "./admin/Airlines";
 import Airports from "./admin/Airports";
 import Flights from "./admin/Flights";
 import AdminBookings from "./admin/AdminBookings";
-import Passengers from "./admin/Passengers";  
+import Passengers from "./admin/Passengers";
 import Payment from "./admin/Payment";
 
 import UserRoute from "./components/UserRoute";
 import User from "./user/User";
 import Dashboard from "./user/Dashboard";
-
 
 function App() {
   return (
@@ -37,6 +38,8 @@ function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/services" element={<Services />} />
         <Route path="/faqs" element={<FAQs />} />
+        <Route path="/about" element={<About />} />
+        <Route path="/contact" element={<Contact />} />
         <Route path="/admin-login" element={<AdminLogin />} />
 
         {/* Admin */}
@@ -57,7 +60,7 @@ function App() {
           <Route path="flights" element={<Flights />} />
           <Route path="bookings" element={<AdminBookings />} />
           <Route path="passengers" element={<Passengers />} />
-          <Route path="payments" element={<Payment/>}/>
+          <Route path="payments" element={<Payment />} />
         </Route>
 
         {/* User */}

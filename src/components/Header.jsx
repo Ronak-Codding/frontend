@@ -1,8 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-
-const Header = ({ scrollToSection }) => {
+const Header = () => {
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -12,7 +11,7 @@ const Header = ({ scrollToSection }) => {
 
   return (
     <>
-     {/* Navigation Bar */}
+      {/* Navigation Bar */}
       <nav className="new-navbar">
         <div className="new-container">
           <div className="new-nav-content">
@@ -31,27 +30,19 @@ const Header = ({ scrollToSection }) => {
                 <li>
                   <button onClick={() => navigate("/")}>Home</button>
                 </li>
-                {/* <li>
-                  <button onClick={() => scrollToSection("destinations")}>
-                    Destinations
-                  </button>
-                </li> */}
                 <li>
-                  <button onClick={() => navigate("/services")}>
-                    Services
-                  </button>
+                  <button onClick={() => navigate("/about")}>About</button>
                 </li>
+
                 <li>
-                  <button onClick={() => scrollToSection("about")}>
-                    About
-                  </button>
+                  <button onClick={() => navigate("/contact")}>Contact</button>
                 </li>
                 <li>
                   <button onClick={() => navigate("/faqs")}>FAQs</button>
                 </li>
                 <li>
-                  <button onClick={() => scrollToSection("contact")}>
-                    Contact
+                  <button onClick={() => navigate("/services")}>
+                    Services
                   </button>
                 </li>
               </ul>
@@ -63,12 +54,6 @@ const Header = ({ scrollToSection }) => {
                 >
                   Sign In
                 </button>
-                {/* <button
-                  className="new-btn new-btn-primary"
-                  onClick={(e) => handleNavigationClick(e, "book")}
-                >
-                  Book Now
-                </button> */}
                 <button
                   className="new-btn new-btn-primary"
                   onClick={() => navigate("/register")}
@@ -86,7 +71,7 @@ const Header = ({ scrollToSection }) => {
           </div>
         </div>
       </nav>
-      </>
+    </>
   );
 };
 

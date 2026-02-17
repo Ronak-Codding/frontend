@@ -1,8 +1,9 @@
 import { useNavigate } from "react-router-dom";
 import "./LandingPage.css";
-import FlightSearchForm from "./FlightSearchForm";
+// import FlightSearchForm from "./FlightSearchForm";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
+
 
 const NewLandingPage = () => {
   const navigate = useNavigate();
@@ -29,7 +30,7 @@ const NewLandingPage = () => {
 
   return (
     <div className="new-landing-page">
-      <Header />
+      <Header  />
 
       {/* Hero Section */}
       <section className="new-hero" id="home">
@@ -64,13 +65,12 @@ const NewLandingPage = () => {
                 </button>
               </div>
             </div>
-            <FlightSearchForm></FlightSearchForm>
+            {/* <FlightSearchForm></FlightSearchForm> */}
           </div>
         </div>
       </section>
 
-      {/* About Section */}
-
+    
       <Footer />
     </div>
   );

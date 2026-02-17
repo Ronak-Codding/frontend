@@ -200,24 +200,28 @@ const Contact = () => {
                       placeholder="Enter your phone number"
                     />
                   </div>
+                  <div className="form-group">
+                    <label htmlFor="subject">Subject *</label>
 
-                  <div className="new-form-group">
-                    <label className="subject">Subject *</label>
-                    <select
-                      id="subject"
-                      name="subject"
-                      value={contactForm.subject}
-                      onChange={handleContactChange}
-                      required
-                    >
-                      <option value="">Select a subject</option>
-                      <option value="booking">Flight Booking</option>
-                      <option value="cancellation">Cancellation/Change</option>
-                      <option value="baggage">Baggage Inquiry</option>
-                      <option value="refund">Refund Request</option>
-                      <option value="feedback">Feedback/Complaint</option>
-                      <option value="other">Other</option>
-                    </select>
+                    <div className="select-wrapper">
+                      <select
+                        id="subject"
+                        name="subject"
+                        value={contactForm.subject}
+                        onChange={handleContactChange}
+                        required
+                      >
+                        <option value="">Select a subject</option>
+                        <option value="booking">Flight Booking</option>
+                        <option value="cancellation">
+                          Cancellation / Change
+                        </option>
+                        <option value="baggage">Baggage Inquiry</option>
+                        <option value="refund">Refund Request</option>
+                        <option value="feedback">Feedback / Complaint</option>
+                        <option value="other">Other</option>
+                      </select>
+                    </div>
                   </div>
                 </div>
 

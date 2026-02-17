@@ -1,10 +1,8 @@
-
 import { useNavigate } from "react-router-dom";
 import "./LandingPage.css";
 import FlightSearchForm from "./FlightSearchForm";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
-
 
 const NewLandingPage = () => {
   const navigate = useNavigate();
@@ -12,15 +10,6 @@ const NewLandingPage = () => {
   const handleBookNow = () => {
     alert("Redirecting to booking page...");
   };
-
-  const scrollToSection = (sectionId) => {
-    const element = document.getElementById(sectionId);
-    if (element) {
-      element.scrollIntoView({ behavior: "smooth" });
-    }
-  };
-
-
 
   const handleNavigationClick = (e, action) => {
     e.preventDefault();
@@ -40,7 +29,7 @@ const NewLandingPage = () => {
 
   return (
     <div className="new-landing-page">
-      <Header scrollToSection={scrollToSection} />
+      <Header />
 
       {/* Hero Section */}
       <section className="new-hero" id="home">
@@ -80,11 +69,9 @@ const NewLandingPage = () => {
         </div>
       </section>
 
-    
       {/* About Section */}
-     
 
-      <Footer scrollToSection={scrollToSection} />
+      <Footer />
     </div>
   );
 };

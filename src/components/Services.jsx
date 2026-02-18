@@ -27,76 +27,76 @@ const Services = () => {
     // Implement search logic here
   };
 
-  const services = [
-    {
-      id: 1,
-      icon: "fas fa-plane-departure",
-      title: "Flight Booking",
-      description:
-        "Book domestic and international flights at the best prices with our easy-to-use platform.",
-      features: [
-        "24/7 Customer Support",
-        "Best Price Guarantee",
-        "Flexible Cancellation",
-      ],
-    },
-    {
-      id: 2,
-      icon: "fas fa-hotel",
-      title: "Hotel Reservations",
-      description:
-        "Find and book the perfect accommodation for your stay with our extensive hotel network.",
-      features: [
-        "Verified Reviews",
-        "Free Cancellation",
-        "Best Rate Guarantee",
-      ],
-    },
-    {
-      id: 3,
-      icon: "fas fa-car",
-      title: "Car Rentals",
-      description:
-        "Rent cars from top providers at competitive rates for a comfortable journey.",
-      features: [
-        "No Hidden Fees",
-        "Free Modifications",
-        "24/7 Roadside Assistance",
-      ],
-    },
-    {
-      id: 4,
-      icon: "fas fa-umbrella-beach",
-      title: "Holiday Packages",
-      description:
-        "Explore our curated holiday packages including flights, hotels, and activities.",
-      features: [
-        "Customizable Itineraries",
-        "Local Experiences",
-        "Expert Guidance",
-      ],
-    },
-    {
-      id: 5,
-      icon: "fas fa-shield-alt",
-      title: "Travel Insurance",
-      description:
-        "Protect your journey with comprehensive travel insurance coverage.",
-      features: [
-        "Medical Coverage",
-        "Trip Cancellation",
-        "Lost Baggage Protection",
-      ],
-    },
-    {
-      id: 6,
-      icon: "fas fa-concierge-bell",
-      title: "Airport Services",
-      description:
-        "Enjoy premium airport services including lounges, transfers, and meet & assist.",
-      features: ["VIP Lounge Access", "Fast Track", "Personal Assistant"],
-    },
-  ];
+  // const services = [
+  //   {
+  //     id: 1,
+  //     icon: "fas fa-plane-departure",
+  //     title: "Flight Booking",
+  //     description:
+  //       "Book domestic and international flights at the best prices with our easy-to-use platform.",
+  //     features: [
+  //       "24/7 Customer Support",
+  //       "Best Price Guarantee",
+  //       "Flexible Cancellation",
+  //     ],
+  //   },
+  //   {
+  //     id: 2,
+  //     icon: "fas fa-hotel",
+  //     title: "Hotel Reservations",
+  //     description:
+  //       "Find and book the perfect accommodation for your stay with our extensive hotel network.",
+  //     features: [
+  //       "Verified Reviews",
+  //       "Free Cancellation",
+  //       "Best Rate Guarantee",
+  //     ],
+  //   },
+  //   {
+  //     id: 3,
+  //     icon: "fas fa-car",
+  //     title: "Car Rentals",
+  //     description:
+  //       "Rent cars from top providers at competitive rates for a comfortable journey.",
+  //     features: [
+  //       "No Hidden Fees",
+  //       "Free Modifications",
+  //       "24/7 Roadside Assistance",
+  //     ],
+  //   },
+  //   {
+  //     id: 4,
+  //     icon: "fas fa-umbrella-beach",
+  //     title: "Holiday Packages",
+  //     description:
+  //       "Explore our curated holiday packages including flights, hotels, and activities.",
+  //     features: [
+  //       "Customizable Itineraries",
+  //       "Local Experiences",
+  //       "Expert Guidance",
+  //     ],
+  //   },
+  //   {
+  //     id: 5,
+  //     icon: "fas fa-shield-alt",
+  //     title: "Travel Insurance",
+  //     description:
+  //       "Protect your journey with comprehensive travel insurance coverage.",
+  //     features: [
+  //       "Medical Coverage",
+  //       "Trip Cancellation",
+  //       "Lost Baggage Protection",
+  //     ],
+  //   },
+  //   {
+  //     id: 6,
+  //     icon: "fas fa-concierge-bell",
+  //     title: "Airport Services",
+  //     description:
+  //       "Enjoy premium airport services including lounges, transfers, and meet & assist.",
+  //     features: ["VIP Lounge Access", "Fast Track", "Personal Assistant"],
+  //   },
+  // ];
 
   const popularDestinations = [
     {

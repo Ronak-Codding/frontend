@@ -1,7 +1,7 @@
 import { Navigate } from "react-router-dom";
 
 const UserRoute = ({ children }) => {
-  const token = localStorage.getItem("token"); // fixed
+  const token = localStorage.getItem("usertoken"); // fixed
   const userStr = localStorage.getItem("user");
 
   let user = null;

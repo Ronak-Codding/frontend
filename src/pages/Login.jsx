@@ -20,7 +20,7 @@ const Login = () => {
       const data = await res.json();
       if (!res.ok) return alert(data.message);
 
-      localStorage.setItem("token", data.token);
+      localStorage.setItem("usertoken", data.token);
       localStorage.setItem("user", JSON.stringify(data.user));
       localStorage.setItem("role", "user"); //  ADD THIS LINE
 
@@ -29,41 +29,6 @@ const Login = () => {
       alert("Server error");
     }
   };
-
-  // const handleLogin = async (e) => {
-  //   e.preventDefault();
-
-  //   try {
-  //     const res = await fetch("http://localhost:5000/api/auth/login", {
-  //       method: "POST",
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //       },
-  //       body: JSON.stringify({ email, password }),
-  //     });
-
-  //     const data = await res.json();
-
-  //     if (!res.ok) {
-  //       alert(data.message || "Login failed");
-  //       return;
-  //     }
-
-  //     // ✅ SAVE TOKEN + USER
-  //     localStorage.setItem("token", data.token);
-  //     localStorage.setItem("user", JSON.stringify(data.user));
-
-  //     // 🔀 ROLE BASED REDIRECT
-  //     if (data.user.role === "admin") {
-  //       navigate("/admin");
-  //     } else {
-  //       navigate("/user");
-  //     }
-  //   } catch (error) {
-  //     console.error(error);
-  //     alert("Server not responding");
-  //   }
-  // };
 
   return (
     <div className="login-container">

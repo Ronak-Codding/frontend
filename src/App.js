@@ -25,9 +25,10 @@ import Passengers from "./admin/Passengers";
 import Payment from "./admin/Payment";
 
 import UserRoute from "./components/UserRoute";
-import User from "./user/User";
+// import User from "./user/User";
 import Dashboard from "./user/Dashboard";
 import FlightSearch from "./user/FlightSearchForm";
+import Sidebar from "./user/Sidebar";
 
 function App() {
   return (
@@ -69,7 +70,8 @@ function App() {
           path="/user"
           element={
             <UserRoute>
-              <User />
+              {/* <User /> */}
+              <Sidebar></Sidebar>
             </UserRoute>
           }
         >

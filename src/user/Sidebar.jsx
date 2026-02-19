@@ -1,13 +1,15 @@
 import React, { useEffect, useState } from "react";
 import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
 import "./Sidebar.css";
+import { useTheme } from "../components/ThemeContext";
 
 const Sidebar = () => {
   const [toggle, setToggle] = useState(false);
-  const [darkMode, setDarkMode] = useState(() => {
-    const saved = localStorage.getItem("admin-dark-mode");
-    return saved ? JSON.parse(saved) : false;
-  });
+  //   const [darkMode, setDarkMode] = useState(() => {
+  //     const saved = localStorage.getItem("user-dark-mode");
+  //     return saved ? JSON.parse(saved) : false;
+  //   });
+  const { darkMode, setDarkMode } = useTheme();
   const [unreadCount, setUnreadCount] = useState(3);
   const [profileOpen, setProfileOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
@@ -28,16 +30,16 @@ const Sidebar = () => {
   }, []);
 
   // Initialize theme
-  useEffect(() => {
-    if (darkMode) {
-      document.body.classList.add("dark");
-      document.body.classList.remove("light");
-    } else {
-      document.body.classList.add("light");
-      document.body.classList.remove("dark");
-    }
-    localStorage.setItem("admin-dark-mode", JSON.stringify(darkMode));
-  }, [darkMode]);
+//   useEffect(() => {
+//     if (darkMode) {
+//       document.body.classList.add("dark");
+//       document.body.classList.remove("light");
+//     } else {
+//       document.body.classList.add("light");
+//       document.body.classList.remove("dark");
+//     }
+//     localStorage.setItem("user-dark-mode", JSON.stringify(darkMode));
+//   }, [darkMode]);
 
   // Fetch initial data
   useEffect(() => {
@@ -127,35 +129,35 @@ const Sidebar = () => {
 
   return (
     <>
-      <div
-        className={`d-flex ${toggle ? "toggled" : ""} ${darkMode ? "dark" : "light"}`}
+        <div
+        className={`d-flex ${toggle ? "toggled" : ""} ${darkMode ? "user-dark" : "user-light"}`}
         id="wrapper"
       >
         {/* ========== SIDEBAR ========== */}
-        <div id="sidebar-wrapper">
-          <div className="sidebar-heading text-center py-3">
+        <div id="user-sidebar">
+          <div className="user-sidebar-heading text-center py-3">
             <h2>User Panel</h2>
             {/* <small className="text-muted">Management System</small> */}
           </div>
 
-          <div className="list-group list-group-flush">
-            <NavLink to="/user/dashboard" className="list-group-item">
+          <div className="user-list-group list-group-flush">
+            <NavLink to="/user/dashboard" className="user-list-group-item">
               <i className="fas fa-tachometer-alt"></i>Dashboard
             </NavLink>
 
-            <NavLink to="/user/flights" className="list-group-item">
+            <NavLink to="/user/flights" className="user-list-group-item">
               <i className="fas fa-plane"></i> Flight
             </NavLink>
 
-            <NavLink to="/user/bookings" className="list-group-item">
+            <NavLink to="/user/bookings" className="user-list-group-item">
               <i className="fas fa-ticket-alt"></i> Booking
             </NavLink>
 
-            <NavLink to="/user/payments" className="list-group-item">
+            <NavLink to="/user/payments" className="user-list-group-item">
               <i className="fas fa-money-bill-wave"></i>Payment
             </NavLink>
 
-            <NavLink to="/user/settings" className="list-group-item">
+            <NavLink to="/user/settings" className="user-list-group-item">
               <i className="fas fa-cog"></i>Setting
             </NavLink>
 
@@ -184,9 +186,9 @@ const Sidebar = () => {
         {/* ========== PAGE CONTENT ========== */}
         <div id="page-content-wrapper">
           {/* UPDATED TOP NAV */}
-          <nav className="navbar admin-navbar">
+          <nav className="navbar user-navbar">
             {/* LEFT SECTION */}
-            <div className="admin-navbar-left">
+            <div className="user-navbar-left">
               {/* Sidebar Toggle */}
               <button
                 className="sidebar-toggle"
@@ -228,7 +230,7 @@ const Sidebar = () => {
             </div>
 
             {/* RIGHT SECTION */}
-            <div className="admin-navbar-right">
+            <div className="user-navbar-right">
               {/* Notifications */}
               <div className="notification-container">
                 <button
@@ -299,7 +301,7 @@ const Sidebar = () => {
                     </div>
                     <div className="notifications-footer">
                       <NavLink
-                        to="/admin/notifications"
+                        to="/user/notifications"
                         className="view-all-link"
                         onClick={() => setNotificationsOpen(false)}
                       >
@@ -312,30 +314,30 @@ const Sidebar = () => {
 
               {/* Admin Profile */}
               <div
-                className={`admin-top-profile ${profileOpen ? "active" : ""}`}
+                className={`user-top-profile ${profileOpen ? "active" : ""}`}
                 onClick={() => {
                   setProfileOpen(!profileOpen);
                   setNotificationsOpen(false);
                 }}
               >
-                <div className="admin-profile-img">
+                <div className="user-profile-img">
                   {currentUser?.fullname
                     ? currentUser.fullname.charAt(0).toUpperCase()
                     : "U"}
                 </div>
 
-                <div className="admin-profile-info">
-                  {/* <span className="admin-profile-name">Guest</span>
-                  <span className="admin-profile-role">Super Guest</span> */}
+                <div className="user-profile-info">
+                  {/* <span className="user-profile-name">Guest</span>
+                  <span className="user-profile-role">Super Guest</span> */}
                 </div>
-                <i className="fas fa-chevron-down admin-profile-arrow"></i>
+                <i className="fas fa-chevron-down user-profile-arrow"></i>
               </div>
 
               {/* Profile Dropdown */}
               {profileOpen && (
-                <div className="admin-profile-dropdown-right">
+                <div className="user-profile-dropdown-right">
                   <div className="dropdown-header">
-                    <div className="admin-profile-img">
+                    <div className="user-profile-img">
                       {currentUser?.fullname
                         ? currentUser.fullname.charAt(0).toUpperCase()
                         : "U"}

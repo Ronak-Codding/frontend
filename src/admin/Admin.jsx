@@ -1,13 +1,15 @@
 import React, { useEffect, useState } from "react";
 import { NavLink, Outlet, useLocation,  useNavigate } from "react-router-dom";
+import { useTheme } from "../components/ThemeContext";
 import "./Admin.css";
 
 const Admin = () => {
   const [toggle, setToggle] = useState(false);
-  const [darkMode, setDarkMode] = useState(() => {
-    const saved = localStorage.getItem("admin-dark-mode");
-    return saved ? JSON.parse(saved) : false;
-  });
+  // const [darkMode, setDarkMode] = useState(() => {
+  //   const saved = localStorage.getItem("admin-dark-mode");
+  //   return saved ? JSON.parse(saved) : false;
+  // });
+  const { darkMode, setDarkMode } = useTheme(); 
   const [unreadCount, setUnreadCount] = useState(3);
   const [profileOpen, setProfileOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
@@ -19,16 +21,16 @@ const Admin = () => {
   const location = useLocation();
 
   // Initialize theme
-  useEffect(() => {
-    if (darkMode) {
-      document.body.classList.add("dark");
-      document.body.classList.remove("light");
-    } else {
-      document.body.classList.add("light");
-      document.body.classList.remove("dark");
-    }
-    localStorage.setItem("admin-dark-mode", JSON.stringify(darkMode));
-  }, [darkMode]);
+  // useEffect(() => {
+  //   if (darkMode) {
+  //     document.body.classList.add("dark");
+  //     document.body.classList.remove("light");
+  //   } else {
+  //     document.body.classList.add("light");
+  //     document.body.classList.remove("dark");
+  //   }
+  //   localStorage.setItem("admin-dark-mode", JSON.stringify(darkMode));
+  // }, [darkMode]);
 
   // Fetch initial data
   useEffect(() => {
@@ -151,7 +153,7 @@ const Admin = () => {
   return (
     <>
       <div
-        className={`d-flex ${toggle ? "toggled" : ""} ${darkMode ? "dark" : "light"}`}
+        className={`d-flex ${toggle ? "toggled" : ""} ${darkMode ? "admin-dark" : "admin-light"}`}
         id="wrapper"
       >
         {/* ========== SIDEBAR ========== */}

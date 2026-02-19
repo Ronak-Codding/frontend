@@ -11,6 +11,7 @@ import Services from "./components/Services";
 import About from "./components/About";
 import Contact from "./components/ContactUs";
 
+import { ThemeProvider } from "./components/ThemeContext";
 import AdminLogin from "./pages/AdminLogin";
 import Admin from "./admin/Admin";
 import AdminRoute from "./components/AdminRoute";
@@ -49,7 +50,9 @@ function App() {
           path="/admin"
           element={
             <AdminRoute>
-              <Admin />
+              <ThemeProvider storageKey="admin-theme">
+                <Admin />
+              </ThemeProvider>
             </AdminRoute>
           }
         >
@@ -70,14 +73,15 @@ function App() {
           path="/user"
           element={
             <UserRoute>
-              {/* <User /> */}
-              <Sidebar></Sidebar>
+              <ThemeProvider storageKey="user-theme">
+                <Sidebar />
+              </ThemeProvider>
             </UserRoute>
           }
         >
           <Route index element={<Navigate to="dashboard" replace />} />
           <Route path="dashboard" element={<Dashboard />} />
-          <Route path="flights" element={<FlightSearch/>}/>
+          <Route path="flights" element={<FlightSearch />} />
         </Route>
 
         {/* Fallback */}

@@ -5,12 +5,8 @@ import { useTheme } from "../components/ThemeContext";
 
 const Sidebar = () => {
   const [toggle, setToggle] = useState(false);
-  //   const [darkMode, setDarkMode] = useState(() => {
-  //     const saved = localStorage.getItem("user-dark-mode");
-  //     return saved ? JSON.parse(saved) : false;
-  //   });
   const { darkMode, setDarkMode } = useTheme();
-  const [unreadCount, setUnreadCount] = useState(3);
+  const [unreadCount, setUnreadCount] = useState(0);
   const [profileOpen, setProfileOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -28,33 +24,48 @@ const Sidebar = () => {
       setCurrentUser(JSON.parse(storedUser));
     }
   }, []);
-
-  // Initialize theme
-//   useEffect(() => {
-//     if (darkMode) {
-//       document.body.classList.add("dark");
-//       document.body.classList.remove("light");
-//     } else {
-//       document.body.classList.add("light");
-//       document.body.classList.remove("dark");
-//     }
-//     localStorage.setItem("user-dark-mode", JSON.stringify(darkMode));
-//   }, [darkMode]);
-
-  // Fetch initial data
   useEffect(() => {
-    // Auto-hide sidebar on mobile
+    const demoNotifications = [
+      {
+        id: 1,
+        message: "Your flight booking is confirmed.",
+        time: "2 min ago",
+        type: "success",
+        read: false,
+      },
+      {
+        id: 2,
+        message: "New payment received.",
+        time: "10 min ago",
+        type: "info",
+        read: false,
+      },
+      {
+        id: 3,
+        message: "Your booking was cancelled.",
+        time: "1 hour ago",
+        type: "warning",
+        read: true,
+      },
+    ];
+
+    setNotifications(demoNotifications);
+  }, []);
+
+  useEffect(() => {
     const handleResize = () => {
-      if (window.innerWidth <= 1024 && !toggle) {
+      if (window.innerWidth <= 1024) {
         setToggle(true);
+      } else {
+        setToggle(false);
       }
     };
 
     window.addEventListener("resize", handleResize);
-    handleResize(); // Initial check
+    handleResize();
 
     return () => window.removeEventListener("resize", handleResize);
-  }, [toggle]);
+  }, []);
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -91,26 +102,27 @@ const Sidebar = () => {
     setSearchQuery("");
   };
 
+  useEffect(() => {
+    const unread = notifications.filter((n) => !n.read).length;
+    setUnreadCount(unread);
+  }, [notifications]);
   const handleNotificationClick = (id) => {
     setNotifications((prev) =>
       prev.map((notification) =>
         notification.id === id ? { ...notification, read: true } : notification,
       ),
     );
-    setUnreadCount((prev) => Math.max(0, prev - 1));
   };
 
   const markAllAsRead = () => {
     setNotifications((prev) =>
       prev.map((notification) => ({ ...notification, read: true })),
     );
-    setUnreadCount(0);
   };
-
   const logout = () => {
     localStorage.removeItem("userToken");
     localStorage.removeItem("user");
-    window.location.href = "/login";
+    navigate("/login");
   };
 
   // Get current page title
@@ -119,6 +131,8 @@ const Sidebar = () => {
     const titles = {
       dashboard: "Dashboard",
       flights: "Flight Search",
+      "flight-details": "Flight Details",
+      "change-password": "Change Password",
       bookings: "Booking",
       payments: "Payment",
       settings: "System Settings",
@@ -129,7 +143,7 @@ const Sidebar = () => {
 
   return (
     <>
-        <div
+      <div
         className={`d-flex ${toggle ? "toggled" : ""} ${darkMode ? "user-dark" : "user-light"}`}
         id="wrapper"
       >
@@ -148,7 +162,16 @@ const Sidebar = () => {
             <NavLink to="/user/flights" className="user-list-group-item">
               <i className="fas fa-plane"></i> Flight
             </NavLink>
+            <NavLink to="/user/flight-details" className="user-list-group-item">
+              <i className="fas fa-plane"></i> Flight details
+            </NavLink>
 
+            <NavLink to="/user/passenger" className="user-list-group-item">
+              <i className="fas fa-user"></i> Passenger
+            </NavLink>
+            {/* <NavLink to="/user/seat-selection" className="user-list-group-item">
+                 <i className="fas fa-chair"></i> Seat Selection
+            </NavLink> */}
             <NavLink to="/user/bookings" className="user-list-group-item">
               <i className="fas fa-ticket-alt"></i> Booking
             </NavLink>
@@ -264,41 +287,52 @@ const Sidebar = () => {
                         </button>
                       )}
                     </div>
+
                     <div className="notifications-list">
-                      {notifications.map((notification) => (
-                        <div
-                          key={notification.id}
-                          className={`notification-item ${!notification.read ? "unread" : ""}`}
-                          onClick={() =>
-                            handleNotificationClick(notification.id)
-                          }
-                        >
-                          <div className="notification-content">
-                            <div
-                              className={`notification-icon ${notification.type}`}
-                            >
-                              <i
-                                className={`fas fa-${
-                                  notification.type === "info"
-                                    ? "info-circle"
-                                    : notification.type === "success"
-                                      ? "check-circle"
-                                      : notification.type === "warning"
-                                        ? "exclamation-triangle"
-                                        : "times-circle"
-                                }`}
-                              ></i>
-                            </div>
-                            <div className="notification-details">
-                              <p>{notification.message}</p>
-                              <span className="notification-time">
-                                {notification.time}
-                              </span>
+                      {notifications.length === 0 ? (
+                        <div className="text-center p-3 text-muted">
+                          No notifications available
+                        </div>
+                      ) : (
+                        notifications.map((notification) => (
+                          <div
+                            key={notification.id}
+                            className={`notification-item ${
+                              !notification.read ? "unread" : ""
+                            }`}
+                            onClick={() =>
+                              handleNotificationClick(notification.id)
+                            }
+                          >
+                            <div className="notification-content">
+                              <div
+                                className={`notification-icon ${notification.type}`}
+                              >
+                                <i
+                                  className={`fas fa-${
+                                    notification.type === "info"
+                                      ? "info-circle"
+                                      : notification.type === "success"
+                                        ? "check-circle"
+                                        : notification.type === "warning"
+                                          ? "exclamation-triangle"
+                                          : "times-circle"
+                                  }`}
+                                ></i>
+                              </div>
+
+                              <div className="notification-details">
+                                <p>{notification.message}</p>
+                                <span className="notification-time">
+                                  {notification.time}
+                                </span>
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      ))}
+                        ))
+                      )}
                     </div>
+
                     <div className="notifications-footer">
                       <NavLink
                         to="/user/notifications"
@@ -312,7 +346,7 @@ const Sidebar = () => {
                 )}
               </div>
 
-              {/* Admin Profile */}
+              {/* User Profile */}
               <div
                 className={`user-top-profile ${profileOpen ? "active" : ""}`}
                 onClick={() => {
@@ -326,11 +360,11 @@ const Sidebar = () => {
                     : "U"}
                 </div>
 
-                <div className="user-profile-info">
-                  {/* <span className="user-profile-name">Guest</span>
-                  <span className="user-profile-role">Super Guest</span> */}
+                {/* <div className="user-profile-info">
+                  <span className="user-profile-name">Guest</span>
+                  <span className="user-profile-role">Super Guest</span>
                 </div>
-                <i className="fas fa-chevron-down user-profile-arrow"></i>
+                <i className="fas fa-chevron-down user-profile-arrow"></i> */}
               </div>
 
               {/* Profile Dropdown */}

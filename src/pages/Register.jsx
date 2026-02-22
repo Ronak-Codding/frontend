@@ -53,11 +53,11 @@ const Register = ({ onRegister }) => {
       newErrors.lastName = "Last name must be at least 2 characters";
     }
 
-    //  userName
+    // Username
     if (!formData.username.trim()) {
-      newErrors.username = "Last name is required";
+      newErrors.username = "Username is required";
     } else if (formData.username.length < 2) {
-      newErrors.username = " username must be at least 2 characters";
+      newErrors.username = "Username must be at least 2 characters";
     }
 
     // Email
@@ -141,6 +141,11 @@ const Register = ({ onRegister }) => {
       if (onRegister) {
         onRegister(data.user);
       }
+
+      // Redirect to dashboard after 2 seconds
+      setTimeout(() => {
+        navigate("/dashboard");
+      }, 2000);
     } catch (error) {
       setErrors({ apiError: "Server not responding" });
       setIsLoading(false);
@@ -155,8 +160,8 @@ const Register = ({ onRegister }) => {
         Back to Home
       </button>
 
-      <div className="register-wrapper single-column">
-        <div className="register-card full-width">
+      <div className="register-wrapper">
+        <div className="register-card">
           {registrationSuccess ? (
             <div className="registration-success">
               <div className="success-icon">
@@ -173,7 +178,7 @@ const Register = ({ onRegister }) => {
             <>
               <div className="register-header">
                 <h2>Create Your Account</h2>
-                <p>Join thousands of travelers worldwide</p>
+                {/* <p>Join thousands of travelers worldwide</p> */}
               </div>
 
               <form onSubmit={handleSubmit} className="register-form">
@@ -195,6 +200,7 @@ const Register = ({ onRegister }) => {
                       <span className="error-message">{errors.firstName}</span>
                     )}
                   </div>
+
                   <div className="form-group">
                     <label>
                       <i className="fas fa-user"></i> Middle Name
@@ -204,7 +210,7 @@ const Register = ({ onRegister }) => {
                       name="middleName"
                       value={formData.middleName}
                       onChange={handleChange}
-                      placeholder="Enter your first name"
+                      placeholder="Enter your middle name"
                       className={errors.middleName ? "error" : ""}
                       disabled={isLoading}
                     />
@@ -212,7 +218,9 @@ const Register = ({ onRegister }) => {
                       <span className="error-message">{errors.middleName}</span>
                     )}
                   </div>
+                </div>
 
+                <div className="form-row">
                   <div className="form-group">
                     <label>
                       <i className="fas fa-user"></i> Last Name
@@ -230,24 +238,24 @@ const Register = ({ onRegister }) => {
                       <span className="error-message">{errors.lastName}</span>
                     )}
                   </div>
-                </div>
 
-                <div className="form-group">
-                  <label>
-                    <i className="fas fa-user"></i> Username
-                  </label>
-                  <input
-                    type="text"
-                    name="username"
-                    value={formData.username}
-                    onChange={handleChange}
-                    placeholder="Enter your username"
-                    className={errors.username ? "error" : ""}
-                    disabled={isLoading}
-                  />
-                  {errors.username && (
-                    <span className="error-message">{errors.username}</span>
-                  )}
+                  <div className="form-group">
+                    <label>
+                      <i className="fas fa-user"></i> Username
+                    </label>
+                    <input
+                      type="text"
+                      name="username"
+                      value={formData.username}
+                      onChange={handleChange}
+                      placeholder="Enter your username"
+                      className={errors.username ? "error" : ""}
+                      disabled={isLoading}
+                    />
+                    {errors.username && (
+                      <span className="error-message">{errors.username}</span>
+                    )}
+                  </div>
                 </div>
 
                 <div className="form-group">
@@ -348,7 +356,7 @@ const Register = ({ onRegister }) => {
                 </div>
 
                 {errors.apiError && (
-                  <div className="error-message">{errors.apiError}</div>
+                  <div className="error-message api-error">{errors.apiError}</div>
                 )}
 
                 <button
@@ -374,6 +382,7 @@ const Register = ({ onRegister }) => {
                   type="button"
                   className="login-link-button"
                   onClick={() => navigate("/login")}
+                  disabled={isLoading}
                 >
                   <i className="fas fa-sign-in-alt"></i>
                   Sign In

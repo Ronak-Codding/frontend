@@ -31,6 +31,12 @@ import Dashboard from "./user/Dashboard";
 import FlightSearch from "./user/FlightSearchForm";
 import Sidebar from "./user/Sidebar";
 
+import FlightDetails from "./user/FlightDetails";
+// import PassengerDetails from "./user/Passenger";
+// import SeatSelection from "./user/SeatSelection";
+// import PaymentGateway from "./user/PaymentGateway";
+// import BookingConfirmation from "./user/BookingConfirmation";
+
 function App() {
   return (
     <BrowserRouter>
@@ -82,6 +88,11 @@ function App() {
           <Route index element={<Navigate to="dashboard" replace />} />
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="flights" element={<FlightSearch />} />
+          <Route path="flight-details" element={<FlightDetails />} />
+          {/* <Route path="passenger" element={<PassengerDetails />} />
+          <Route path="seat-selection" element={<SeatSelection />} />
+          <Route path="payments" element={<PaymentGateway />} />
+          <Route path="bookings" element={<BookingConfirmation/>}/> */}
         </Route>
 
         {/* Fallback */}

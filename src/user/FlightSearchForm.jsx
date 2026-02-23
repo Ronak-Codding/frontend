@@ -1,8 +1,9 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import "bootstrap/dist/css/bootstrap.min.css";
 import AirportAutocomplete from "../components/AirportAutocomplete";
+import "./FlightSearch.css"; 
+
 
 const FlightSearch = () => {
   const navigate = useNavigate();
@@ -132,7 +133,7 @@ const FlightSearch = () => {
   };
 
   return (
-    <div className="container py-5">
+    <div className="container">
       <div className="card shadow-lg p-4 rounded-4">
         <h4 className="fw-bold mb-4 text-center">
           <i className="fas fa-plane me-2 text-info"></i>

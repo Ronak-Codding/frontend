@@ -1,0 +1,472 @@
+/* FlightSearch.css */
+
+/* Container Styles */
+.container {
+  max-width: 1200px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+}
+
+/* Card Styles */
+.card {
+  background: white;
+  border: none;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+}
+
+.card:hover {
+  box-shadow: 0 15px 50px rgba(0, 0, 0, 0.12);
+}
+
+/* Typography */
+h4.fw-bold {
+  color: #2c3e50;
+  font-size: 1.75rem;
+  position: relative;
+  padding-bottom: 1rem;
+}
+
+h4.fw-bold:after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80px;
+  height: 3px;
+  background: #17a2b8;
+  border-radius: 2px;
+}
+
+/* Trip Type Buttons */
+.d-flex.justify-content-center.gap-3 {
+  flex-wrap: wrap;
+}
+
+.btn-outline-info {
+  border-width: 2px;
+  font-weight: 600;
+  padding: 0.75rem 1.5rem;
+  transition: all 0.3s ease;
+}
+
+.btn-info {
+  background: #17a2b8;
+  border-color: #17a2b8;
+  box-shadow: 0 4px 15px rgba(23, 162, 184, 0.3);
+}
+
+.btn-info:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(23, 162, 184, 0.4);
+}
+
+/* Form Inputs */
+.form-control, .form-select {
+  border: 2px solid #e9ecef;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  font-size: 1rem;
+}
+
+.form-control:focus, .form-select:focus {
+  border-color: #17a2b8;
+  box-shadow: 0 0 0 0.2rem rgba(23, 162, 184, 0.15);
+}
+
+.form-control.py-3 {
+  padding: 0.75rem 1rem;
+}
+
+/* Labels */
+label {
+  color: #2c3e50;
+  margin-bottom: 0.5rem;
+  font-size: 0.95rem;
+  letter-spacing: 0.3px;
+}
+
+/* Swap Button */
+.btn-light.rounded-circle {
+  background: white;
+  border: 2px solid #e9ecef;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.btn-light.rounded-circle:hover {
+  transform: rotate(180deg) scale(1.1);
+  border-color: #17a2b8;
+  background: #f8f9fa;
+}
+
+.btn-light.rounded-circle i {
+  font-size: 1.2rem;
+}
+
+/* Passenger Counter Section */
+.border.rounded.p-3 {
+  border: 2px solid #e9ecef !important;
+  border-radius: 12px !important;
+  background: #f8f9fa;
+}
+
+.btn-outline-secondary {
+  border-width: 2px;
+  font-weight: bold;
+  padding: 0.25rem 0.75rem;
+}
+
+.btn-outline-secondary:hover {
+  background: #17a2b8;
+  border-color: #17a2b8;
+  color: white;
+}
+
+/* Multi City Cards */
+.card.p-3.mb-3.bg-light {
+  background: #f8f9fa !important;
+  border: 2px solid #e9ecef;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+}
+
+.card.p-3.mb-3.bg-light:hover {
+  border-color: #17a2b8;
+  box-shadow: 0 5px 20px rgba(23, 162, 184, 0.1);
+}
+
+/* Submit Button */
+.btn-info.w-100 {
+  background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+  border: none;
+  border-radius: 12px;
+  font-size: 1.1rem;
+  letter-spacing: 0.5px;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.btn-info.w-100:before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s ease;
+}
+
+.btn-info.w-100:hover:before {
+  left: 100%;
+}
+
+.btn-info.w-100:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 30px rgba(23, 162, 184, 0.4);
+}
+
+.btn-info.w-100:active {
+  transform: translateY(0);
+}
+
+/* Total Passengers */
+.text-end.fw-bold {
+  color: #17a2b8;
+  font-size: 1.1rem;
+}
+
+/* Responsive Design */
+
+/* Extra Large Devices (1200px and up) */
+@media (min-width: 1200px) {
+  .container {
+    max-width: 1140px;
+  }
+}
+
+/* Large Devices (992px to 1199px) */
+@media (max-width: 1199px) {
+  .container {
+    max-width: 960px;
+  }
+  
+  h4.fw-bold {
+    font-size: 1.6rem;
+  }
+}
+
+/* Medium Devices (768px to 991px) */
+@media (max-width: 991px) {
+  .container {
+    max-width: 720px;
+    margin: 1.5rem auto;
+  }
+  
+  .card.shadow-lg.p-4 {
+    padding: 2rem !important;
+  }
+  
+  h4.fw-bold {
+    font-size: 1.5rem;
+  }
+  
+  .btn {
+    padding: 0.6rem 1.2rem;
+    font-size: 0.9rem;
+  }
+  
+  .col-md-2.d-flex {
+    margin: 1rem 0;
+  }
+  
+  .btn-light.rounded-circle {
+    width: 45px !important;
+    height: 45px !important;
+  }
+  
+  .btn-light.rounded-circle i {
+    font-size: 1rem;
+  }
+  
+  /* Stack columns in multi-city */
+  .row.g-3 .col-md-4,
+  .row.g-3 .col-md-6 {
+    margin-bottom: 1rem;
+  }
+}
+
+/* Small Devices (576px to 767px) */
+@media (max-width: 767px) {
+  .container {
+    max-width: 540px;
+    margin: 1rem auto;
+  }
+  
+  .card.shadow-lg.p-4 {
+    padding: 1.5rem !important;
+  }
+  
+  h4.fw-bold {
+    font-size: 1.4rem;
+    padding-bottom: 0.75rem;
+  }
+  
+  h4.fw-bold:after {
+    width: 60px;
+    height: 2px;
+  }
+  
+  .d-flex.justify-content-center.gap-3 {
+    gap: 0.5rem !important;
+  }
+  
+  .btn {
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+    width: calc(33.33% - 0.5rem);
+  }
+  
+  /* Passenger section stack */
+  .col-md-6 {
+    margin-bottom: 1.5rem;
+  }
+  
+  .col-md-6:last-child {
+    margin-bottom: 0;
+  }
+  
+  /* Adjust font sizes */
+  label {
+    font-size: 0.9rem;
+  }
+  
+  .form-control.py-3 {
+    padding: 0.6rem 0.875rem;
+    font-size: 0.95rem;
+  }
+  
+  /* Passenger counter */
+  .border.rounded.p-3 {
+    padding: 1rem !important;
+  }
+  
+  .d-flex.justify-content-between.align-items-center {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  
+  .text-muted.small {
+    font-size: 0.75rem;
+  }
+  
+  .btn-outline-secondary.btn-sm {
+    padding: 0.2rem 0.5rem;
+    font-size: 0.85rem;
+  }
+  
+  .fw-bold {
+    font-size: 0.9rem;
+  }
+  
+  .text-end.fw-bold {
+    font-size: 1rem;
+  }
+}
+
+/* Extra Small Devices (less than 576px) */
+@media (max-width: 575px) {
+  .container {
+    margin: 0.5rem auto;
+  }
+  
+  .card.shadow-lg.p-4 {
+    padding: 1rem !important;
+    border-radius: 16px !important;
+  }
+  
+  h4.fw-bold {
+    font-size: 1.2rem;
+    padding-bottom: 0.5rem;
+  }
+  
+  .d-flex.justify-content-center.gap-3 {
+    flex-direction: column;
+    gap: 0.5rem !important;
+  }
+  
+  .btn {
+    width: 100%;
+    padding: 0.6rem;
+    font-size: 0.9rem;
+  }
+  
+  /* Stack form elements */
+  .row.g-3 .col-md-5,
+  .row.g-3 .col-md-6 {
+    margin-bottom: 1rem;
+  }
+  
+  /* Swap button adjustment */
+  .col-md-2.d-flex {
+    margin: 0.5rem 0;
+  }
+  
+  .btn-light.rounded-circle {
+    width: 40px !important;
+    height: 40px !important;
+  }
+  
+  .btn-light.rounded-circle i {
+    font-size: 0.9rem;
+  }
+  
+  /* Multi city cards */
+  .card.p-3.mb-3.bg-light {
+    padding: 1rem !important;
+  }
+  
+  h6.fw-bold {
+    font-size: 0.95rem;
+    margin-bottom: 1rem;
+  }
+  
+  /* Passenger counter */
+  .border.rounded.p-3 {
+    padding: 0.75rem !important;
+  }
+  
+  .d-flex.justify-content-between.align-items-center {
+    flex-direction: column;
+    align-items: flex-start !important;
+    gap: 0.5rem;
+    margin-bottom: 1rem !important;
+  }
+  
+  .d-flex.align-items-center.gap-2 {
+    width: 100%;
+    justify-content: space-between;
+  }
+  
+  .btn-outline-secondary.btn-sm {
+    padding: 0.3rem 0.8rem;
+    font-size: 0.9rem;
+  }
+  
+  .fw-bold {
+    font-size: 1rem;
+  }
+  
+  /* Submit button */
+  .btn-info.w-100 {
+    padding: 0.8rem !important;
+    font-size: 1rem;
+  }
+}
+
+/* Landscape Mode */
+@media (max-height: 600px) and (orientation: landscape) {
+  .container {
+    margin: 0.5rem auto;
+  }
+  
+  .card.shadow-lg.p-4 {
+    padding: 1rem !important;
+  }
+  
+  .d-flex.justify-content-center.gap-3 {
+    flex-wrap: wrap;
+  }
+  
+  .btn {
+    padding: 0.4rem 1rem;
+  }
+}
+
+/* Touch Device Optimizations */
+@media (hover: none) and (pointer: coarse) {
+  .btn,
+  .btn-light.rounded-circle,
+  .btn-outline-secondary {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  .form-control,
+  .form-select {
+    font-size: 16px; /* Prevents zoom on iOS */
+  }
+}
+
+/* Animation for swap button */
+@keyframes swapAnimation {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(180deg);
+  }
+}
+
+/* Smooth transitions */
+* {
+  transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Print Styles */
+@media print {
+  .btn,
+  .btn-light.rounded-circle,
+  .btn-outline-info,
+  .btn-info {
+    display: none;
+  }
+  
+  .card {
+    box-shadow: none;
+    border: 1px solid #ddd;
+  }
+}

@@ -16,9 +16,6 @@ const Flights = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const flightsPerPage = 5;
 
-  // const [publishedCount, setPublishedCount] = useState(0);
-  // const [draftCount, setDraftCount] = useState(0);
-
   const [newFlight, setNewFlight] = useState({
     flight_number: "",
     airline: "",
@@ -70,13 +67,6 @@ const Flights = () => {
       );
       const airportsData = await airportsRes.json();
       setAirports(airportsData);
-
-      // setPublishedCount(
-      //   flightsData.filter((f) => f.admin_status === "Publish").length,
-      // );
-      // setDraftCount(
-      //   flightsData.filter((f) => f.admin_status === "Draft").length,
-      // );
 
       setLoading(false);
     } catch (err) {
@@ -308,7 +298,7 @@ const Flights = () => {
       </div>
 
       {/* Flights Table */}
-      <div className="bg-white rounded-lg shadow">                          
+      <div className="bg-white rounded-lg shadow">
         <div className="p-4 overflow-x-auto">
           <table className="min-w-full text-sm text-left text-gray-700">
             <thead className="bg-gray-100 text-xs uppercase text-gray-600">
@@ -317,7 +307,7 @@ const Flights = () => {
                 <th className="px-4 py-3">Airline</th>
                 <th className="px-4 py-3">Route</th>
                 <th className="px-4 py-3">Departure</th>
-                <th className="px-4 py-3">Duration</th>
+                {/* <th className="px-4 py-3">Duration</th> */}
                 <th className="px-4 py-3">Price</th>
                 <th className="px-4 py-3">Seats</th>
                 <th className="px-4 py-3">Status</th>
@@ -357,9 +347,9 @@ const Flights = () => {
                       </div>
                     </td>
 
-                    <td className="px-4 py-3 font-medium">
+                    {/* <td className="px-4 py-3 font-medium">
                       {Math.floor(row.duration / 60)}h {row.duration % 60}m
-                    </td>
+                    </td> */}
 
                     <td className="px-4 py-3 font-medium">${row.price}</td>
 
@@ -535,7 +525,7 @@ const Flights = () => {
             <form onSubmit={handleAddFlight}>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* Flight Number */}
-                <div>
+                {/* <div>
                   <label className="block text-sm font-medium mb-1 text-black dark:text-white">
                     Flight Number *
                   </label>
@@ -551,7 +541,7 @@ const Flights = () => {
                          border-black dark:border-white
                          outline-none"
                   />
-                </div>
+                </div> */}
 
                 {/* Airline */}
                 <div>
@@ -579,6 +569,24 @@ const Flights = () => {
                           </option>
                         ))}
                   </select>
+                </div>
+
+                {/* Aircraft Type */}
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-black dark:text-white">
+                    Aircraft Type
+                  </label>
+                  <input
+                    type="text"
+                    name="aircraft_type"
+                    value={newFlight.aircraft_type}
+                    onChange={handleNewFlightInputChange}
+                    className="w-full px-3 py-2 border rounded-md
+                         bg-white dark:bg-black
+                         text-black dark:text-white
+                         border-black dark:border-white
+                         outline-none"
+                  />
                 </div>
 
                 {/* From Airport */}
@@ -735,24 +743,6 @@ const Flights = () => {
                     onChange={handleNewFlightInputChange}
                     min="0"
                     max={newFlight.total_seats}
-                    className="w-full px-3 py-2 border rounded-md
-                         bg-white dark:bg-black
-                         text-black dark:text-white
-                         border-black dark:border-white
-                         outline-none"
-                  />
-                </div>
-
-                {/* Aircraft Type */}
-                <div>
-                  <label className="block text-sm font-medium mb-1 text-black dark:text-white">
-                    Aircraft Type
-                  </label>
-                  <input
-                    type="text"
-                    name="aircraft_type"
-                    value={newFlight.aircraft_type}
-                    onChange={handleNewFlightInputChange}
                     className="w-full px-3 py-2 border rounded-md
                          bg-white dark:bg-black
                          text-black dark:text-white

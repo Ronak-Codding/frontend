@@ -301,7 +301,7 @@ const FlightDetails = () => {
                             {flight.airline?.airline_name}
                           </h5>
                           <p className="text-muted mb-0">
-                            {flight.flight_number} • {flight.aircraft}
+                            {flight.flight_number} • {flight.aircraft_type}
                           </p>
                         </div>
                       </div>
@@ -457,7 +457,7 @@ const FlightDetails = () => {
                                     Aircraft:
                                   </td>
                                   <td className="fw-semibold border-0">
-                                    {flight.aircraft}
+                                    {flight.aircraft_type}
                                   </td>
                                 </tr>
                                 <tr>

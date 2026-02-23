@@ -149,9 +149,21 @@ const Sidebar = () => {
       >
         {/* ========== SIDEBAR ========== */}
         <div id="user-sidebar">
-          <div className="user-sidebar-heading text-center py-3">
+          {/* <div className="user-sidebar-heading text-center py-3">
             <h2>User Panel</h2>
-            {/* <small className="text-muted">Management System</small> */}
+            <small className="text-muted">Management System</small>
+          </div> */}
+          <div className="user-sidebar-profile">
+            <div className="sidebar-profile-avatar">
+              {currentUser?.fullname
+                ? currentUser.fullname.charAt(0).toUpperCase()
+                : "U"}
+            </div>
+
+            <div className="sidebar-profile-info">
+              <h6>{currentUser?.fullname || "User Name"}</h6>
+              <span>{currentUser?.email || "user@gmail.com"}</span>
+            </div>
           </div>
 
           <div className="user-list-group list-group-flush">

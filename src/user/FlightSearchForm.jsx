@@ -2,8 +2,7 @@ import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import AirportAutocomplete from "../components/AirportAutocomplete";
-import "./FlightSearch.css"; 
-
+import "./FlightSearch.css";
 
 const FlightSearch = () => {
   const navigate = useNavigate();
@@ -158,7 +157,11 @@ const FlightSearch = () => {
           ))}
         </div>
 
-        <form onSubmit={handleSubmit} noValidate>
+        <form
+          onSubmit={handleSubmit}
+          noValidate
+          className={validated ? "was-validated" : ""}
+        >
           {/* Round Trip & One Way */}
           {(tripType === "roundtrip" || tripType === "oneway") && (
             <div className="row g-3 mb-4">
@@ -263,7 +266,7 @@ const FlightSearch = () => {
                     <label className="fw-semibold">Depart</label>
                     <input
                       type="date"
-                      className="form-control py-3 mt-2"
+                      className="form-control py-3"
                       value={flight.departDate}
                       onChange={(e) =>
                         updateMultiCityDate(flight.id, e.target.value)

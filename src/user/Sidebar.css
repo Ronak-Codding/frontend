@@ -73,7 +73,47 @@ body {
   display: flex;
   flex-direction: column;
 }
+/* ===== Sidebar Profile Section ===== */
 
+.user-sidebar-profile {
+  padding: 20px 15px;
+  text-align: center;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.sidebar-profile-avatar {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #4e73df, #224abe);
+  color: white;
+  font-size: 28px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+}
+
+.sidebar-profile-info h6 {
+  margin: 0;
+  font-weight: 600;
+  font-size: 15px;
+}
+
+.sidebar-profile-info span {
+  font-size: 12px;
+  color: #6c757d;
+}
+
+.user-dark .user-sidebar-profile {
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.user-dark .sidebar-profile-info span {
+  color: #ccc;
+}
 /* Sidebar header */
 .user-sidebar-heading {
   padding: 1.5rem 1rem;

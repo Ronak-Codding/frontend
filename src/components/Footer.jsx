@@ -87,7 +87,7 @@ const Footer = () => {
               <h3>Services</h3>
               <ul>
                 <li>
-                  <button>Flight Booking</button>
+                  <button onClick={() => navigate("/user/flights")}>Flight Booking</button>
                 </li>
                 <li>
                   <button>Flight Status</button>

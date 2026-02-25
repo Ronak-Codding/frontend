@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { NavLink, Outlet, useLocation,  useNavigate } from "react-router-dom";
+import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useTheme } from "../components/ThemeContext";
 import "./Admin.css";
 
@@ -9,7 +9,7 @@ const Admin = () => {
   //   const saved = localStorage.getItem("admin-dark-mode");
   //   return saved ? JSON.parse(saved) : false;
   // });
-  const { darkMode, setDarkMode } = useTheme(); 
+  const { darkMode, setDarkMode } = useTheme();
   const [unreadCount, setUnreadCount] = useState(3);
   const [profileOpen, setProfileOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
@@ -69,40 +69,40 @@ const Admin = () => {
     }
   };
 
- const handleSearch = (e) => {
-  e.preventDefault();
+  const handleSearch = (e) => {
+    e.preventDefault();
 
-  const query = searchQuery.toLowerCase().trim();
-  if (!query) return;
+    const query = searchQuery.toLowerCase().trim();
+    if (!query) return;
 
-  setLoading(true);
+    setLoading(true);
 
-  const routes = [
-    { keywords: ["user", "users"], path: "/admin/users" },
-    { keywords: ["flight", "flights"], path: "/admin/flights" },
-    { keywords: ["booking", "bookings"], path: "/admin/bookings" },
-    { keywords: ["passenger", "passengers"], path: "/admin/passengers" },
-    { keywords: ["payment", "payments"], path: "/admin/payments" },
-    { keywords: ["airline", "airlines"], path: "/admin/airlines" },
-    { keywords: ["airport", "airports"], path: "/admin/airports" },
-    { keywords: ["contact", "message", "messages"], path: "/admin/contacts" },
-  ];
+    const routes = [
+      { keywords: ["user", "users"], path: "/admin/users" },
+      { keywords: ["flight", "flights"], path: "/admin/flights" },
+      { keywords: ["booking", "bookings"], path: "/admin/bookings" },
+      { keywords: ["passenger", "passengers"], path: "/admin/passengers" },
+      { keywords: ["payment", "payments"], path: "/admin/payments" },
+      { keywords: ["airline", "airlines"], path: "/admin/airlines" },
+      { keywords: ["airport", "airports"], path: "/admin/airports" },
+      { keywords: ["contact", "message", "messages"], path: "/admin/contacts" },
+    ];
 
-  const matchedRoute = routes.find((route) =>
-    route.keywords.some((key) => query.includes(key))
-  );
+    const matchedRoute = routes.find((route) =>
+      route.keywords.some((key) => query.includes(key)),
+    );
 
-  setTimeout(() => {
-    setLoading(false);
-    setSearchQuery("");
+    setTimeout(() => {
+      setLoading(false);
+      setSearchQuery("");
 
-    if (matchedRoute) {
-      navigate(matchedRoute.path);
-    } else {
-      alert("No matching page found. Please try a different search term.");
-    }
-  }, 400);
-};
+      if (matchedRoute) {
+        navigate(matchedRoute.path);
+      } else {
+        alert("No matching page found. Please try a different search term.");
+      }
+    }, 400);
+  };
 
   const clearSearch = () => {
     setSearchQuery("");
@@ -175,13 +175,6 @@ const Admin = () => {
               </span>
             </NavLink>
 
-            <NavLink to="/admin/contacts" className="list-group-item">
-              <i className="fas fa-envelope"></i>Contact Messages
-              {unreadCount > 0 && (
-                <span className="badge bg-danger ms-auto">{unreadCount}</span>
-              )}
-            </NavLink>
-
             <NavLink to="/admin/airlines" className="list-group-item">
               <i className="fas fa-plane-departure"></i>Airlines
             </NavLink>
@@ -189,7 +182,7 @@ const Admin = () => {
             <NavLink to="/admin/airports" className="list-group-item">
               <i className="fas fa-map-marker-alt"></i>Airports
             </NavLink>
-            
+
             <NavLink to="/admin/flights" className="list-group-item">
               <i className="fas fa-plane"></i> Flights
             </NavLink>
@@ -209,9 +202,16 @@ const Admin = () => {
               <i className="fas fa-money-bill-wave"></i>Payments
             </NavLink>
 
-            <NavLink to="/admin/reports" className="list-group-item">
-              <i className="fas fa-chart-bar"></i>Reports & Analytics
+            <NavLink to="/admin/contacts" className="list-group-item">
+              <i className="fas fa-envelope"></i>Contact Messages
+              {unreadCount > 0 && (
+                <span className="badge bg-danger ms-auto">{unreadCount}</span>
+              )}
             </NavLink>
+
+            {/* <NavLink to="/admin/reports" className="list-group-item">
+              <i className="fas fa-chart-bar"></i>Reports & Analytics
+            </NavLink> */}
 
             <NavLink to="/admin/settings" className="list-group-item">
               <i className="fas fa-cog"></i>Settings

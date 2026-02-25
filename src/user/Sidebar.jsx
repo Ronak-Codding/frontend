@@ -149,11 +149,11 @@ const Sidebar = () => {
       >
         {/* ========== SIDEBAR ========== */}
         <div id="user-sidebar">
-          {/* <div className="user-sidebar-heading text-center py-3">
+          <div className="user-sidebar-heading text-center py-3">
             <h2>User Panel</h2>
-            <small className="text-muted">Management System</small>
-          </div> */}
-          <div className="user-sidebar-profile">
+            {/* <small className="text-muted">Management System</small> */}
+          </div>
+          {/* <div className="user-sidebar-profile">
             <div className="sidebar-profile-avatar">
               {currentUser?.fullname
                 ? currentUser.fullname.charAt(0).toUpperCase()
@@ -164,7 +164,7 @@ const Sidebar = () => {
               <h6>{currentUser?.fullname || "User Name"}</h6>
               <span>{currentUser?.email || "user@gmail.com"}</span>
             </div>
-          </div>
+          </div> */}
 
           <div className="user-list-group list-group-flush">
             <NavLink to="/user/dashboard" className="user-list-group-item">
@@ -178,9 +178,12 @@ const Sidebar = () => {
               <i className="fas fa-plane"></i> Flight details
             </NavLink>
 
-            <NavLink to="/user/passenger" className="user-list-group-item">
+            {/* <NavLink to="/user/passenger" className="user-list-group-item">
               <i className="fas fa-user"></i> Passenger
-            </NavLink>
+            </NavLink> */}
+             {/* <NavLink to="/user/profile" className="user-list-group-item">
+              <i className="fas fa-user"></i> Profile
+            </NavLink> */}
             {/* <NavLink to="/user/seat-selection" className="user-list-group-item">
                  <i className="fas fa-chair"></i> Seat Selection
             </NavLink> */}
@@ -188,9 +191,9 @@ const Sidebar = () => {
               <i className="fas fa-ticket-alt"></i> Booking
             </NavLink>
 
-            <NavLink to="/user/payments" className="user-list-group-item">
+            {/* <NavLink to="/user/payments" className="user-list-group-item">
               <i className="fas fa-money-bill-wave"></i>Payment
-            </NavLink>
+            </NavLink> */}
 
             <NavLink to="/user/settings" className="user-list-group-item">
               <i className="fas fa-cog"></i>Setting

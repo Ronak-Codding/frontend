@@ -141,7 +141,7 @@ const FlightSearch = () => {
 
         {/* Trip Type Buttons */}
         <div className="d-flex justify-content-center gap-3 mb-4">
-          {["roundtrip", "oneway", "multicity"].map((type) => (
+          {["oneway", "roundtrip", "multicity"].map((type) => (
             <button
               key={type}
               className={`btn ${
@@ -150,8 +150,8 @@ const FlightSearch = () => {
               onClick={() => setTripType(type)}
               type="button"
             >
-              {type === "roundtrip" && "ROUND TRIP"}
               {type === "oneway" && "ONE WAY"}
+              {type === "roundtrip" && "ROUND TRIP"}
               {type === "multicity" && "MULTI CITY"}
             </button>
           ))}
@@ -163,7 +163,7 @@ const FlightSearch = () => {
           className={validated ? "was-validated" : ""}
         >
           {/* Round Trip & One Way */}
-          {(tripType === "roundtrip" || tripType === "oneway") && (
+          {(tripType === "oneway"|| tripType === "roundtrip") && (
             <div className="row g-3 mb-4">
               <div className="col-md-5">
                 <AirportAutocomplete

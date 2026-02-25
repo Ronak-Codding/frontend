@@ -144,7 +144,7 @@ const Register = ({ onRegister }) => {
 
       // Redirect to dashboard after 2 seconds
       setTimeout(() => {
-        navigate("/dashboard");
+        navigate("/login");
       }, 2000);
     } catch (error) {
       setErrors({ apiError: "Server not responding" });
@@ -344,7 +344,7 @@ const Register = ({ onRegister }) => {
                       disabled={isLoading}
                     />
                     <span>
-                      I agree to the <Link to="/terms">Terms & Conditions</Link>{" "}
+                      I agree to the <Link to="/terms">Terms & Conditions</Link>
                       and <Link to="/privacy">Privacy Policy</Link>
                     </span>
                   </label>

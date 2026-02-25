@@ -351,7 +351,13 @@ const Flights = () => {
                       {Math.floor(row.duration / 60)}h {row.duration % 60}m
                     </td> */}
 
-                    <td className="px-4 py-3 font-medium">${row.price}</td>
+                    <td className="px-4 py-3 font-medium">
+                      {new Intl.NumberFormat("en-IN", {
+                        style: "currency",
+                        currency: "INR",
+                        maximumFractionDigits: 0,
+                      }).format(row.price)}
+                    </td>
 
                     <td className="px-4 py-3">
                       <span
@@ -694,7 +700,7 @@ const Flights = () => {
                 {/* Price */}
                 <div>
                   <label className="block text-sm font-medium mb-1 text-black dark:text-white">
-                    Price ($) *
+                    Price (₹) *
                   </label>
                   <input
                     type="number"
@@ -921,7 +927,7 @@ const Flights = () => {
                 {/* Price */}
                 <div>
                   <label className="block text-sm font-medium mb-1 text-black dark:text-white">
-                    Price ($)
+                    Price (₹) 
                   </label>
                   <input
                     type="number"

@@ -26,16 +26,14 @@ import Passengers from "./admin/Passengers";
 import Payment from "./admin/Payment";
 
 import UserRoute from "./components/UserRoute";
-// import User from "./user/User";
+// import UserProfile from "./user/UserProfile";
 import Dashboard from "./user/Dashboard";
 import FlightSearch from "./user/FlightSearchForm";
 import Sidebar from "./user/Sidebar";
 
 import FlightDetails from "./user/FlightDetails";
-// import PassengerDetails from "./user/Passenger";
-// import SeatSelection from "./user/SeatSelection";
-// import PaymentGateway from "./user/PaymentGateway";
-// import BookingConfirmation from "./user/BookingConfirmation";
+import Booking from "./user/Booking";
+
 
 function App() {
   return (
@@ -87,12 +85,10 @@ function App() {
         >
           <Route index element={<Navigate to="dashboard" replace />} />
           <Route path="dashboard" element={<Dashboard />} />
+          {/* <Route path="profile" element={<UserProfile />} /> */}
           <Route path="flights" element={<FlightSearch />} />
           <Route path="flight-details" element={<FlightDetails />} />
-          {/* <Route path="passenger" element={<PassengerDetails />} />
-          <Route path="seat-selection" element={<SeatSelection />} />
-          <Route path="payments" element={<PaymentGateway />} />
-          <Route path="bookings" element={<BookingConfirmation/>}/> */}
+          <Route path="bookings" element={<Booking/>}/>
         </Route>
 
         {/* Fallback */}

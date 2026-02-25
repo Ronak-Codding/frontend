@@ -20,6 +20,11 @@ const AdminLogin = () => {
       const data = await res.json();
       if (!res.ok) return alert(data.message);
 
+      //  CLEAR USER SESSION FIRST
+      localStorage.removeItem("usertoken");
+      localStorage.removeItem("user");
+
+      // SET ADMIN SESSION
       localStorage.setItem("adminToken", data.token);
       localStorage.setItem(
         "admin",

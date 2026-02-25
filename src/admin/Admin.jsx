@@ -5,10 +5,6 @@ import "./Admin.css";
 
 const Admin = () => {
   const [toggle, setToggle] = useState(false);
-  // const [darkMode, setDarkMode] = useState(() => {
-  //   const saved = localStorage.getItem("admin-dark-mode");
-  //   return saved ? JSON.parse(saved) : false;
-  // });
   const { darkMode, setDarkMode } = useTheme();
   const [unreadCount, setUnreadCount] = useState(3);
   const [profileOpen, setProfileOpen] = useState(false);
@@ -20,17 +16,14 @@ const Admin = () => {
   const [loading, setLoading] = useState(false);
   const location = useLocation();
 
-  // Initialize theme
-  // useEffect(() => {
-  //   if (darkMode) {
-  //     document.body.classList.add("dark");
-  //     document.body.classList.remove("light");
-  //   } else {
-  //     document.body.classList.add("light");
-  //     document.body.classList.remove("dark");
-  //   }
-  //   localStorage.setItem("admin-dark-mode", JSON.stringify(darkMode));
-  // }, [darkMode]);
+  const [currentUser, setCurrentUser] = useState(null);
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem("admin");
+    if (storedUser) {
+      setCurrentUser(JSON.parse(storedUser));
+    }
+  }, []);
 
   // Fetch initial data
   useEffect(() => {
@@ -385,22 +378,31 @@ const Admin = () => {
                   setNotificationsOpen(false);
                 }}
               >
-                <div className="admin-profile-img">A</div>
-                <div className="admin-profile-info">
+                <div className="admin-profile-img">
+                  {currentUser?.email
+                    ? currentUser.email.charAt(0).toUpperCase()
+                    : "A"}
+                </div>
+                {/* <div className="admin-profile-info">
                   <span className="admin-profile-name">Administrator</span>
                   <span className="admin-profile-role">Super Admin</span>
                 </div>
-                <i className="fas fa-chevron-down admin-profile-arrow"></i>
+                <i className="fas fa-chevron-down admin-profile-arrow"></i> */}
               </div>
 
               {/* Profile Dropdown */}
               {profileOpen && (
                 <div className="admin-profile-dropdown-right">
                   <div className="dropdown-header">
-                    <div className="admin-profile-img">A</div>
+                    <div className="admin-profile-img">
+                     {currentUser?.email
+                    ? currentUser.email.charAt(0).toUpperCase()
+                    : "A"}
+                    </div>
                     <div className="dropdown-header-info">
                       <h6>Administrator</h6>
-                      <span>admin@flightmanagement.com</span>
+                        {/* <h6>{currentUser?.email || "Admin"}</h6> */}
+                      <span>{currentUser?.email || "user@gmail.com"}</span>
                     </div>
                   </div>
                   <NavLink

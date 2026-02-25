@@ -211,13 +211,13 @@ const LandingPage = () => {
     setCurrentIndex(index);
   };
 
-  const goToPrevious = () => {
-    setCurrentIndex((prev) => (prev - 1 + slides.length) % slides.length);
-  };
+  // const goToPrevious = () => {
+  //   setCurrentIndex((prev) => (prev - 1 + slides.length) % slides.length);
+  // };
 
-  const goToNext = () => {
-    setCurrentIndex((prev) => (prev + 1) % slides.length);
-  };
+  // const goToNext = () => {
+  //   setCurrentIndex((prev) => (prev + 1) % slides.length);
+  // };
 
   const filteredDeals = filterAndSortDeals();
   const totalPages = Math.ceil(filteredDeals.length / itemsPerPage);
@@ -283,7 +283,7 @@ const LandingPage = () => {
             </div>
           </div>
           {/* Left/Right Navigation Arrows */}
-          <button
+          {/* <button
             onClick={goToPrevious}
             className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-opacity-30 hover:bg-opacity-50 text-white p-2 rounded-full z-20 hidden sm:block"
             aria-label="Previous slide"
@@ -322,7 +322,7 @@ const LandingPage = () => {
                 d="M9 5l7 7-7 7"
               />
             </svg>
-          </button>
+          </button> */}
         </section>
 
         {/* ================= FLIGHT DEALS / OFFERS SECTION WITH FUNCTIONALITIES ================= */}

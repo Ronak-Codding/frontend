@@ -21,8 +21,13 @@ const Login = () => {
       if (!res.ok) return alert(data.message);
 
       localStorage.setItem("usertoken", data.token);
-      localStorage.setItem("user", JSON.stringify(data.user));
-      localStorage.setItem("role", "user"); //  ADD THIS LINE
+      localStorage.setItem(
+        "user",
+        JSON.stringify({
+          ...data.user,
+          role: "user", // ADD THIS
+        }),
+      );
 
       navigate("/user");
     } catch (err) {
@@ -32,11 +37,12 @@ const Login = () => {
 
   return (
     <div className="login-container">
-      <form className="login-card" onSubmit={handleLogin}>
+      <form className="login-card"  autoComplete= "on" onSubmit={handleLogin}>
         <h2>Sign In</h2>
 
         <input
           type="email"
+          autoComplete="email"
           placeholder="Email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}

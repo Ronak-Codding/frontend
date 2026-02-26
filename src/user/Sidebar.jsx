@@ -25,29 +25,7 @@ const Sidebar = () => {
     }
   }, []);
   useEffect(() => {
-    const demoNotifications = [
-      {
-        id: 1,
-        message: "Your flight booking is confirmed.",
-        time: "2 min ago",
-        type: "success",
-        read: false,
-      },
-      {
-        id: 2,
-        message: "New payment received.",
-        time: "10 min ago",
-        type: "info",
-        read: false,
-      },
-      {
-        id: 3,
-        message: "Your booking was cancelled.",
-        time: "1 hour ago",
-        type: "warning",
-        read: true,
-      },
-    ];
+    const demoNotifications = [];
 
     setNotifications(demoNotifications);
   }, []);
@@ -174,30 +152,30 @@ const Sidebar = () => {
             <NavLink to="/user/flights" className="user-list-group-item">
               <i className="fas fa-plane"></i> Flight
             </NavLink>
-            <NavLink to="/user/flight-details" className="user-list-group-item">
+            {/* <NavLink to="/user/flight-details" className="user-list-group-item">
               <i className="fas fa-plane"></i> Flight details
-            </NavLink>
+            </NavLink> */}
 
             {/* <NavLink to="/user/passenger" className="user-list-group-item">
               <i className="fas fa-user"></i> Passenger
             </NavLink> */}
-             {/* <NavLink to="/user/profile" className="user-list-group-item">
+            {/* <NavLink to="/user/profile" className="user-list-group-item">
               <i className="fas fa-user"></i> Profile
             </NavLink> */}
             {/* <NavLink to="/user/seat-selection" className="user-list-group-item">
                  <i className="fas fa-chair"></i> Seat Selection
             </NavLink> */}
-            <NavLink to="/user/bookings" className="user-list-group-item">
+            {/* <NavLink to="/user/bookings" className="user-list-group-item">
               <i className="fas fa-ticket-alt"></i> Booking
-            </NavLink>
+            </NavLink> */}
 
             {/* <NavLink to="/user/payments" className="user-list-group-item">
               <i className="fas fa-money-bill-wave"></i>Payment
             </NavLink> */}
 
-            <NavLink to="/user/settings" className="user-list-group-item">
+            {/* <NavLink to="/user/settings" className="user-list-group-item">
               <i className="fas fa-cog"></i>Setting
-            </NavLink>
+            </NavLink> */}
 
             <div className="mt-auto p-3 border-top">
               <div className="d-flex align-items-center justify-content-between mb-2">

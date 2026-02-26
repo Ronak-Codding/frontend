@@ -26,13 +26,12 @@ import Passengers from "./admin/Passengers";
 import Payment from "./admin/Payment";
 
 import UserRoute from "./components/UserRoute";
-// import UserProfile from "./user/UserProfile";
 import Dashboard from "./user/Dashboard";
 import FlightSearch from "./user/FlightSearchForm";
 import Sidebar from "./user/Sidebar";
 
 import FlightDetails from "./user/FlightDetails";
-import Booking from "./user/Booking";
+
 
 
 function App() {
@@ -85,10 +84,8 @@ function App() {
         >
           <Route index element={<Navigate to="dashboard" replace />} />
           <Route path="dashboard" element={<Dashboard />} />
-          {/* <Route path="profile" element={<UserProfile />} /> */}
           <Route path="flights" element={<FlightSearch />} />
           <Route path="flight-details" element={<FlightDetails />} />
-          <Route path="bookings" element={<Booking/>}/>
         </Route>
 
         {/* Fallback */}

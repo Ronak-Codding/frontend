@@ -19,9 +19,15 @@ const LandingPage = () => {
       url: "https://images.unsplash.com/photo-1506012787146-f92b2d7d6d96?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2069&q=80",
       alt: "Beautiful beach destination",
     },
+    {
+      url: "https://images.unsplash.com/photo-1517479149777-5f3b1511d5ad?auto=format&fit=crop&w=2070&q=80",
+      alt: "Passenger airplane taking off",
+    },
+    {
+      url: "https://images.unsplash.com/photo-1474302770737-173ee21bab63?auto=format&fit=crop&w=2070&q=80",
+      alt: "Jet airplane in clear sky",
+    },
   ];
-
-  
 
   const [currentIndex, setCurrentIndex] = useState(0);
 
@@ -34,7 +40,6 @@ const LandingPage = () => {
     return () => clearInterval(interval);
   }, [slides.length]);
 
-
   const goToSlide = (index) => {
     setCurrentIndex(index);
   };
@@ -46,7 +51,6 @@ const LandingPage = () => {
   // const goToNext = () => {
   //   setCurrentIndex((prev) => (prev + 1) % slides.length);
   // };
-
 
   return (
     <>
@@ -86,7 +90,10 @@ const LandingPage = () => {
               exceptional service.
             </p>
 
-            <button className="bg-gradient-to-r from-sky-500 to-indigo-600 hover:scale-105 transition duration-300 text-white font-semibold px-8 py-3 rounded-full shadow-xl" onClick={() => navigate("/user/flights")}>
+            <button
+              className="bg-gradient-to-r from-sky-500 to-indigo-600 hover:scale-105 transition duration-300 text-white font-semibold px-8 py-3 rounded-full shadow-xl"
+              onClick={() => navigate("/user/flights")}
+            >
               Search Flights
             </button>
           </div>
@@ -148,7 +155,7 @@ const LandingPage = () => {
         </section>
 
         {/* ================= FLIGHT DEALS / OFFERS SECTION WITH FUNCTIONALITIES ================= */}
-        
+
         <Footer />
       </div>
     </>

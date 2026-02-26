@@ -40,12 +40,12 @@ const About = () => {
 ];
 
 
-  const stats = [
-    { value: "500K+", label: "Happy Customers" },
-    { value: "100+", label: "Daily Flights" },
-    { value: "50+", label: "Destinations" },
-    { value: "15", label: "Years of Service" },
-  ];
+  // const stats = [
+  //   { value: "500K+", label: "Happy Customers" },
+  //   { value: "100+", label: "Daily Flights" },
+  //   { value: "50+", label: "Destinations" },
+  //   { value: "15", label: "Years of Service" },
+  // ];
 
   const values = [
     {
@@ -119,7 +119,7 @@ const About = () => {
         </section>
 
         {/* Stats Section */}
-        <section className="about-stats">
+        {/* <section className="about-stats">
           <div className="about-container">
             <div className="stats-grid">
               {stats.map((stat, index) => (
@@ -130,7 +130,7 @@ const About = () => {
               ))}
             </div>
           </div>
-        </section>
+        </section> */}
 
         {/* Our Story */}
         <section className="about-story">
@@ -238,7 +238,7 @@ const About = () => {
         </section>
 
         {/* CTA Section */}
-        <section className="about-cta">
+        {/* <section className="about-cta">
           <div className="about-container">
             <h2 className="cta-title">Ready to Fly With Us?</h2>
             <p className="cta-text">
@@ -248,7 +248,7 @@ const About = () => {
               Book Your Flight <i className="fas fa-arrow-right"></i>
             </button>
           </div>
-        </section>
+        </section> */}
       </div>
       <Footer></Footer>
     </>

@@ -206,9 +206,9 @@ const Admin = () => {
               <i className="fas fa-chart-bar"></i>Reports & Analytics
             </NavLink> */}
 
-            <NavLink to="/admin/settings" className="list-group-item">
+            {/* <NavLink to="/admin/settings" className="list-group-item">
               <i className="fas fa-cog"></i>Settings
-            </NavLink>
+            </NavLink> */}
 
             <div className="mt-auto p-3 border-top">
               <div className="d-flex align-items-center justify-content-between mb-2">

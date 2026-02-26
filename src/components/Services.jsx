@@ -1,102 +1,43 @@
-import React, { useState } from "react";
+// import React, { useState } from "react";
 import "./Services.css";
 import Footer from "./Footer";
 import Header from "./Header";
 
 const Services = () => {
-  const [activeTab, setActiveTab] = useState("flights");
-  const [searchForm, setSearchForm] = useState({
-    from: "",
-    to: "",
-    departDate: "",
-    returnDate: "",
-    passengers: 1,
-    class: "economy",
-  });
-
-  const handleSearchChange = (e) => {
-    setSearchForm({
-      ...searchForm,
-      [e.target.name]: e.target.value,
-    });
-  };
-
-  const handleSearch = (e) => {
-    e.preventDefault();
-    console.log("Searching:", searchForm);
-    // Implement search logic here
-  };
-
-  // const services = [
-  //   {
-  //     id: 1,
-  //     icon: "fas fa-plane-departure",
-  //     title: "Flight Booking",
-  //     description:
-  //       "Book domestic and international flights at the best prices with our easy-to-use platform.",
-  //     features: [
-  //       "24/7 Customer Support",
-  //       "Best Price Guarantee",
-  //       "Flexible Cancellation",
-  //     ],
-  //   },
-  //   {
-  //     id: 2,
-  //     icon: "fas fa-hotel",
-  //     title: "Hotel Reservations",
-  //     description:
-  //       "Find and book the perfect accommodation for your stay with our extensive hotel network.",
-  //     features: [
-  //       "Verified Reviews",
-  //       "Free Cancellation",
-  //       "Best Rate Guarantee",
-  //     ],
-  //   },
-  //   {
-  //     id: 3,
-  //     icon: "fas fa-car",
-  //     title: "Car Rentals",
-  //     description:
-  //       "Rent cars from top providers at competitive rates for a comfortable journey.",
-  //     features: [
-  //       "No Hidden Fees",
-  //       "Free Modifications",
-  //       "24/7 Roadside Assistance",
-  //     ],
-  //   },
-  //   {
-  //     id: 4,
-  //     icon: "fas fa-umbrella-beach",
-  //     title: "Holiday Packages",
-  //     description:
-  //       "Explore our curated holiday packages including flights, hotels, and activities.",
-  //     features: [
-  //       "Customizable Itineraries",
-  //       "Local Experiences",
-  //       "Expert Guidance",
-  //     ],
-  //   },
-  //   {
-  //     id: 5,
-  //     icon: "fas fa-shield-alt",
-  //     title: "Travel Insurance",
-  //     description:
-  //       "Protect your journey with comprehensive travel insurance coverage.",
-  //     features: [
-  //       "Medical Coverage",
-  //       "Trip Cancellation",
-  //       "Lost Baggage Protection",
-  //     ],
-  //   },
-  //   {
-  //     id: 6,
-  //     icon: "fas fa-concierge-bell",
-  //     title: "Airport Services",
-  //     description:
-  //       "Enjoy premium airport services including lounges, transfers, and meet & assist.",
-  //     features: ["VIP Lounge Access", "Fast Track", "Personal Assistant"],
-  //   },
-  // ];
+  const services = [
+    {
+      id: 1,
+      icon: "fas fa-plane-departure",
+      title: "Flight Booking",
+      description:
+        "Book domestic and international flights at the best prices with our easy-to-use platform.",
+      features: [
+        "24/7 Customer Support",
+        "Best Price Guarantee",
+        "Flexible Cancellation",
+      ],
+    },
+    {
+      id: 2,
+      icon: "fas fa-shield-alt",
+      title: "Travel Insurance",
+      description:
+        "Protect your journey with comprehensive travel insurance coverage.",
+      features: [
+        "Medical Coverage",
+        "Trip Cancellation",
+        "Lost Baggage Protection",
+      ],
+    },
+    {
+      id: 3,
+      icon: "fas fa-concierge-bell",
+      title: "Airport Services",
+      description:
+        "Enjoy premium airport services including lounges, transfers, and meet & assist.",
+      features: ["VIP Lounge Access", "Fast Track", "Personal Assistant"],
+    },
+  ];
 
   const popularDestinations = [
     {
@@ -180,7 +121,6 @@ const Services = () => {
                 covered.
               </p>
             </div>
-
           </div>
         </section>
 
@@ -200,6 +140,39 @@ const Services = () => {
                     <p>{dest.code}</p>
                     <button className="destination-btn">Explore</button>
                   </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Services Section */}
+        <section className="services-section">
+          <div className="services-container">
+            <div className="section-header">
+              <h2>Our Premium Services</h2>
+              <p>Everything you need for a seamless travel experience</p>
+            </div>
+
+            <div className="services-grid">
+              {services.map((service) => (
+                <div key={service.id} className="service-card">
+                  <div className="service-icon">
+                    <i className={service.icon}></i>
+                  </div>
+
+                  <h3>{service.title}</h3>
+                  <p className="service-description">{service.description}</p>
+
+                  <ul className="service-features">
+                    {service.features.map((feature, index) => (
+                      <li key={index}>
+                        <i className="fas fa-check-circle"></i> {feature}
+                      </li>
+                    ))}
+                  </ul>
+
+                  <button className="service-btn">Learn More</button>
                 </div>
               ))}
             </div>

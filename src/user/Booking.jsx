@@ -223,52 +223,33 @@ const Booking = () => {
     setIsLoading(true);
 
     try {
-      // Generate PNR
-      const pnr = generatePNR();
+      const user = JSON.parse(localStorage.getItem("user"));
 
-      // Prepare booking data
-      const bookingPayload = {
-        pnr,
-        flight: selectedFlight,
-        passengers,
-        contact: contactDetails,
-        totalAmount: calculateTotal(),
-        bookingDate: new Date().toISOString(),
-        status: "confirmed",
-        paymentStatus: "pending",
-      };
-
-      // In a real app, you would send this to your backend
-      // const response = await fetch("http://localhost:5000/api/bookings", {
-      //   method: "POST",
-      //   headers: {
-      //     "Content-Type": "application/json",
-      //     "Authorization": `Bearer ${localStorage.getItem("usertoken")}`
-      //   },
-      //   body: JSON.stringify(bookingPayload)
-      // });
-
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-
-      setBookingData({
-        ...bookingData,
-        pnr,
-        status: "confirmed",
-        totalAmount: calculateTotal(),
+      const response = await fetch("http://localhost:5000/api/bookings", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("usertoken")}`,
+        },
+        body: JSON.stringify({
+          user_id: user._id,
+          flight_id: selectedFlight._id,
+          total_passengers: passengers.length,
+          total_amount: calculateTotal(),
+        }),
       });
 
-      setBookingComplete(true);
+      const data = await response.json();
 
-      // Save booking to localStorage for demo
-      const existingBookings = JSON.parse(
-        localStorage.getItem("bookings") || "[]",
-      );
-      existingBookings.push(bookingPayload);
-      localStorage.setItem("bookings", JSON.stringify(existingBookings));
+      if (!response.ok) {
+        throw new Error(data.message);
+      }
+
+      // Redirect to success page using backend booking id
+      navigate(`/user/booking-success/${data.booking._id}`);
     } catch (error) {
       console.error("Booking error:", error);
-      setErrors({ submit: "Failed to complete booking. Please try again." });
+      setErrors({ submit: error.message });
     } finally {
       setIsLoading(false);
     }
@@ -302,19 +283,21 @@ const Booking = () => {
             <div className="detail-row">
               <span>Flight:</span>
               <strong>
-                {selectedFlight.airline} - {selectedFlight.flightNumber}
+                {selectedFlight.airline?.airline_name} -{" "}
+                {selectedFlight.flight_number}
               </strong>
             </div>
             <div className="detail-row">
               <span>Route:</span>
               <strong>
-                {selectedFlight.from} → {selectedFlight.to}
+                {selectedFlight.from_airport?.city} →{" "}
+                {selectedFlight.to_airport?.city}
               </strong>
             </div>
             <div className="detail-row">
               <span>Date:</span>
               <strong>
-                {new Date(selectedFlight.departureDate).toLocaleDateString()}
+                {new Date(selectedFlight.departure_time).toLocaleDateString()}
               </strong>
             </div>
             <div className="detail-row">
@@ -759,20 +742,22 @@ const Booking = () => {
                     <div className="review-row">
                       <span>Flight:</span>
                       <strong>
-                        {selectedFlight.airline} - {selectedFlight.flightNumber}
+                        {selectedFlight.airline?.airline_name} -{" "}
+                        {selectedFlight.flight_number}
                       </strong>
                     </div>
                     <div className="review-row">
                       <span>Route:</span>
                       <strong>
-                        {selectedFlight.from} → {selectedFlight.to}
+                        {selectedFlight.from_airport?.city} →{" "}
+                        {selectedFlight.to_airport?.city}
                       </strong>
                     </div>
                     <div className="review-row">
                       <span>Departure:</span>
                       <strong>
                         {new Date(
-                          selectedFlight.departureDate,
+                          selectedFlight.departure_time,
                         ).toLocaleString()}
                       </strong>
                     </div>
@@ -905,8 +890,8 @@ const Booking = () => {
             <div className="airline-info">
               <i className="fas fa-plane"></i>
               <span>
-                {selectedFlight.airline || "Sky Airlines"} -{" "}
-                {selectedFlight.flightNumber || "SA123"}
+                {selectedFlight.airline?.airline_name || "Sky Airlines"} -
+                {selectedFlight.flight_number || "SA123"}
               </span>
             </div>
 

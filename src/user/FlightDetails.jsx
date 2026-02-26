@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
-
 const FlightDetails = () => {
   const navigate = useNavigate();
   const [selectedFlight, setSelectedFlight] = useState(null);
@@ -420,7 +419,13 @@ const FlightDetails = () => {
                               ? "btn-primary text-white"
                               : "btn-outline-primary"
                           }`}
-                          onClick={() => setSelectedFlight(flight._id)}
+                          onClick={() => {
+                            setSelectedFlight(flight._id);
+                            localStorage.setItem(
+                              "selectedFlight",
+                              JSON.stringify(flight),
+                            );
+                          }}
                         >
                           {selectedFlight === flight._id
                             ? "Selected"
@@ -517,9 +522,9 @@ const FlightDetails = () => {
             <div className="position-fixed bottom-0 end-0 m-4 z-3">
               <button
                 className="btn btn-primary btn-lg rounded-pill shadow-lg px-5"
-                onClick={() => navigate("/user/passenger")}
+                onClick={() => navigate("/user/bookings")}
               >
-                Continue to Passenger Details
+                Continue to Booking
                 <i className="fas fa-arrow-right ms-2"></i>
               </button>
             </div>

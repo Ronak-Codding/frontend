@@ -163,7 +163,7 @@ const FlightSearch = () => {
           className={validated ? "was-validated" : ""}
         >
           {/* Round Trip & One Way */}
-          {(tripType === "oneway"|| tripType === "roundtrip") && (
+          {(tripType === "oneway" || tripType === "roundtrip") && (
             <div className="row g-3 mb-4">
               <div className="col-md-5">
                 <AirportAutocomplete
@@ -291,97 +291,108 @@ const FlightSearch = () => {
 
           {/* Passenger + Class */}
           <div className="row g-3 mb-4">
+            {/* Passenger Selector */}
             <div className="col-md-6">
               <label className="fw-semibold">Passengers</label>
 
-              <div className="border rounded p-3">
-                {/* Adults */}
-                <div className="d-flex justify-content-between align-items-center mb-3">
-                  <div>
-                    <strong>Adults</strong>
-                    <div className="text-muted small">12+ years</div>
+              <div className="dropdown">
+                <button
+                  className="form-control text-start py-3 dropdown-toggle"
+                  type="button"
+                  data-bs-toggle="dropdown"
+                >
+                  {totalPassengers} Passenger(s)
+                </button>
+
+                <div className="dropdown-menu w-100 p-3 shadow rounded-4">
+                  {/* Adults */}
+                  <div className="d-flex justify-content-between align-items-center mb-3">
+                    <div>
+                      <strong>Adults</strong>
+                      <div className="text-muted small">12+ years</div>
+                    </div>
+
+                    <div className="d-flex align-items-center gap-2">
+                      <button
+                        type="button"
+                        className="btn btn-outline-secondary btn-sm"
+                        onClick={() => updatePassengers("adults", "decrease")}
+                      >
+                        -
+                      </button>
+
+                      <span className="fw-bold">{passengers.adults}</span>
+
+                      <button
+                        type="button"
+                        className="btn btn-outline-secondary btn-sm"
+                        onClick={() => updatePassengers("adults", "increase")}
+                      >
+                        +
+                      </button>
+                    </div>
                   </div>
 
-                  <div className="d-flex align-items-center gap-2">
-                    <button
-                      type="button"
-                      className="btn btn-outline-secondary btn-sm"
-                      onClick={() => updatePassengers("adults", "decrease")}
-                    >
-                      -
-                    </button>
+                  {/* Children */}
+                  <div className="d-flex justify-content-between align-items-center mb-3">
+                    <div>
+                      <strong>Children</strong>
+                      <div className="text-muted small">2-11 years</div>
+                    </div>
 
-                    <span className="fw-bold">{passengers.adults}</span>
+                    <div className="d-flex align-items-center gap-2">
+                      <button
+                        type="button"
+                        className="btn btn-outline-secondary btn-sm"
+                        onClick={() => updatePassengers("children", "decrease")}
+                      >
+                        -
+                      </button>
 
-                    <button
-                      type="button"
-                      className="btn btn-outline-secondary btn-sm"
-                      onClick={() => updatePassengers("adults", "increase")}
-                    >
-                      +
-                    </button>
-                  </div>
-                </div>
+                      <span className="fw-bold">{passengers.children}</span>
 
-                {/* Children */}
-                <div className="d-flex justify-content-between align-items-center mb-3">
-                  <div>
-                    <strong>Children</strong>
-                    <div className="text-muted small">2-11 years</div>
-                  </div>
-
-                  <div className="d-flex align-items-center gap-2">
-                    <button
-                      type="button"
-                      className="btn btn-outline-secondary btn-sm"
-                      onClick={() => updatePassengers("children", "decrease")}
-                    >
-                      -
-                    </button>
-
-                    <span className="fw-bold">{passengers.children}</span>
-
-                    <button
-                      type="button"
-                      className="btn btn-outline-secondary btn-sm"
-                      onClick={() => updatePassengers("children", "increase")}
-                    >
-                      +
-                    </button>
-                  </div>
-                </div>
-
-                {/* Infants */}
-                <div className="d-flex justify-content-between align-items-center">
-                  <div>
-                    <strong>Infants</strong>
-                    <div className="text-muted small">Below 2 years</div>
+                      <button
+                        type="button"
+                        className="btn btn-outline-secondary btn-sm"
+                        onClick={() => updatePassengers("children", "increase")}
+                      >
+                        +
+                      </button>
+                    </div>
                   </div>
 
-                  <div className="d-flex align-items-center gap-2">
-                    <button
-                      type="button"
-                      className="btn btn-outline-secondary btn-sm"
-                      onClick={() => updatePassengers("infants", "decrease")}
-                    >
-                      -
-                    </button>
+                  {/* Infants */}
+                  <div className="d-flex justify-content-between align-items-center">
+                    <div>
+                      <strong>Infants</strong>
+                      <div className="text-muted small">Below 2 years</div>
+                    </div>
 
-                    <span className="fw-bold">{passengers.infants}</span>
+                    <div className="d-flex align-items-center gap-2">
+                      <button
+                        type="button"
+                        className="btn btn-outline-secondary btn-sm"
+                        onClick={() => updatePassengers("infants", "decrease")}
+                      >
+                        -
+                      </button>
 
-                    <button
-                      type="button"
-                      className="btn btn-outline-secondary btn-sm"
-                      onClick={() => updatePassengers("infants", "increase")}
-                    >
-                      +
-                    </button>
+                      <span className="fw-bold">{passengers.infants}</span>
+
+                      <button
+                        type="button"
+                        className="btn btn-outline-secondary btn-sm"
+                        onClick={() => updatePassengers("infants", "increase")}
+                      >
+                        +
+                      </button>
+                    </div>
                   </div>
-                </div>
 
-                <hr />
-                <div className="text-end fw-bold">
-                  Total: {totalPassengers} Passenger(s)
+                  <hr />
+                  <div className="text-end fw-bold text-info">
+                    Total: {totalPassengers} Passenger(s)
+                  </div>
                 </div>
               </div>
             </div>

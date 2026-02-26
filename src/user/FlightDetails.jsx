@@ -10,7 +10,7 @@ const FlightDetails = () => {
     airlines: [],
     departureTime: "all",
     arrivalTime: "all",
-  });
+  }); 
   const location = useLocation();
   const flights = location.state?.flights || [];
   const searchData = location.state?.searchData;

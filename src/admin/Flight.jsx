@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+// import DataTable from "react-data-table-component";
 
 const Flights = () => {
   const [flights, setFlights] = useState([]);
@@ -8,26 +9,12 @@ const Flights = () => {
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [currentFlight, setCurrentFlight] = useState(null);
-  const [notification, setNotification] = useState({
-    show: false,
-    message: "",
-    type: "",
-  });
 
   const [airlines, setAirlines] = useState([]);
   const [airports, setAirports] = useState([]);
 
   const [currentPage, setCurrentPage] = useState(1);
   const flightsPerPage = 5;
-
-  const [statusFilter, setStatusFilter] = useState("All");
-  const [adminStatusFilter, setAdminStatusFilter] = useState("All");
-  const [sortConfig, setSortConfig] = useState({
-    key: "departure_time",
-    direction: "asc",
-  });
-  const [selectedFlights, setSelectedFlights] = useState([]);
-  const [exportFormat, setExportFormat] = useState("csv");
 
   const [newFlight, setNewFlight] = useState({
     flight_number: "",
@@ -52,21 +39,11 @@ const Flights = () => {
     seats_available: "",
   });
 
-  // Notification helper
-  const showNotification = (message, type = "success") => {
-    setNotification({ show: true, message, type });
-    setTimeout(
-      () => setNotification({ show: false, message: "", type: "" }),
-      3000,
-    );
-  };
-
   useEffect(() => {
     fetchAllData();
   }, []);
 
   const fetchAllData = async () => {
-    setLoading(true);
     try {
       const flightsRes = await fetch(
         "http://localhost:5000/api/flights/allFlights",
@@ -91,98 +68,34 @@ const Flights = () => {
       const airportsData = await airportsRes.json();
       setAirports(airportsData);
 
-      showNotification("Data loaded successfully", "success");
+      setLoading(false);
     } catch (err) {
       console.error(err);
-      showNotification("Failed to fetch data", "error");
-    } finally {
       setLoading(false);
     }
-  };
-
-  /* ================= SORTING FUNCTION ================= */
-  const sortedFlights = () => {
-    const filtered = filteredFlightsData();
-    return [...filtered].sort((a, b) => {
-      let aValue = a[sortConfig.key];
-      let bValue = b[sortConfig.key];
-
-      if (
-        sortConfig.key === "departure_time" ||
-        sortConfig.key === "arrival_time"
-      ) {
-        aValue = new Date(aValue).getTime();
-        bValue = new Date(bValue).getTime();
-      } else if (sortConfig.key === "price") {
-        aValue = Number(aValue);
-        bValue = Number(bValue);
-      }
-
-      if (aValue < bValue) {
-        return sortConfig.direction === "asc" ? -1 : 1;
-      }
-      if (aValue > bValue) {
-        return sortConfig.direction === "asc" ? 1 : -1;
-      }
-      return 0;
-    });
-  };
-
-  const requestSort = (key) => {
-    let direction = "asc";
-    if (sortConfig.key === key && sortConfig.direction === "asc") {
-      direction = "desc";
-    }
-    setSortConfig({ key, direction });
   };
 
   const handleSearch = (e) => {
     const value = e.target.value.toLowerCase();
     setSearchTerm(value);
-    setCurrentPage(1);
+
+    if (!value) {
+      setFilteredFlights(flights);
+      setCurrentPage(1);
+
+      return;
+    }
+
+    setFilteredFlights(
+      flights.filter(
+        (f) =>
+          f.flight_number?.toLowerCase().includes(value) ||
+          f.airline?.airline_name?.toLowerCase().includes(value) ||
+          f.from_airport?.iata_code?.toLowerCase().includes(value) ||
+          f.to_airport?.iata_code?.toLowerCase().includes(value),
+      ),
+    );
   };
-
-  const filteredFlightsData = () => {
-    return flights.filter((f) => {
-      const matchesSearch =
-        !searchTerm ||
-        f.flight_number?.toLowerCase().includes(searchTerm) ||
-        f.airline?.airline_name?.toLowerCase().includes(searchTerm) ||
-        f.airline?.airline_code?.toLowerCase().includes(searchTerm) ||
-        f.from_airport?.iata_code?.toLowerCase().includes(searchTerm) ||
-        f.to_airport?.iata_code?.toLowerCase().includes(searchTerm) ||
-        f.from_airport?.city?.toLowerCase().includes(searchTerm) ||
-        f.to_airport?.city?.toLowerCase().includes(searchTerm);
-
-      const matchesStatus = statusFilter === "All" || f.status === statusFilter;
-      const matchesAdminStatus =
-        adminStatusFilter === "All" || f.admin_status === adminStatusFilter;
-
-      return matchesSearch && matchesStatus && matchesAdminStatus;
-    });
-  };
-
-  const filteredAndSortedFlights = sortedFlights();
-
-  const publishedCount = filteredAndSortedFlights.filter(
-    (f) => f.admin_status === "Publish",
-  ).length;
-  const draftCount = filteredAndSortedFlights.filter(
-    (f) => f.admin_status === "Draft",
-  ).length;
-  const scheduledCount = filteredAndSortedFlights.filter(
-    (f) => f.status === "Scheduled",
-  ).length;
-
-  const indexOfLast = currentPage * flightsPerPage;
-  const indexOfFirst = indexOfLast - flightsPerPage;
-  const currentFlights = filteredAndSortedFlights.slice(
-    indexOfFirst,
-    indexOfLast,
-  );
-  const totalPages = Math.ceil(
-    filteredAndSortedFlights.length / flightsPerPage,
-  );
 
   const calculateDuration = (dep, arr) => {
     const diff = new Date(arr) - new Date(dep);
@@ -193,11 +106,10 @@ const Flights = () => {
     e.preventDefault();
 
     if (newFlight.from_airport === newFlight.to_airport) {
-      showNotification("From and To airport cannot be same", "error");
+      alert("From and To airport cannot be same");
       return;
     }
 
-    setLoading(true);
     const flightData = {
       ...newFlight,
       duration: calculateDuration(
@@ -220,40 +132,26 @@ const Flights = () => {
 
       if (!res.ok) {
         const err = await res.json();
-        throw new Error(err.message || "Failed to add flight");
+        alert(err.message || "Failed to add flight");
+        return;
       }
 
-      showNotification("Flight added successfully", "success");
       setShowAddModal(false);
       fetchAllData();
     } catch (err) {
       console.error(err);
-      showNotification(err.message, "error");
-    } finally {
-      setLoading(false);
     }
   };
 
   const toggleFlightStatus = async (id, status) => {
-    setLoading(true);
-    try {
-      await fetch(`http://localhost:5000/api/flights/${id}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          admin_status: status === "Publish" ? "Draft" : "Publish",
-        }),
-      });
-      showNotification(
-        `Status changed to ${status === "Publish" ? "Draft" : "Publish"}`,
-        "success",
-      );
-      fetchAllData();
-    } catch (error) {
-      showNotification("Failed to update status", "error");
-    } finally {
-      setLoading(false);
-    }
+    await fetch(`http://localhost:5000/api/flights/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        admin_status: status === "Publish" ? "Draft" : "Publish",
+      }),
+    });
+    fetchAllData();
   };
 
   const handleEditClick = (f) => {
@@ -270,199 +168,29 @@ const Flights = () => {
 
   const handleEditSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
-    try {
-      await fetch(
-        `http://localhost:5000/api/flights/updateFlight/${currentFlight._id}`,
-        {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(editFlight),
-        },
-      );
-      showNotification("Flight updated successfully", "success");
-      setShowEditModal(false);
-      fetchAllData();
-    } catch (error) {
-      showNotification("Failed to update flight", "error");
-    } finally {
-      setLoading(false);
-    }
+    await fetch(
+      `http://localhost:5000/api/flights/updateFlight/${currentFlight._id}`,
+      {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(editFlight),
+      },
+    );
+    setShowEditModal(false);
+    fetchAllData();
   };
+
+  const indexOfLast = currentPage * flightsPerPage;
+  const indexOfFirst = indexOfLast - flightsPerPage;
+  const currentFlights = filteredFlights.slice(indexOfFirst, indexOfLast);
+  const totalPages = Math.ceil(filteredFlights.length / flightsPerPage);
 
   const handleDelete = async (id) => {
     if (!window.confirm("Delete this flight?")) return;
-    setLoading(true);
-    try {
-      await fetch(`http://localhost:5000/api/flights/deleteFlight/${id}`, {
-        method: "DELETE",
-      });
-      showNotification("Flight deleted successfully", "success");
-      fetchAllData();
-    } catch (error) {
-      showNotification("Failed to delete flight", "error");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  /* ================= BULK DELETE ================= */
-  const handleBulkDelete = async () => {
-    if (!window.confirm(`Delete ${selectedFlights.length} selected flights?`))
-      return;
-
-    setLoading(true);
-    try {
-      await Promise.all(
-        selectedFlights.map((id) =>
-          fetch(`http://localhost:5000/api/flights/deleteFlight/${id}`, {
-            method: "DELETE",
-          }),
-        ),
-      );
-
-      setFlights(flights.filter((f) => !selectedFlights.includes(f._id)));
-      setSelectedFlights([]);
-      showNotification(
-        `${selectedFlights.length} flights deleted successfully`,
-        "success",
-      );
-      fetchAllData();
-    } catch (error) {
-      showNotification("Failed to delete flights", "error");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  /* ================= BULK STATUS UPDATE ================= */
-  const handleBulkStatusUpdate = async (newStatus) => {
-    setLoading(true);
-    try {
-      await Promise.all(
-        selectedFlights.map((id) =>
-          fetch(`http://localhost:5000/api/flights/updateFlight/${id}`, {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ status: newStatus }),
-          }),
-        ),
-      );
-
-      await fetchAllData();
-      setSelectedFlights([]);
-      showNotification(
-        `${selectedFlights.length} flights updated to ${newStatus}`,
-        "success",
-      );
-    } catch (error) {
-      showNotification("Failed to update flights", "error");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  /* ================= BULK ADMIN STATUS UPDATE ================= */
-  const handleBulkAdminStatusUpdate = async (newStatus) => {
-    setLoading(true);
-    try {
-      await Promise.all(
-        selectedFlights.map((id) =>
-          fetch(`http://localhost:5000/api/flights/${id}`, {
-            method: "PATCH",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ admin_status: newStatus }),
-          }),
-        ),
-      );
-
-      await fetchAllData();
-      setSelectedFlights([]);
-      showNotification(
-        `${selectedFlights.length} flights admin status updated to ${newStatus}`,
-        "success",
-      );
-    } catch (error) {
-      showNotification("Failed to update flights", "error");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  /* ================= EXPORT FLIGHTS ================= */
-  const exportFlights = () => {
-    const dataToExport = filteredAndSortedFlights;
-
-    if (exportFormat === "csv") {
-      const headers = [
-        "Flight Number",
-        "Airline",
-        "From",
-        "To",
-        "Departure",
-        "Arrival",
-        "Duration",
-        "Price",
-        "Seats Available",
-        "Total Seats",
-        "Status",
-        "Admin Status",
-      ];
-
-      const csvData = dataToExport.map((flight) => [
-        flight.flight_number,
-        flight.airline?.airline_name || "",
-        `${flight.from_airport?.city} (${flight.from_airport?.iata_code})`,
-        `${flight.to_airport?.city} (${flight.to_airport?.iata_code})`,
-        new Date(flight.departure_time).toLocaleString(),
-        new Date(flight.arrival_time).toLocaleString(),
-        `${Math.floor(flight.duration / 60)}h ${flight.duration % 60}m`,
-        flight.price,
-        flight.seats_available,
-        flight.total_seats,
-        flight.status,
-        flight.admin_status,
-      ]);
-
-      const csvContent = [headers, ...csvData]
-        .map((row) => row.map((cell) => `"${cell}"`).join(","))
-        .join("\n");
-
-      const blob = new Blob([csvContent], { type: "text/csv" });
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `flights_export_${new Date().toISOString().split("T")[0]}.csv`;
-      a.click();
-    } else if (exportFormat === "json") {
-      const jsonContent = JSON.stringify(dataToExport, null, 2);
-      const blob = new Blob([jsonContent], { type: "application/json" });
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `flights_export_${new Date().toISOString().split("T")[0]}.json`;
-      a.click();
-    }
-
-    showNotification(`Exported ${dataToExport.length} flights`, "success");
-  };
-
-  /* ================= SELECT ALL ================= */
-  const handleSelectAll = () => {
-    if (selectedFlights.length === currentFlights.length) {
-      setSelectedFlights([]);
-    } else {
-      setSelectedFlights(currentFlights.map((f) => f._id));
-    }
-  };
-
-  /* ================= TOGGLE SELECTION ================= */
-  const toggleFlightSelection = (flightId) => {
-    if (selectedFlights.includes(flightId)) {
-      setSelectedFlights(selectedFlights.filter((id) => id !== flightId));
-    } else {
-      setSelectedFlights([...selectedFlights, flightId]);
-    }
+    await fetch(`http://localhost:5000/api/flights/deleteFlight/${id}`, {
+      method: "DELETE",
+    });
+    fetchAllData();
   };
 
   const handleNewFlightInputChange = (e) => {
@@ -475,7 +203,7 @@ const Flights = () => {
     setEditFlight((p) => ({ ...p, [name]: value }));
   };
 
-  if (loading && !flights.length) {
+  if (loading) {
     return (
       <div className="flex justify-center items-center h-[80vh]">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
@@ -484,242 +212,90 @@ const Flights = () => {
   }
 
   return (
-    <div className="flights-container p-6 min-h-screen">
-      {/* Loading Overlay */}
-      {loading && (
-        <div className="fixed inset-0 bg-black/20 z-[10000] flex items-center justify-center">
-          <div className="bg-white dark:bg-black p-4 rounded-lg shadow-xl">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-            <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-              Loading...
-            </p>
-          </div>
-        </div>
-      )}
-
-      {/* Notification */}
-      {notification.show && (
-        <div
-          className={`fixed top-4 right-4 z-[10001] px-4 py-2 rounded-lg shadow-lg ${
-            notification.type === "success" ? "bg-green-500" : "bg-red-500"
-          } text-white`}
-        >
-          {notification.message}
-        </div>
-      )}
+    //  bg-gray-50
+    <div className="flights-container p-6  min-h-screen">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+      <div className="flex justify-between items-center mb-6">
         <div>
           <h2 className="text-2xl font-bold text-gray-800 mb-1">
-            Flights Management
+            Flights Data
           </h2>
-          <p className="text-gray-600">
-            Total Flights: {flights.length} | Filtered:{" "}
-            {filteredAndSortedFlights.length}
-          </p>
+          {/* <p className="text-gray-600">Manage all flights in the system</p> */}
         </div>
-
-        <div className="flex gap-2">
-          {/* Export Button */}
-          <div className="relative flex items-center">
-            <select
-              value={exportFormat}
-              onChange={(e) => setExportFormat(e.target.value)}
-              className="px-3 py-2 border border-gray-300 rounded-l-lg bg-white text-sm focus:outline-none"
-            >
-              <option value="csv">CSV</option>
-              <option value="json">JSON</option>
-            </select>
-            <button
-              onClick={exportFlights}
-              className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-r-lg font-medium"
-            >
-              <i className="fas fa-download mr-2"></i>Export
-            </button>
-          </div>
-
-          <button
-            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-lg font-medium flex items-center"
-            onClick={() => setShowAddModal(true)}
-          >
-            <i className="fas fa-plus mr-2"></i>Add New Flight
-          </button>
-        </div>
+        <button
+          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-lg font-medium flex items-center"
+          onClick={() => setShowAddModal(true)}
+        >
+          <i className="fas fa-plus mr-2"></i>Add New Flight
+        </button>
       </div>
 
       {/* Statistics Cards */}
-      {/* <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <div className="bg-white rounded-lg shadow p-4">
+      {/* <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+        <div className="bg-white rounded-lg shadow p-6">
           <div className="flex justify-between items-center">
             <div>
-              <h5 className="text-gray-500 text-xs font-medium">
+              <h5 className="text-gray-500 text-sm font-medium">
                 Total Flights
               </h5>
-              <h3 className="text-xl font-bold text-gray-800 mt-1">
+              <h3 className="text-2xl font-bold text-gray-800 mt-1">
                 {flights.length}
               </h3>
             </div>
-            <i className="fas fa-plane text-2xl text-blue-500"></i>
+            <i className="fas fa-plane text-3xl text-blue-500"></i>
           </div>
         </div>
-        <div className="bg-white rounded-lg shadow p-4">
+        <div className="bg-white rounded-lg shadow p-6">
           <div className="flex justify-between items-center">
             <div>
-              <h5 className="text-gray-500 text-xs font-medium">Published</h5>
-              <h3 className="text-xl font-bold text-gray-800 mt-1">
+              <h5 className="text-gray-500 text-sm font-medium">Published</h5>
+              <h3 className="text-2xl font-bold text-gray-800 mt-1">
                 {publishedCount}
               </h3>
             </div>
-            <i className="fas fa-globe text-2xl text-green-500"></i>
+            <i className="fas fa-globe text-3xl text-green-500"></i>
           </div>
         </div>
-        <div className="bg-white rounded-lg shadow p-4">
+        <div className="bg-white rounded-lg shadow p-6">
           <div className="flex justify-between items-center">
             <div>
-              <h5 className="text-gray-500 text-xs font-medium">Draft</h5>
-              <h3 className="text-xl font-bold text-gray-800 mt-1">
+              <h5 className="text-gray-500 text-sm font-medium">Draft</h5>
+              <h3 className="text-2xl font-bold text-gray-800 mt-1">
                 {draftCount}
               </h3>
             </div>
-            <i className="fas fa-file-alt text-2xl text-yellow-500"></i>
-          </div>
-        </div>
-        <div className="bg-white rounded-lg shadow p-4">
-          <div className="flex justify-between items-center">
-            <div>
-              <h5 className="text-gray-500 text-xs font-medium">Scheduled</h5>
-              <h3 className="text-xl font-bold text-gray-800 mt-1">
-                {scheduledCount}
-              </h3>
-            </div>
-            <i className="fas fa-calendar-check text-2xl text-purple-500"></i>
+            <i className="fas fa-file-alt text-3xl text-yellow-500"></i>
           </div>
         </div>
       </div> */}
 
-      {/* Filters */}
+      {/* Search Bar */}
       <div className="bg-white dark:bg-black rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 mb-6 transition-colors">
         <div className="p-4">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            {/* Search Input */}
-            <div className="relative md:col-span-2">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <i className="fas fa-search text-gray-400 dark:text-gray-500 text-sm"></i>
-              </div>
-              <input
-                type="text"
-                className="w-full pl-9 pr-3 py-2 text-sm
-                     border border-gray-300 dark:border-gray-700
-                     rounded-lg
-                     bg-gray-50 dark:bg-neutral-100
-                     text-black dark:text-white
-                     placeholder-gray-400 dark:placeholder-gray-500
-                     focus:bg-white dark:focus:bg-neutral-100
-                     focus:ring-1 focus:ring-black dark:focus:ring-white
-                     outline-none transition"
-                placeholder="Search flights by number, airline, or airport..."
-                value={searchTerm}
-                onChange={handleSearch}
-              />
+          <div className="relative">
+            {/* Icon */}
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <i className="fas fa-search text-gray-400 dark:text-gray-500 text-sm"></i>
             </div>
 
-            {/* Status Filter */}
-            <div>
-              <select
-                value={statusFilter}
-                onChange={(e) => {
-                  setStatusFilter(e.target.value);
-                  setCurrentPage(1);
-                }}
-                className="w-full px-3 py-2 text-sm
-                     border border-gray-300 dark:border-gray-700
-                     rounded-lg
-                     bg-gray-50 dark:bg-neutral-100
-                     text-black dark:text-white
-                     focus:bg-white dark:focus:bg-neutral-100
-                     focus:ring-1 focus:ring-black dark:focus:ring-white
-                     outline-none transition"
-              >
-                <option value="All">All Status</option>
-                <option value="Scheduled">Scheduled</option>
-                <option value="Delayed">Delayed</option>
-                <option value="Cancelled">Cancelled</option>
-                <option value="Completed">Completed</option>
-              </select>
-            </div>
-
-            {/* Admin Status Filter */}
-            <div>
-              <select
-                value={adminStatusFilter}
-                onChange={(e) => {
-                  setAdminStatusFilter(e.target.value);
-                  setCurrentPage(1);
-                }}
-                className="w-full px-3 py-2 text-sm
-                     border border-gray-300 dark:border-gray-700
-                     rounded-lg
-                     bg-gray-50 dark:bg-neutral-100
-                     text-black dark:text-white
-                     focus:bg-white dark:focus:bg-neutral-100
-                     focus:ring-1 focus:ring-black dark:focus:ring-white
-                     outline-none transition"
-              >
-                <option value="All">All Admin Status</option>
-                <option value="Publish">Published</option>
-                <option value="Draft">Draft</option>
-              </select>
-            </div>
+            <input
+              type="text"
+              className="w-full pl-9 pr-3 py-2 text-sm
+                   border border-gray-300 dark:border-gray-700
+                   rounded-lg
+                   bg-gray-50 dark:bg-neutral-100
+                   text-black dark:text-white
+                   placeholder-gray-400 dark:placeholder-gray-500
+                   focus:bg-white dark:focus:bg-neutral-100
+                   focus:ring-1 focus:ring-black dark:focus:ring-white
+                   outline-none transition"
+              placeholder="Search flights by flight number, airline, or airport code..."
+              value={searchTerm}
+              onChange={handleSearch}
+            />
           </div>
         </div>
       </div>
-
-      {/* Bulk Actions Bar */}
-      {selectedFlights.length > 0 && (
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4 flex flex-wrap items-center justify-between gap-2">
-          <span className="text-sm text-blue-700">
-            {selectedFlights.length} flight(s) selected
-          </span>
-          <div className="flex flex-wrap gap-2">
-            <select
-              onChange={(e) => handleBulkStatusUpdate(e.target.value)}
-              className="px-3 py-1 border border-blue-300 rounded-lg text-sm bg-white"
-              defaultValue=""
-            >
-              <option value="" disabled>
-                Change Status
-              </option>
-              <option value="Scheduled">Set Scheduled</option>
-              <option value="Delayed">Set Delayed</option>
-              <option value="Cancelled">Set Cancelled</option>
-              <option value="Completed">Set Completed</option>
-            </select>
-            <select
-              onChange={(e) => handleBulkAdminStatusUpdate(e.target.value)}
-              className="px-3 py-1 border border-blue-300 rounded-lg text-sm bg-white"
-              defaultValue=""
-            >
-              <option value="" disabled>
-                Change Admin Status
-              </option>
-              <option value="Publish">Set Published</option>
-              <option value="Draft">Set Draft</option>
-            </select>
-            <button
-              onClick={handleBulkDelete}
-              className="px-3 py-1 bg-red-600 text-white rounded-lg text-sm hover:bg-red-700"
-            >
-              Delete Selected
-            </button>
-            <button
-              onClick={() => setSelectedFlights([])}
-              className="px-3 py-1 bg-gray-200 text-gray-700 rounded-lg text-sm hover:bg-gray-300"
-            >
-              Clear
-            </button>
-          </div>
-        </div>
-      )}
 
       {/* Flights Table */}
       <div className="bg-white rounded-lg shadow">
@@ -727,67 +303,15 @@ const Flights = () => {
           <table className="min-w-full text-sm text-left text-gray-700">
             <thead className="bg-gray-100 text-xs uppercase text-gray-600">
               <tr>
-                <th className="px-4 py-3">
-                  <input
-                    type="checkbox"
-                    checked={
-                      selectedFlights.length === currentFlights.length &&
-                      currentFlights.length > 0
-                    }
-                    onChange={handleSelectAll}
-                    className="rounded border-gray-300"
-                  />
-                </th>
-                <th
-                  className="px-4 py-3 cursor-pointer hover:bg-gray-200"
-                  onClick={() => requestSort("flight_number")}
-                >
-                  Flight{" "}
-                  {sortConfig.key === "flight_number" &&
-                    (sortConfig.direction === "asc" ? "↑" : "↓")}
-                </th>
-                <th
-                  className="px-4 py-3 cursor-pointer hover:bg-gray-200"
-                  onClick={() => requestSort("airline")}
-                >
-                  Airline{" "}
-                  {sortConfig.key === "airline" &&
-                    (sortConfig.direction === "asc" ? "↑" : "↓")}
-                </th>
+                <th className="px-4 py-3">Flight</th>
+                <th className="px-4 py-3">Airline</th>
                 <th className="px-4 py-3">Route</th>
-                <th
-                  className="px-4 py-3 cursor-pointer hover:bg-gray-200"
-                  onClick={() => requestSort("departure_time")}
-                >
-                  Departure{" "}
-                  {sortConfig.key === "departure_time" &&
-                    (sortConfig.direction === "asc" ? "↑" : "↓")}
-                </th>
-                <th
-                  className="px-4 py-3 cursor-pointer hover:bg-gray-200"
-                  onClick={() => requestSort("price")}
-                >
-                  Price{" "}
-                  {sortConfig.key === "price" &&
-                    (sortConfig.direction === "asc" ? "↑" : "↓")}
-                </th>
+                <th className="px-4 py-3">Departure</th>
+                {/* <th className="px-4 py-3">Duration</th> */}
+                <th className="px-4 py-3">Price</th>
                 <th className="px-4 py-3">Seats</th>
-                <th
-                  className="px-4 py-3 cursor-pointer hover:bg-gray-200"
-                  onClick={() => requestSort("status")}
-                >
-                  Status{" "}
-                  {sortConfig.key === "status" &&
-                    (sortConfig.direction === "asc" ? "↑" : "↓")}
-                </th>
-                <th
-                  className="px-4 py-3 cursor-pointer hover:bg-gray-200"
-                  onClick={() => requestSort("admin_status")}
-                >
-                  Admin{" "}
-                  {sortConfig.key === "admin_status" &&
-                    (sortConfig.direction === "asc" ? "↑" : "↓")}
-                </th>
+                <th className="px-4 py-3">Status</th>
+                <th className="px-4 py-3">Admin</th>
                 <th className="px-4 py-3 text-center">Actions</th>
               </tr>
             </thead>
@@ -795,15 +319,7 @@ const Flights = () => {
             <tbody className="divide-y text-gray-700">
               {currentFlights.length > 0 ? (
                 currentFlights.map((row) => (
-                  <tr key={row._id} className="hover:bg-gray-200 transition">
-                    <td className="px-4 py-3">
-                      <input
-                        type="checkbox"
-                        checked={selectedFlights.includes(row._id)}
-                        onChange={() => toggleFlightSelection(row._id)}
-                        className="rounded border-gray-300"
-                      />
-                    </td>
+                  <tr key={row._id} className="hover:bg-gray-50 transition">
                     <td className="px-4 py-3 font-bold">{row.flight_number}</td>
 
                     <td className="px-4 py-3">
@@ -816,13 +332,7 @@ const Flights = () => {
                     </td>
 
                     <td className="px-4 py-3 font-medium">
-                      <div>
-                        {row.from_airport?.city} → {row.to_airport?.city}
-                      </div>
-                      <div className="text-gray-500 text-xs">
-                        {row.from_airport?.iata_code} →{" "}
-                        {row.to_airport?.iata_code}
-                      </div>
+                      {row.from_airport?.city} → {row.to_airport?.city}
                     </td>
 
                     <td className="px-4 py-3">
@@ -837,8 +347,16 @@ const Flights = () => {
                       </div>
                     </td>
 
+                    {/* <td className="px-4 py-3 font-medium">
+                      {Math.floor(row.duration / 60)}h {row.duration % 60}m
+                    </td> */}
+
                     <td className="px-4 py-3 font-medium">
-                      ₹{row.price?.toLocaleString()}
+                      {new Intl.NumberFormat("en-IN", {
+                        style: "currency",
+                        currency: "INR",
+                        maximumFractionDigits: 0,
+                      }).format(row.price)}
                     </td>
 
                     <td className="px-4 py-3">
@@ -888,18 +406,16 @@ const Flights = () => {
                     </td>
 
                     <td className="px-4 py-3 text-center">
-                      <div className="flex justify-center gap-1">
+                      <div className="flex justify-center gap-2">
                         <button
                           onClick={() => handleEditClick(row)}
                           className="text-blue-600 hover:bg-blue-50 p-2 rounded"
-                          title="Edit"
                         >
                           <i className="fas fa-edit"></i>
                         </button>
                         <button
                           onClick={() => handleDelete(row._id)}
                           className="text-red-600 hover:bg-red-50 p-2 rounded"
-                          title="Delete"
                         >
                           <i className="fas fa-trash"></i>
                         </button>
@@ -923,22 +439,24 @@ const Flights = () => {
           {/* Pagination */}
           {totalPages > 1 && (
             <div className="flex justify-center items-center gap-2 mt-5 flex-wrap">
+              {/* Prev Button */}
               <button
                 disabled={currentPage === 1}
                 onClick={() => setCurrentPage(currentPage - 1)}
                 className={`
-                  px-3 py-1.5 text-sm rounded-lg border
-                  transition-all duration-200
-                  ${
-                    currentPage === 1
-                      ? "opacity-50 cursor-not-allowed border-gray-300 bg-white text-gray-400"
-                      : "border-gray-300 bg-white hover:bg-gray-100 text-gray-700"
-                  }
-                `}
+        px-3 py-1.5 text-sm rounded-lg border
+        transition-all duration-200
+        ${
+          currentPage === 1
+            ? "opacity-50 cursor-not-allowed border-gray-300 bg-white text-gray-400"
+            : "border-gray-300 bg-white hover:bg-gray-100 text-gray-700"
+        }
+      `}
               >
                 ‹ Prev
               </button>
 
+              {/* Page Numbers */}
               {[...Array(totalPages)].map((_, i) => {
                 const page = i + 1;
                 const isActive = currentPage === page;
@@ -948,31 +466,32 @@ const Flights = () => {
                     key={page}
                     onClick={() => setCurrentPage(page)}
                     className={`
-                      px-3 py-1.5 text-sm rounded-lg border transition-all duration-200
-                      ${
-                        isActive
-                          ? "bg-gradient-to-r from-indigo-600 to-purple-600 text-white border-transparent"
-                          : "border-gray-300 bg-white text-gray-700 hover:bg-gray-100"
-                      }
-                    `}
+            px-3 py-1.5 text-sm rounded-lg border transition-all duration-200
+            ${
+              isActive
+                ? "bg-gradient-to-r from-indigo-600 to-purple-600 text-white border-transparent"
+                : "border-gray-300 bg-white text-gray-700 hover:bg-gray-100"
+            }
+          `}
                   >
                     {page}
                   </button>
                 );
               })}
 
+              {/* Next Button */}
               <button
                 disabled={currentPage === totalPages}
                 onClick={() => setCurrentPage(currentPage + 1)}
                 className={`
-                  px-3 py-1.5 text-sm rounded-lg border
-                  transition-all duration-200
-                  ${
-                    currentPage === totalPages
-                      ? "opacity-50 cursor-not-allowed border-gray-300 bg-white text-gray-400"
-                      : "border-gray-300 bg-white hover:bg-gray-100 text-gray-700"
-                  }
-                `}
+        px-3 py-1.5 text-sm rounded-lg border
+        transition-all duration-200
+        ${
+          currentPage === totalPages
+            ? "opacity-50 cursor-not-allowed border-gray-300 bg-white text-gray-400"
+            : "border-gray-300 bg-white hover:bg-gray-100 text-gray-700"
+        }
+      `}
               >
                 Next ›
               </button>
@@ -981,20 +500,22 @@ const Flights = () => {
         </div>
       </div>
 
-      {/* Add Flight Modal */}
       {showAddModal && (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center">
+          {/* Backdrop */}
           <div
             className="absolute inset-0 bg-black/60 backdrop-blur-sm"
             onClick={() => setShowAddModal(false)}
           ></div>
 
+          {/* Modal */}
           <div
             className="relative w-full max-w-4xl max-h-[90vh] overflow-y-auto p-6
                     bg-white dark:bg-black
                     border border-black dark:border-white
                     rounded-lg shadow-2xl"
           >
+            {/* Header */}
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-lg font-semibold text-black dark:text-white">
                 Add New Flight
@@ -1024,7 +545,7 @@ const Flights = () => {
                          bg-white dark:bg-black
                          text-black dark:text-white
                          border-black dark:border-white
-                         outline-none focus:ring-2 focus:ring-blue-500"
+                         outline-none"
                   />
                 </div> */}
 
@@ -1042,7 +563,7 @@ const Flights = () => {
                          bg-white dark:bg-black
                          text-black dark:text-white
                          border-black dark:border-white
-                         outline-none focus:ring-2 focus:ring-blue-500"
+                         outline-none"
                   >
                     <option value="">Select Airline</option>
                     {Array.isArray(airlines) &&
@@ -1070,7 +591,7 @@ const Flights = () => {
                          bg-white dark:bg-black
                          text-black dark:text-white
                          border-black dark:border-white
-                         outline-none focus:ring-2 focus:ring-blue-500"
+                         outline-none"
                   />
                 </div>
 
@@ -1088,7 +609,7 @@ const Flights = () => {
                          bg-white dark:bg-black
                          text-black dark:text-white
                          border-black dark:border-white
-                         outline-none focus:ring-2 focus:ring-blue-500"
+                         outline-none"
                   >
                     <option value="">Select Airport</option>
                     {Array.isArray(airports) &&
@@ -1120,7 +641,7 @@ const Flights = () => {
                          bg-white dark:bg-black
                          text-black dark:text-white
                          border-black dark:border-white
-                         outline-none focus:ring-2 focus:ring-blue-500"
+                         outline-none"
                   >
                     <option value="">Select Airport</option>
                     {Array.isArray(airports) &&
@@ -1153,7 +674,7 @@ const Flights = () => {
                          bg-white dark:bg-black
                          text-black dark:text-white
                          border-black dark:border-white
-                         outline-none focus:ring-2 focus:ring-blue-500"
+                         outline-none"
                   />
                 </div>
 
@@ -1172,7 +693,7 @@ const Flights = () => {
                          bg-white dark:bg-black
                          text-black dark:text-white
                          border-black dark:border-white
-                         outline-none focus:ring-2 focus:ring-blue-500"
+                         outline-none"
                   />
                 </div>
 
@@ -1192,7 +713,7 @@ const Flights = () => {
                          bg-white dark:bg-black
                          text-black dark:text-white
                          border-black dark:border-white
-                         outline-none focus:ring-2 focus:ring-blue-500"
+                         outline-none"
                   />
                 </div>
 
@@ -1212,7 +733,7 @@ const Flights = () => {
                          bg-white dark:bg-black
                          text-black dark:text-white
                          border-black dark:border-white
-                         outline-none focus:ring-2 focus:ring-blue-500"
+                         outline-none"
                   />
                 </div>
 
@@ -1232,7 +753,7 @@ const Flights = () => {
                          bg-white dark:bg-black
                          text-black dark:text-white
                          border-black dark:border-white
-                         outline-none focus:ring-2 focus:ring-blue-500"
+                         outline-none"
                   />
                 </div>
 
@@ -1249,7 +770,7 @@ const Flights = () => {
                          bg-white dark:bg-black
                          text-black dark:text-white
                          border-black dark:border-white
-                         outline-none focus:ring-2 focus:ring-blue-500"
+                         outline-none"
                   >
                     <option value="Scheduled">Scheduled</option>
                     <option value="Delayed">Delayed</option>
@@ -1271,7 +792,7 @@ const Flights = () => {
                          bg-white dark:bg-black
                          text-black dark:text-white
                          border-black dark:border-white
-                         outline-none focus:ring-2 focus:ring-blue-500"
+                         outline-none"
                   >
                     <option value="Publish">Publish</option>
                     <option value="Draft">Draft</option>
@@ -1279,6 +800,7 @@ const Flights = () => {
                 </div>
               </div>
 
+              {/* Buttons */}
               <div className="mt-6 flex justify-end gap-3">
                 <button
                   type="button"
@@ -1295,14 +817,12 @@ const Flights = () => {
 
                 <button
                   type="submit"
-                  disabled={loading}
                   className="px-4 py-2 rounded-md
                        bg-blue-600 dark:bg-blue-500
                        text-white dark:text-black
-                       hover:opacity-80 transition
-                       disabled:opacity-50 disabled:cursor-not-allowed"
+                       hover:opacity-80 transition"
                 >
-                  {loading ? "Processing..." : "Add Flight"}
+                  Add Flight
                 </button>
               </div>
             </form>
@@ -1313,17 +833,20 @@ const Flights = () => {
       {/* Edit Flight Modal */}
       {showEditModal && currentFlight && (
         <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto">
+          {/* Backdrop */}
           <div
             className="fixed inset-0 bg-black/60 backdrop-blur-sm"
             onClick={() => setShowEditModal(false)}
           ></div>
 
+          {/* Modal Box */}
           <div
             className="relative z-50 w-full max-w-lg mx-4 rounded-2xl shadow-2xl p-6
                     bg-white dark:bg-black
                     border border-black dark:border-white
                     animate-fadeIn"
           >
+            {/* Header */}
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-xl font-semibold text-black dark:text-white">
                 Edit Flight {currentFlight.flight_number}
@@ -1337,8 +860,10 @@ const Flights = () => {
               </button>
             </div>
 
+            {/* Form */}
             <form onSubmit={handleEditSubmit}>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Flight Number */}
                 <div>
                   <label className="block text-sm font-medium mb-1 text-black dark:text-white">
                     Flight Number
@@ -1353,10 +878,11 @@ const Flights = () => {
                          bg-white dark:bg-black
                          text-black dark:text-white
                          border-black dark:border-white
-                         outline-none focus:ring-2 focus:ring-blue-500"
+                         outline-none"
                   />
                 </div>
 
+                {/* Status */}
                 <div>
                   <label className="block text-sm font-medium mb-1 text-black dark:text-white">
                     Status
@@ -1369,7 +895,7 @@ const Flights = () => {
                          bg-white dark:bg-black
                          text-black dark:text-white
                          border-black dark:border-white
-                         outline-none focus:ring-2 focus:ring-blue-500"
+                         outline-none"
                   >
                     <option value="Scheduled">Scheduled</option>
                     <option value="Delayed">Delayed</option>
@@ -1378,6 +904,7 @@ const Flights = () => {
                   </select>
                 </div>
 
+                {/* Admin Status */}
                 <div>
                   <label className="block text-sm font-medium mb-1 text-black dark:text-white">
                     Admin Status
@@ -1390,16 +917,17 @@ const Flights = () => {
                          bg-white dark:bg-black
                          text-black dark:text-white
                          border-black dark:border-white
-                         outline-none focus:ring-2 focus:ring-blue-500"
+                         outline-none"
                   >
                     <option value="Publish">Publish</option>
                     <option value="Draft">Draft</option>
                   </select>
                 </div>
 
+                {/* Price */}
                 <div>
                   <label className="block text-sm font-medium mb-1 text-black dark:text-white">
-                    Price (₹)
+                    Price (₹) 
                   </label>
                   <input
                     type="number"
@@ -1412,10 +940,11 @@ const Flights = () => {
                          bg-white dark:bg-black
                          text-black dark:text-white
                          border-black dark:border-white
-                         outline-none focus:ring-2 focus:ring-blue-500"
+                         outline-none"
                   />
                 </div>
 
+                {/* Seats Available */}
                 <div className="md:col-span-2">
                   <label className="block text-sm font-medium mb-1 text-black dark:text-white">
                     Seats Available
@@ -1431,11 +960,12 @@ const Flights = () => {
                          bg-white dark:bg-black
                          text-black dark:text-white
                          border-black dark:border-white
-                         outline-none focus:ring-2 focus:ring-blue-500"
+                         outline-none"
                   />
                 </div>
               </div>
 
+              {/* Buttons */}
               <div className="mt-6 flex justify-end gap-3">
                 <button
                   type="button"
@@ -1452,13 +982,12 @@ const Flights = () => {
 
                 <button
                   type="submit"
-                  disabled={loading}
                   className="px-4 py-2 bg-blue-600 dark:bg-blue-500
                        text-white dark:text-black
                        rounded-lg transition shadow-md
-                       hover:opacity-80 disabled:opacity-50 disabled:cursor-not-allowed"
+                       hover:opacity-80"
                 >
-                  {loading ? "Processing..." : "Update Flight"}
+                  Update Flight
                 </button>
               </div>
             </form>

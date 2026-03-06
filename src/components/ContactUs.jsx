@@ -1,9 +1,11 @@
 import React, { useState } from "react";
 import "./Contact.css";
+import { validateForm } from "../utils/formValidator";
 import Footer from "./Footer";
 import Header from "./Header";
 
 const Contact = () => {
+  const [errors, setErrors] = useState({});
   const [contactForm, setContactForm] = useState({
     name: "",
     email: "",
@@ -26,6 +28,15 @@ const Contact = () => {
   };
   const handleContactSubmit = async (e) => {
     e.preventDefault();
+
+    const validationErrors = validateForm(contactForm);
+
+    if (Object.keys(validationErrors).length === 0) {
+      alert("Form Valid ✅");
+      console.log(contactForm);
+    } else {
+      setErrors(validationErrors);
+    }
 
     try {
       const res = await fetch("http://localhost:5000/api/contact", {
@@ -169,9 +180,9 @@ const Contact = () => {
                       name="name"
                       value={contactForm.name}
                       onChange={handleContactChange}
-                      required
                       placeholder="Enter your full name"
                     />
+                    <p style={{ color: "red" }}>{errors.name}</p>
                   </div>
 
                   <div className="form-group">
@@ -182,9 +193,9 @@ const Contact = () => {
                       name="email"
                       value={contactForm.email}
                       onChange={handleContactChange}
-                      required
                       placeholder="Enter your email"
                     />
+                    <p style={{ color: "red" }}>{errors.email}</p>
                   </div>
                 </div>
 
@@ -199,6 +210,7 @@ const Contact = () => {
                       onChange={handleContactChange}
                       placeholder="Enter your phone number"
                     />
+                    <p style={{ color: "red" }}>{errors.phone}</p>
                   </div>
                   <div className="form-group">
                     <label htmlFor="subject">Subject *</label>

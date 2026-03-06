@@ -32,6 +32,7 @@ import FlightSearch from "./user/FlightSearchForm";
 import Sidebar from "./user/Sidebar";
 
 import FlightDetails from "./user/FlightDetails";
+// import HomePage from "./pages/HomePage";
 
 
 
@@ -41,6 +42,7 @@ function App() {
       <Routes>
         {/* Public */}
         <Route path="/" element={<NewLandingPage />} />
+        {/* <Route path="/" element={<HomePage />} /> */}
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/services" element={<Services />} />

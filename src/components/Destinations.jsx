@@ -1,0 +1,119 @@
+import { ArrowRight } from "lucide-react";
+
+const destinations = [
+  {
+    city: "Paris",
+    country: "France",
+    image: "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=600&q=80",
+    price: "From $499",
+  },
+  {
+    city: "Tokyo",
+    country: "Japan",
+    image: "https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=600&q=80",
+    price: "From $899",
+  },
+  {
+    city: "Dubai",
+    country: "UAE",
+    image: "https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=600&q=80",
+    price: "From $649",
+  },
+  {
+    city: "New York",
+    country: "USA",
+    image: "https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?w=600&q=80",
+    price: "From $349",
+  },
+  {
+    city: "Maldives",
+    country: "Maldives",
+    image: "https://images.unsplash.com/photo-1514282401047-d79a71a590e8?w=600&q=80",
+    price: "From $1,199",
+  },
+  {
+    city: "Sydney",
+    country: "Australia",
+    image: "https://images.unsplash.com/photo-1506973035872-a4ec16b8e8d9?w=600&q=80",
+    price: "From $1,049",
+  },
+];
+
+export default function Destinations() {
+  return (
+    <section id="destinations" className="bg-background px-4 py-20 lg:py-28">
+      <div className="mx-auto max-w-7xl">
+        {/* Header */}
+        <div className="mb-12 flex flex-col items-start justify-between gap-6 md:flex-row md:items-end">
+          <div>
+            <p className="mb-2 text-sm font-semibold uppercase tracking-wider text-primary">
+              Explore the World
+            </p>
+            <h2 className="font-display text-4xl font-bold tracking-tight text-foreground md:text-5xl">
+              Popular Destinations
+            </h2>
+          </div>
+          <a
+            href="#"
+            className="group flex items-center gap-2 text-sm font-medium uppercase tracking-wider text-primary transition-colors hover:text-primary/80"
+          >
+            View All Destinations
+            <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+          </a>
+        </div>
+
+        {/* Destinations Grid */}
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {destinations.map((dest, index) => (
+            <a
+              key={dest.city}
+              href="#"
+              className={`group relative overflow-hidden rounded-2xl ${
+                index === 0 ? "sm:col-span-2 sm:row-span-2" : ""
+              }`}
+            >
+              <div
+                className={`relative ${
+                  index === 0 ? "aspect-[4/3] sm:aspect-square" : "aspect-[4/3]"
+                }`}
+              >
+                <img
+                  src={dest.image}
+                  alt={dest.city}
+                  className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                
+                {/* Content */}
+                <div className="absolute bottom-0 left-0 right-0 p-6">
+                  <div className="flex items-end justify-between">
+                    <div>
+                      <h3
+                        className={`font-display font-bold text-white ${
+                          index === 0 ? "text-3xl md:text-4xl" : "text-2xl"
+                        }`}
+                      >
+                        {dest.city}
+                      </h3>
+                      <p className="text-sm text-white/70">{dest.country}</p>
+                    </div>
+                    <div className="rounded-full bg-primary/90 px-4 py-2 text-sm font-semibold text-primary-foreground backdrop-blur-sm">
+                      {dest.price}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Hover Overlay */}
+                <div className="absolute inset-0 flex items-center justify-center bg-primary/20 opacity-0 backdrop-blur-sm transition-opacity group-hover:opacity-100">
+                  <span className="rounded-full border-2 border-white px-6 py-3 text-sm font-semibold uppercase tracking-wider text-white">
+                    Explore
+                  </span>
+                </div>
+              </div>
+            </a>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}

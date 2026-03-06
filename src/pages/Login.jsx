@@ -1,14 +1,25 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./Login.css";
+import { validateForm } from "../utils/formValidator";
 
 const Login = () => {
+  const [errors, setErrors] = useState({});
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
+
+    const validationErrors = validateForm({ email, password });
+
+    if (Object.keys(validationErrors).length === 0) {
+      alert("Form Valid ✅");
+      console.log("Form Data:", { email, password });
+    } else {
+      setErrors(validationErrors);
+    }
 
     try {
       const res = await fetch("http://localhost:5000/api/user/login", {
@@ -37,7 +48,7 @@ const Login = () => {
 
   return (
     <div className="login-container">
-      <form className="login-card"  autoComplete= "on" onSubmit={handleLogin}>
+      <form className="login-card" autoComplete="on" onSubmit={handleLogin}>
         <h2>Sign In</h2>
 
         <input
@@ -46,16 +57,16 @@ const Login = () => {
           placeholder="Email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          required
         />
+        <p style={{ color: "red" }}>{errors.email}</p>
 
         <input
           type="password"
           placeholder="Password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          required
         />
+        <p style={{ color: "red" }}>{errors.password}</p>
         <p className="forgot-link" onClick={() => navigate("/forgot-password")}>
           Forgot password?
         </p>

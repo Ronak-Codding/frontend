@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Plane, Calendar, Users, ArrowRightLeft, Search } from "lucide-react";
 
 export default function BookingForm() {
- const [tripType, setTripType] = useState("roundtrip");
+  const [tripType, setTripType] = useState("roundtrip");
 
   return (
     <section className="relative -mt-32 z-20 px-4 pb-20">
@@ -81,7 +81,9 @@ export default function BookingForm() {
             </div>
 
             {/* Return */}
-            <div className={`group relative ${tripType === "oneway" ? "opacity-50 pointer-events-none" : ""}`}>
+            <div
+              className={`group relative ${tripType === "oneway" ? "opacity-50 pointer-events-none" : ""}`}
+            >
               <label className="mb-2 block text-xs font-medium uppercase tracking-wider text-muted-foreground">
                 Return
               </label>

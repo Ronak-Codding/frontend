@@ -118,7 +118,7 @@ export default function Footer() {
         {/* Bottom Bar */}
         <div className="mt-12 flex flex-col items-center justify-between gap-6 border-t border-border pt-8 sm:flex-row">
           <p className="text-sm text-muted-foreground">
-            © 2025 SkyVoyage Airlines. All rights reserved.
+            &copy; {new Date().getFullYear()} SkyVoyage Airlines. All rights reserved.
           </p>
 
           {/* Social Links */}

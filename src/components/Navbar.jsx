@@ -1,15 +1,18 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Menu, X, Plane } from "lucide-react";
 
 const navLinks = [
-  { label: "Flights", href: "#flights" },
-  { label: "Destinations", href: "#destinations" },
-  { label: "Experience", href: "#experience" },
-  { label: "Loyalty", href: "#loyalty" },
-  { label: "Contact", href: "#contact" },
+  { label: "Home", href: "/" },
+  { label: "About", href: "/about" },
+  // { label: "Destinations", href: "#destinations" },
+  { label: "FAQs", href: "/faqs" },
+  // { label: "Loyalty", href: "#loyalty" },
+  { label: "Contact", href: "/contact" },
 ];
 
 export default function Navbar() {
+  const navigate = useNavigate();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -57,7 +60,10 @@ export default function Navbar() {
 
         {/* CTA Buttons */}
         <div className="hidden items-center gap-4 lg:flex">
-          <button className="text-sm font-medium uppercase tracking-wider text-white/80 transition-colors hover:text-white">
+          <button
+            className="text-sm font-medium uppercase tracking-wider text-white/80 transition-colors hover:text-white"
+            onClick={() => navigate("/login")}
+          >
             Sign In
           </button>
           <button className="rounded-full bg-primary px-6 py-2.5 text-sm font-semibold uppercase tracking-wider text-primary-foreground transition-all hover:shadow-[0_0_20px_rgba(212,168,83,0.3)]">
@@ -97,7 +103,10 @@ export default function Navbar() {
             </a>
           ))}
           <div className="mt-4 flex flex-col gap-3 border-t border-border pt-4">
-            <button className="rounded-lg px-4 py-3 text-left text-sm font-medium uppercase tracking-wider text-white/80 transition-colors hover:bg-white/5 hover:text-white">
+            <button
+              className="rounded-lg px-4 py-3 text-left text-sm font-medium uppercase tracking-wider text-white/80 transition-colors hover:bg-white/5 hover:text-white"
+              onClick={() => navigate("/login")}
+            >
               Sign In
             </button>
             <button className="rounded-full bg-primary px-6 py-3 text-sm font-semibold uppercase tracking-wider text-primary-foreground">

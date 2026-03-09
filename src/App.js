@@ -21,6 +21,14 @@ import Contact from "./components/ContactUs";
 import FAQs from "./components/FAQs";
 import About from "./components/About";
 
+
+import UserRoute from "./components/UserRoute";
+import Dashboard from "./user/Dashboard";
+// import FlightSearch from "./user/FlightSearchForm";
+import Sidebar from "./user/Sidebar";
+
+// import FlightDetails from "./user/FlightDetails";
+
 export default function App() {
   return (
     <BrowserRouter>
@@ -54,6 +62,23 @@ export default function App() {
           <Route path="bookings" element={<AdminBookings />} />
           <Route path="passengers" element={<Passengers />} />
           <Route path="payments" element={<Payment />} />
+        </Route>
+
+        {/* User */}
+        <Route
+          path="/user"
+          element={
+            <UserRoute>
+              <ThemeProvider storageKey="user-theme">
+                <Sidebar />
+              </ThemeProvider>
+            </UserRoute>
+          }
+        >
+          <Route index element={<Navigate to="dashboard" replace />} />
+          <Route path="dashboard" element={<Dashboard />} />
+          {/* <Route path="flights" element={<FlightSearch />} />
+          <Route path="flight-details" element={<FlightDetails />} /> */}
         </Route>
 
         {/* Fallback */}

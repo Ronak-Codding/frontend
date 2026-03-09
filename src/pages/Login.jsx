@@ -1,8 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import "./Login.css";
 import { validateForm } from "../utils/formValidator";
-import Navbar from "../components/Navbar";
-import Footer from "../components/Footer";
 
 const Login = () => {
   const [errors, setErrors] = useState({});
@@ -37,7 +36,7 @@ const Login = () => {
         "user",
         JSON.stringify({
           ...data.user,
-          role: "user",
+          role: "user", // ADD THIS
         }),
       );
 
@@ -48,64 +47,35 @@ const Login = () => {
   };
 
   return (
-    <>
-    <Navbar></Navbar>
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#1d2671] to-[#c33764] animate-fadeIn">
-      <form
-        className="bg-white p-8 sm:p-10 w-full max-w-[350px] rounded-xl shadow-2xl mx-4"
-        autoComplete="on"
-        onSubmit={handleLogin}
-      >
-        <h2 className="text-center text-2xl font-semibold text-gray-800 mb-6">
-          Sign In
-        </h2>
+    <div className="login-container">
+      <form className="login-card" autoComplete="on" onSubmit={handleLogin}>
+        <h2>Sign In</h2>
 
-        <div className="mb-4">
-          <input
-            type="email"
-            autoComplete="email"
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-[#1d2671] focus:ring-2 focus:ring-[#1d2671]/20 outline-none transition-all duration-300 text-base"
-          />
-          {errors.email && (
-            <p className="text-red-500 text-sm mt-1">{errors.email}</p>
-          )}
-        </div>
+        <input
+          type="email"
+          autoComplete="email"
+          placeholder="Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
+        <p style={{ color: "red" }}>{errors.email}</p>
 
-        <div className="mb-2">
-          <input
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-[#1d2671] focus:ring-2 focus:ring-[#1d2671]/20 outline-none transition-all duration-300 text-base"
-          />
-          {errors.password && (
-            <p className="text-red-500 text-sm mt-1">{errors.password}</p>
-          )}
-        </div>
-
-        <p
-          className="text-sm text-indigo-600 cursor-pointer text-right hover:underline mb-6"
-          onClick={() => navigate("/forgot-password")}
-        >
+        <input
+          type="password"
+          placeholder="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
+        <p style={{ color: "red" }}>{errors.password}</p>
+        <p className="forgot-link" onClick={() => navigate("/forgot-password")}>
           Forgot password?
         </p>
-
-        <button
-          type="submit"
-          className="w-full py-3 bg-[#1d2671] text-white text-base rounded-lg cursor-pointer transition-colors duration-300 hover:bg-[#162060] mb-6"
-        >
-          Login
-        </button>
-
-        <div className="text-center pt-5 border-t border-gray-200">
-          <p className="text-sm text-gray-600">
+        <button type="submit">Login</button>
+        <div className="login-footer">
+          <p style={{ marginTop: "10px" }}>
             New user?{" "}
             <span
-              className="text-indigo-600 font-semibold cursor-pointer hover:underline"
+              style={{ color: "blue", cursor: "pointer" }}
               onClick={() => navigate("/register")}
             >
               Register here
@@ -113,25 +83,7 @@ const Login = () => {
           </p>
         </div>
       </form>
-
-      <style jsx>{`
-        @keyframes fadeIn {
-          from {
-            opacity: 0;
-            transform: translateY(10px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-        .animate-fadeIn {
-          animation: fadeIn 0.5s ease-in-out;
-        }
-      `}</style>
     </div>
-    <Footer/>
-    </>
   );
 };
 

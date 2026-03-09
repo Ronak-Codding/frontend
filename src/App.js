@@ -16,18 +16,16 @@ import Payment from "./admin/Payment";
 
 import HomePage from "./pages/Home";
 import Login from "./pages/Login";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
 import Register from "./pages/Register";
 import Contact from "./components/ContactUs";
 import FAQs from "./components/FAQs";
 import About from "./components/About";
 
-
 import UserRoute from "./components/UserRoute";
 import Dashboard from "./user/Dashboard";
-// import FlightSearch from "./user/FlightSearchForm";
 import Sidebar from "./user/Sidebar";
-
-// import FlightDetails from "./user/FlightDetails";
 
 export default function App() {
   return (
@@ -36,6 +34,8 @@ export default function App() {
         <Route path="/" element={<HomePage />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password/:token" element={<ResetPassword />} />
         <Route path="/faqs" element={<FAQs />} />
         <Route path="/about" element={<About />} />
         <Route path="/contact" element={<Contact />} />
@@ -77,8 +77,6 @@ export default function App() {
         >
           <Route index element={<Navigate to="dashboard" replace />} />
           <Route path="dashboard" element={<Dashboard />} />
-          {/* <Route path="flights" element={<FlightSearch />} />
-          <Route path="flight-details" element={<FlightDetails />} /> */}
         </Route>
 
         {/* Fallback */}

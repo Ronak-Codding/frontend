@@ -1,8 +1,12 @@
 import { useState } from "react";
 import { Plane, Calendar, Users, ArrowRightLeft, Search } from "lucide-react";
+import AirportAutocomplete from "../components/AirportAutocomplete";
 
 export default function BookingForm() {
   const [tripType, setTripType] = useState("roundtrip");
+  //  Airport Selection State
+  const [fromAirport, setFromAirport] = useState(null);
+  const [toAirport, setToAirport] = useState(null);
 
   return (
     <section className="relative -mt-32 z-20 px-4 pb-20">
@@ -38,31 +42,31 @@ export default function BookingForm() {
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
             {/* From */}
             <div className="group relative">
-              <label className="mb-2 block text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                From
-              </label>
               <div className="relative">
-                <input
-                  type="text"
-                  placeholder="City or Airport"
-                  className="w-full rounded-xl border border-border bg-secondary/50 px-4 py-4 pr-10 text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-                />
-                <Plane className="absolute right-3 top-1/2 h-5 w-5 -translate-y-1/2 rotate-45 text-muted-foreground" />
+                <div className="group relative">
+                  <AirportAutocomplete
+                    label="From"
+                    icon="fa-plane-departure"
+                    value={fromAirport}
+                    onSelect={(airport) => setFromAirport(airport)}
+                  />
+                </div>
+                {/* <Plane className="absolute right-3 top-1/2 h-5 w-5 -translate-y-1/2 rotate-45 text-muted-foreground" /> */}
               </div>
             </div>
 
             {/* To */}
             <div className="group relative">
-              <label className="mb-2 block text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                To
-              </label>
               <div className="relative">
-                <input
-                  type="text"
-                  placeholder="City or Airport"
-                  className="w-full rounded-xl border border-border bg-secondary/50 px-4 py-4 pr-10 text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-                />
-                <Plane className="absolute right-3 top-1/2 h-5 w-5 -translate-y-1/2 -rotate-45 text-muted-foreground" />
+                <div className="group relative">
+                  <AirportAutocomplete
+                    label="To"
+                    icon="fa-plane-arrival"
+                    value={toAirport}
+                    onSelect={(airport) => setToAirport(airport)}
+                  />
+                </div>
+                {/* <Plane className="absolute right-3 top-1/2 h-5 w-5 -translate-y-1/2 -rotate-45 text-muted-foreground" /> */}
               </div>
             </div>
 
@@ -76,7 +80,7 @@ export default function BookingForm() {
                   type="date"
                   className="w-full rounded-xl border border-border bg-secondary/50 px-4 py-4 pr-10 text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
                 />
-                <Calendar className="absolute right-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+                {/* <Calendar className="absolute right-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground pointer-events-none" /> */}
               </div>
             </div>
 
@@ -93,7 +97,7 @@ export default function BookingForm() {
                   disabled={tripType === "oneway"}
                   className="w-full rounded-xl border border-border bg-secondary/50 px-4 py-4 pr-10 text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 disabled:cursor-not-allowed"
                 />
-                <Calendar className="absolute right-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+                {/* <Calendar className="absolute right-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground pointer-events-none" /> */}
               </div>
             </div>
 
@@ -105,9 +109,14 @@ export default function BookingForm() {
               <div className="relative">
                 <select className="w-full appearance-none rounded-xl border border-border bg-secondary/50 px-4 py-4 pr-10 text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20">
                   <option>1 Adult</option>
-                  <option>2 Adults</option>
-                  <option>3 Adults</option>
-                  <option>4+ Adults</option>
+                  <option>2 Adult</option>
+                  <option>3 Adult</option>
+                  <option>4 Adult</option>
+                  <option>5 Adult</option>
+                  <option>6 Adult</option>
+                  <option>7 Adult</option>
+                  <option>8 Adult</option>
+                  <option>9+ Adults</option>
                 </select>
                 <Users className="absolute right-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground pointer-events-none" />
               </div>

@@ -1,10 +1,19 @@
-import { Plane, Facebook, Twitter, Instagram, Youtube, MapPin, Phone, Mail } from "lucide-react";
+import {
+  Plane,
+  Facebook,
+  Twitter,
+  Instagram,
+  Youtube,
+  MapPin,
+  Phone,
+  Mail,
+} from "lucide-react";
 
 const footerLinks = {
-  company: [
-    { label: "About Us", href: "#" },
-    { label: "Careers", href: "#" },
-    { label: "Press", href: "#" },
+  Quick: [
+    { label: "Home", href: "/" },
+    { label: "About Us", href: "/about" },
+    { label: "Services", href: "#" },
     { label: "Blog", href: "#" },
   ],
   support: [
@@ -37,9 +46,10 @@ export default function Footer() {
               </span>
             </a>
             <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
-              Experience luxury travel reimagined. Flying you to over 200 destinations with unmatched comfort and service.
+              Experience luxury travel reimagined. Flying you to over 200
+              destinations with unmatched comfort and service.
             </p>
-            
+
             {/* Contact Info */}
             <div className="mt-6 space-y-3">
               <div className="flex items-center gap-3 text-sm text-muted-foreground">
@@ -61,10 +71,10 @@ export default function Footer() {
           <div className="grid gap-8 sm:grid-cols-3 lg:col-span-3">
             <div>
               <h4 className="mb-4 text-sm font-semibold uppercase tracking-wider text-foreground">
-                Company
+                Quick Links
               </h4>
               <ul className="space-y-3">
-                {footerLinks.company.map((link) => (
+                {footerLinks.Quick.map((link) => (
                   <li key={link.label}>
                     <a
                       href={link.href}
@@ -118,7 +128,8 @@ export default function Footer() {
         {/* Bottom Bar */}
         <div className="mt-12 flex flex-col items-center justify-between gap-6 border-t border-border pt-8 sm:flex-row">
           <p className="text-sm text-muted-foreground">
-            &copy; {new Date().getFullYear()} SkyVoyage Airlines. All rights reserved.
+            &copy; {new Date().getFullYear()} SkyVoyage Airlines. All rights
+            reserved.
           </p>
 
           {/* Social Links */}

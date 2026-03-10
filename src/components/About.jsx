@@ -39,14 +39,6 @@ const About = () => {
   }
 ];
 
-
-  // const stats = [
-  //   { value: "500K+", label: "Happy Customers" },
-  //   { value: "100+", label: "Daily Flights" },
-  //   { value: "50+", label: "Destinations" },
-  //   { value: "15", label: "Years of Service" },
-  // ];
-
   const values = [
     {
       icon: "fas fa-shield-alt",
@@ -80,7 +72,7 @@ const About = () => {
         <section className="about-hero">
           <div className="about-hero-overlay"></div>
           <div className="about-container">
-            <h1 className="about-hero-title">About SkyJet Airlines</h1>
+            <h1 className="about-hero-title">About Us</h1>
             <p className="about-hero-subtitle">
               Connecting the world with comfort, safety, and excellence since
               2008
@@ -117,21 +109,6 @@ const About = () => {
             </div>
           </div>
         </section>
-
-        {/* Stats Section */}
-        {/* <section className="about-stats">
-          <div className="about-container">
-            <div className="stats-grid">
-              {stats.map((stat, index) => (
-                <div className="stat-card" key={index}>
-                  <div className="stat-value">{stat.value}</div>
-                  <div className="stat-label">{stat.label}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section> */}
-
         {/* Our Story */}
         <section className="about-story">
           <div className="about-container">

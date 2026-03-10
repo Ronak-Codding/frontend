@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Plane, Calendar, Users, ArrowRightLeft, Search } from "lucide-react";
+import { Plane, Users, ArrowRightLeft, Search } from "lucide-react";
 import AirportAutocomplete from "../components/AirportAutocomplete";
 
 export default function BookingForm() {
@@ -80,7 +80,6 @@ export default function BookingForm() {
                   type="date"
                   className="w-full rounded-xl border border-border bg-secondary/50 px-4 py-4 pr-10 text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
                 />
-                {/* <Calendar className="absolute right-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground pointer-events-none" /> */}
               </div>
             </div>
 
@@ -97,7 +96,6 @@ export default function BookingForm() {
                   disabled={tripType === "oneway"}
                   className="w-full rounded-xl border border-border bg-secondary/50 px-4 py-4 pr-10 text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 disabled:cursor-not-allowed"
                 />
-                {/* <Calendar className="absolute right-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground pointer-events-none" /> */}
               </div>
             </div>
 

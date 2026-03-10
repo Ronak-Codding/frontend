@@ -5,9 +5,7 @@ import { Menu, X, Plane } from "lucide-react";
 const navLinks = [
   { label: "Home", href: "/" },
   { label: "About", href: "/about" },
-  // { label: "Destinations", href: "#destinations" },
   { label: "FAQs", href: "/faqs" },
-  // { label: "Loyalty", href: "#loyalty" },
   { label: "Contact", href: "/contact" },
 ];
 
@@ -40,7 +38,7 @@ export default function Navbar() {
             <div className="absolute inset-0 rounded-full bg-primary opacity-0 blur-lg transition-opacity group-hover:opacity-50" />
           </div>
           <span className="font-display text-xl font-bold tracking-tight text-white">
-            Sky<span className="text-primary">Voyage</span>
+            Sky<span className="text-primary">Jet</span>
           </span>
         </a>
 
@@ -66,14 +64,14 @@ export default function Navbar() {
           >
             Sign In
           </button>
-          <button className="rounded-full bg-primary px-6 py-2.5 text-sm font-semibold uppercase tracking-wider text-primary-foreground transition-all hover:shadow-[0_0_20px_rgba(212,168,83,0.3)]">
-            Book Now
-          </button>
           <button
             className="rounded-full bg-primary px-6 py-2.5 text-sm font-semibold uppercase tracking-wider text-primary-foreground transition-all hover:shadow-[0_0_20px_rgba(212,168,83,0.3)]"
             onClick={() => navigate("/register")}
           >
             Register Now
+          </button>
+          <button className="rounded-full bg-primary px-6 py-2.5 text-sm font-semibold uppercase tracking-wider text-primary-foreground transition-all hover:shadow-[0_0_20px_rgba(212,168,83,0.3)]">
+            Book Now
           </button>
         </div>
 
@@ -115,14 +113,14 @@ export default function Navbar() {
             >
               Sign In
             </button>
-            <button className="rounded-full bg-primary px-6 py-3 text-sm font-semibold uppercase tracking-wider text-primary-foreground">
-              Book Now
-            </button>
             <button
               className="rounded-full bg-primary px-6 py-2.5 text-sm font-semibold uppercase tracking-wider text-primary-foreground transition-all hover:shadow-[0_0_20px_rgba(212,168,83,0.3)]"
               onClick={() => navigate("/register")}
             >
               Register Now
+            </button>
+            <button className="rounded-full bg-primary px-6 py-3 text-sm font-semibold uppercase tracking-wider text-primary-foreground">
+              Book Now
             </button>
           </div>
         </div>

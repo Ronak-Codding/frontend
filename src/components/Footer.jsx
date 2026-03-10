@@ -42,7 +42,7 @@ export default function Footer() {
                 <Plane className="h-5 w-5 text-primary-foreground" />
               </div>
               <span className="font-display text-xl font-bold tracking-tight text-foreground">
-                Sky<span className="text-primary">Voyage</span>
+                Sky<span className="text-primary">Jet</span>
               </span>
             </a>
             <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
@@ -58,11 +58,11 @@ export default function Footer() {
               </div>
               <div className="flex items-center gap-3 text-sm text-muted-foreground">
                 <Phone className="h-4 w-4 text-primary" />
-                <span>+1 (800) SKY-VOYAGE</span>
+                <span>+1 (800) SKY-JET</span>
               </div>
               <div className="flex items-center gap-3 text-sm text-muted-foreground">
                 <Mail className="h-4 w-4 text-primary" />
-                <span>hello@skyvoyage.com</span>
+                <span>hello@skyjet.com</span>
               </div>
             </div>
           </div>

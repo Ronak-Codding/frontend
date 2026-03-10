@@ -90,7 +90,7 @@ const AirportAutocomplete = ({
 
       {showDropdown && (
         <div
-          className="position-absolute w-100 bg-white shadow rounded mt-1"
+          className="position-absolute w-100 bg-black shadow rounded mt-1"
           style={{
             zIndex: 1050,
             maxHeight: "250px",

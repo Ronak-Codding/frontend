@@ -149,9 +149,9 @@ const Sidebar = () => {
               <i className="fas fa-tachometer-alt"></i>Dashboard
             </NavLink>
 
-            <NavLink to="/user/flights" className="user-list-group-item">
+            {/* <NavLink to="/user/flights" className="user-list-group-item">
               <i className="fas fa-plane"></i> Flight
-            </NavLink>
+            </NavLink> */}
             {/* <NavLink to="/user/flight-details" className="user-list-group-item">
               <i className="fas fa-plane"></i> Flight details
             </NavLink> */}

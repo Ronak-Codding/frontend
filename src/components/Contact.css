@@ -426,7 +426,7 @@
 /* Focus same as input */
 .select-wrapper select:focus {
   outline: none;
-  border-color: #667eea;
+  border-color: #e8e9ef;
   box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 

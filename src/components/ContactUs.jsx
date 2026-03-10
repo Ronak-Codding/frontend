@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import "./Contact.css";
-// import { validateForm } from "../utils/formValidator";
+import { validateForm } from "../utils/formValidator";
 import Footer from "./Footer";
 import Navbar from "./Navbar";
 
@@ -156,10 +156,6 @@ const Contact = () => {
             <div className="form-container">
               <div className="form-header">
                 <h2>Send Us a Message</h2>
-                <p>
-                  We'd love to hear from you. Send us a message and we'll
-                  respond as soon as possible.
-                </p>
               </div>
 
               {formStatus.submitted && (
@@ -221,7 +217,6 @@ const Contact = () => {
                         name="subject"
                         value={contactForm.subject}
                         onChange={handleContactChange}
-                        required
                       >
                         <option value="">Select a subject</option>
                         <option value="booking">Flight Booking</option>
@@ -244,8 +239,7 @@ const Contact = () => {
                     name="message"
                     value={contactForm.message}
                     onChange={handleContactChange}
-                    required
-                    rows="6"
+                    rows="3"
                     placeholder="Type your message here..."
                   ></textarea>
                 </div>

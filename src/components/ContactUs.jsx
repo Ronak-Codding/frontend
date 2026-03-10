@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import "./Contact.css";
 import { validateForm } from "../utils/formValidator";
+import Breadcrumb from "../components/Breadcrumb";
 import Footer from "./Footer";
 import Navbar from "./Navbar";
 
@@ -98,13 +99,7 @@ const Contact = () => {
     <>
       <Navbar />
       <div className="contact-page">
-        {/* Hero Section */}
-        <section className="contact-hero">
-          <div className="container">
-            <h1>Contact Us</h1>
-            <p>We're here to help you with your travel needs</p>
-          </div>
-        </section>
+       <Breadcrumb title="Contact Us" />
 
         {/* Contact Information Cards */}
         <section className="contact-info-section">

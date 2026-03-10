@@ -1,43 +1,47 @@
 import Footer from "./Footer";
 import "./About.css";
 import Navbar from "./Navbar";
+import Breadcrumb from "../components/Breadcrumb";
 
 const About = () => {
- const teamMembers = [
-  {
-    name: "John Smith",
-    role: "CEO & Founder",
-    image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=600",
-    bio: "20+ years in aviation industry",
-    social: {
-      linkedin: "#",
-      twitter: "#",
-      email: "#"
-    }
-  },
-  {
-    name: "Sarah Johnson",
-    role: "Head of Operations",
-    image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=600",
-    bio: "Former airline executive",
-    social: {
-      linkedin: "#",
-      twitter: "#",
-      email: "#"
-    }
-  },
-  {
-    name: "Michael Chen",
-    role: "Customer Experience Director",
-    image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600",
-    bio: "Hospitality expert",
-    social: {
-      linkedin: "#",
-      twitter: "#",
-      email: "#"
-    }
-  }
-];
+  const teamMembers = [
+    {
+      name: "John Smith",
+      role: "CEO & Founder",
+      image:
+        "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=600",
+      bio: "20+ years in aviation industry",
+      social: {
+        linkedin: "#",
+        twitter: "#",
+        email: "#",
+      },
+    },
+    {
+      name: "Sarah Johnson",
+      role: "Head of Operations",
+      image:
+        "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=600",
+      bio: "Former airline executive",
+      social: {
+        linkedin: "#",
+        twitter: "#",
+        email: "#",
+      },
+    },
+    {
+      name: "Michael Chen",
+      role: "Customer Experience Director",
+      image:
+        "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600",
+      bio: "Hospitality expert",
+      social: {
+        linkedin: "#",
+        twitter: "#",
+        email: "#",
+      },
+    },
+  ];
 
   const values = [
     {
@@ -66,19 +70,12 @@ const About = () => {
 
   return (
     <>
-      <Navbar/>
+      <Navbar />
+
       <div className="about-page">
         {/* Hero Section */}
-        <section className="about-hero">
-          <div className="about-hero-overlay"></div>
-          <div className="about-container">
-            <h1 className="about-hero-title">About Us</h1>
-            <p className="about-hero-subtitle">
-              Connecting the world with comfort, safety, and excellence since
-              2008
-            </p>
-          </div>
-        </section>
+
+        <Breadcrumb title="About Us" />
 
         {/* Mission & Vision */}
         <section className="about-mission">

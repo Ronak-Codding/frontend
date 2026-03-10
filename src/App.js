@@ -26,6 +26,10 @@ import About from "./components/About";
 import UserRoute from "./components/UserRoute";
 import Dashboard from "./user/Dashboard";
 import Sidebar from "./user/Sidebar";
+import MyProfile from "./user/MyProfile";
+import PrivacyPolicy from "./pages/Privacy";
+import TermsOfService from "./pages/TermsOfService";
+import Services from "./components/Services";
 
 export default function App() {
   return (
@@ -39,6 +43,9 @@ export default function App() {
         <Route path="/faqs" element={<FAQs />} />
         <Route path="/about" element={<About />} />
         <Route path="/contact" element={<Contact />} />
+        <Route path="/services" element={<Services />} />
+        <Route path="/privacy" element={<PrivacyPolicy />} />
+        <Route path="/termofservice" element={<TermsOfService />} />
         <Route path="/admin-login" element={<AdminLogin />} />
 
         {/* Admin */}
@@ -77,6 +84,7 @@ export default function App() {
         >
           <Route index element={<Navigate to="dashboard" replace />} />
           <Route path="dashboard" element={<Dashboard />} />
+          <Route path="myprofile" element={<MyProfile />} />
         </Route>
 
         {/* Fallback */}

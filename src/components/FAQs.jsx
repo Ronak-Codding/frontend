@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import "./FAQs.css";
 import Footer from "./Footer";
 import Navbar from "./Navbar";
+import Breadcrumb from "../components/Breadcrumb";
 
 const FAQs = () => {
   const [activeIndex, setActiveIndex] = useState(null);
@@ -106,21 +107,7 @@ const FAQs = () => {
     <div className="faqs-page">
        <Navbar/>
       {/* Hero Section */}
-      <section className="faqs-hero">
-        <div className="faqs-hero-overlay"></div>
-        <div className="faqs-hero-content">
-          <h1>Frequently Asked Questions</h1>
-          <p>Find answers to common questions about your journey with SkyJet</p>
-          <div className="faqs-search">
-            <i className="fas fa-search"></i>
-            <input 
-              type="text" 
-              placeholder="Search your question..."
-              className="faqs-search-input"
-            />
-          </div>
-        </div>
-      </section>
+      <Breadcrumb title="FAQs" />
 
       {/* Quick Categories */}
       <section className="faqs-categories">

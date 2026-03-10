@@ -425,7 +425,7 @@ const Admin = () => {
                   </NavLink>
                   <div className="dropdown-divider"></div>
                   <button
-                    className={`flex items-center px-5 py-3 w-full text-left text-sm font-medium text-red-500 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors cursor-pointer border-none bg-transparent`}
+                    className={`flex items-center px-5 py-3 w-full text-left text-md font-medium text-red-500 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors cursor-pointer border-none bg-transparent`}
                     onClick={logout}
                   >
                     <i className="fas fa-sign-out-alt w-5 mr-3 text-red-500"></i>

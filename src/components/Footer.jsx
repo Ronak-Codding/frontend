@@ -13,18 +13,18 @@ const footerLinks = {
   Quick: [
     { label: "Home", href: "/" },
     { label: "About Us", href: "/about" },
-    { label: "Services", href: "#" },
+    { label: "Services", href: "/services" },
     { label: "Blog", href: "#" },
   ],
   support: [
     { label: "Help Center", href: "#" },
-    { label: "Contact Us", href: "#" },
-    { label: "FAQs", href: "#" },
+    { label: "Contact Us", href: "/contact" },
+    { label: "FAQs", href: "/faqs" },
     { label: "Baggage Info", href: "#" },
   ],
   legal: [
-    { label: "Privacy Policy", href: "#" },
-    { label: "Terms of Service", href: "#" },
+    { label: "Privacy Policy", href: "/privacy" },
+    { label: "Terms of Service", href: "/termofservice" },
     { label: "Cookie Policy", href: "#" },
     { label: "Accessibility", href: "#" },
   ],

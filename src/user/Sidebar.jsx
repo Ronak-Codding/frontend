@@ -128,10 +128,10 @@ const Sidebar = () => {
         {/* ========== SIDEBAR ========== */}
         <div id="user-sidebar">
           <div className="user-sidebar-heading text-center py-3">
-            <h2>User Panel</h2>
+            {/* <h2>User Panel</h2> */}
             {/* <small className="text-muted">Management System</small> */}
           </div>
-          {/* <div className="user-sidebar-profile">
+          <div className="user-sidebar-profile">
             <div className="sidebar-profile-avatar">
               {currentUser?.fullname
                 ? currentUser.fullname.charAt(0).toUpperCase()
@@ -142,19 +142,19 @@ const Sidebar = () => {
               <h6>{currentUser?.fullname || "User Name"}</h6>
               <span>{currentUser?.email || "user@gmail.com"}</span>
             </div>
-          </div> */}
+          </div>
 
           <div className="user-list-group list-group-flush">
             <NavLink to="/user/dashboard" className="user-list-group-item">
               <i className="fas fa-tachometer-alt"></i>Dashboard
             </NavLink>
 
-            {/* <NavLink to="/user/flights" className="user-list-group-item">
-              <i className="fas fa-plane"></i> Flight
-            </NavLink> */}
-            {/* <NavLink to="/user/flight-details" className="user-list-group-item">
-              <i className="fas fa-plane"></i> Flight details
-            </NavLink> */}
+            <NavLink to="/user/myprofile" className="user-list-group-item">
+              <i className="fas fa-user"></i> My Profile
+            </NavLink>
+            <NavLink to="/user/mybooking" className="user-list-group-item">
+              <i className="fas fa-ticket-alt"></i> My Booking
+            </NavLink>
 
             {/* <NavLink to="/user/passenger" className="user-list-group-item">
               <i className="fas fa-user"></i> Passenger
@@ -178,7 +178,7 @@ const Sidebar = () => {
             </NavLink> */}
 
             <div className="mt-auto p-3 border-top">
-              <div className="d-flex align-items-center justify-content-between mb-2">
+              {/* <div className="d-flex align-items-center justify-content-between mb-2">
                 <small className="text-muted">Dark Mode</small>
                 <div
                   className="form-check form-switch"
@@ -191,9 +191,12 @@ const Sidebar = () => {
                     onChange={() => {}}
                   />
                 </div>
-              </div>
-              <button className="btn btn-outline-danger w-100" onClick={logout}>
-                <i className="fas fa-sign-out-alt me-2"></i>Logout
+              </div> */}
+              <button
+                className="w-full py-2 px-4 border border-red-500 text-red-500 rounded-lg font-semibold hover:bg-red-500 hover:text-white transition-all duration-300 flex items-center justify-center"
+                onClick={logout}
+              >
+                <i className="fas fa-sign-out-alt mr-2"></i>Logout
               </button>
             </div>
           </div>
@@ -398,10 +401,11 @@ const Sidebar = () => {
                   </NavLink>
                   <div className="dropdown-divider"></div>
                   <button
-                    className="dropdown-item text-danger"
+                    className={`flex items-center px-5 py-3 w-full text-left text-md font-medium text-red-500 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors cursor-pointer border-none bg-transparent`}
                     onClick={logout}
                   >
-                    <i className="fas fa-sign-out-alt me-2"></i>Logout
+                    <i className="fas fa-sign-out-alt w-5 mr-3 text-red-500"></i>
+                    Logout
                   </button>
                 </div>
               )}

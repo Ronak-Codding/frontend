@@ -30,6 +30,7 @@ import MyProfile from "./user/MyProfile";
 import PrivacyPolicy from "./pages/Privacy";
 import TermsOfService from "./pages/TermsOfService";
 import Services from "./components/Services";
+import SearchResults from "./pages/SearchResults";
 
 export default function App() {
   return (
@@ -46,6 +47,7 @@ export default function App() {
         <Route path="/services" element={<Services />} />
         <Route path="/privacy" element={<PrivacyPolicy />} />
         <Route path="/termofservice" element={<TermsOfService />} />
+        <Route path="/results" element={<SearchResults />} />
         <Route path="/admin-login" element={<AdminLogin />} />
 
         {/* Admin */}

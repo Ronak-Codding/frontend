@@ -1,12 +1,27 @@
 import { useState } from "react";
 import { Plane, Users, ArrowRightLeft, Search } from "lucide-react";
 import AirportAutocomplete from "../components/AirportAutocomplete";
+import { useNavigate } from "react-router-dom";
 
 export default function BookingForm() {
   const [tripType, setTripType] = useState("roundtrip");
-  //  Airport Selection State
+
+  const [departureDate, setDepartureDate] = useState("");
+  const [passengers, setPassengers] = useState("1");
+
+  // Airport Selection State
   const [fromAirport, setFromAirport] = useState(null);
   const [toAirport, setToAirport] = useState(null);
+  const navigate = useNavigate();
+
+  const handleSearch = () => {
+    console.log("fromAirport:", fromAirport); 
+    console.log("toAirport:", toAirport); 
+    if (!fromAirport || !toAirport) return;
+    navigate(
+      `/results?from=${fromAirport.airport_code}&to=${toAirport.airport_code}&date=${departureDate}&passengers=${passengers}`,
+    );
+  };
 
   return (
     <section className="relative -mt-32 z-20 px-4 pb-20">
@@ -78,7 +93,9 @@ export default function BookingForm() {
               <div className="relative">
                 <input
                   type="date"
-                  className="w-full rounded-xl border border-border bg-secondary/50 px-4 py-4 pr-10 text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  value={departureDate}
+                  onChange={(e) => setDepartureDate(e.target.value)}
+                  className="w-full rounded-xl border border-border bg-secondary/50 px-4 py-4 pr-10"
                 />
               </div>
             </div>
@@ -105,16 +122,17 @@ export default function BookingForm() {
                 Passengers
               </label>
               <div className="relative">
-                <select className="w-full appearance-none rounded-xl border border-border bg-secondary/50 px-4 py-4 pr-10 text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20">
-                  <option>1 Adult</option>
-                  <option>2 Adult</option>
-                  <option>3 Adult</option>
-                  <option>4 Adult</option>
-                  <option>5 Adult</option>
-                  <option>6 Adult</option>
-                  <option>7 Adult</option>
-                  <option>8 Adult</option>
-                  <option>9+ Adults</option>
+                <select
+                  value={passengers}
+                  onChange={(e) => setPassengers(e.target.value)}
+                  className="w-full appearance-none rounded-xl border border-border bg-secondary/50 px-4 py-4 pr-10"
+                >
+                  <option value="1">1 Adult</option>
+                  <option value="2">2 Adult</option>
+                  <option value="3">3 Adult</option>
+                  <option value="4">4 Adult</option>
+                  <option value="5">5 Adult</option>
+                  <option value="6">6 Adult</option>
                 </select>
                 <Users className="absolute right-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground pointer-events-none" />
               </div>
@@ -123,7 +141,10 @@ export default function BookingForm() {
 
           {/* Search Button */}
           <div className="mt-6 flex justify-center md:justify-end">
-            <button className="group relative flex w-full items-center justify-center gap-3 overflow-hidden rounded-xl bg-primary px-8 py-4 text-sm font-semibold uppercase tracking-wider text-primary-foreground transition-all hover:shadow-[0_0_30px_rgba(212,168,83,0.4)] md:w-auto">
+            <button
+              className="group relative flex w-full items-center justify-center gap-3 overflow-hidden rounded-xl bg-primary px-8 py-4 text-sm font-semibold uppercase tracking-wider text-primary-foreground transition-all hover:shadow-[0_0_30px_rgba(212,168,83,0.4)] md:w-auto"
+              onClick={handleSearch}
+            >
               <Search className="h-5 w-5" />
               <span>Search Flights</span>
               <div className="absolute inset-0 -translate-x-full bg-white/20 transition-transform group-hover:translate-x-full" />

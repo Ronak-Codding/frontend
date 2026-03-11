@@ -17,7 +17,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
- background: linear-gradient(135deg, #667eea, #764ba2) ;
+  background: linear-gradient(135deg, #667eea, #764ba2);
   position: relative;
 }
 
@@ -125,6 +125,7 @@
   font-size: 14px;
   transition: all 0.3s ease;
   background-color: white;
+  color: #334155;
 }
 
 .form-group input:focus {
@@ -512,8 +513,6 @@
   }
 }
 
-
-
 /* Add to your existing Register.css */
 
 .phone-otp-group {
@@ -536,7 +535,7 @@
 }
 
 .phone-input.verified {
-  border-color: #4CAF50;
+  border-color: #4caf50;
   background-color: #f8fff8;
 }
 
@@ -568,7 +567,7 @@
   display: flex;
   align-items: center;
   gap: 5px;
-  color: #4CAF50;
+  color: #4caf50;
   font-weight: 600;
   padding: 0 15px;
   white-space: nowrap;
@@ -614,7 +613,7 @@
 
 .verify-otp-btn {
   padding: 12px 25px;
-  background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+  background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
   color: white;
   border: none;
   border-radius: 8px;
@@ -676,19 +675,19 @@
   .phone-input-wrapper {
     flex-direction: column;
   }
-  
+
   .send-otp-btn {
     width: 100%;
   }
-  
+
   .otp-input-wrapper {
     flex-direction: column;
   }
-  
+
   .verify-otp-btn {
     width: 100%;
   }
-  
+
   .verified-badge {
     justify-content: center;
     margin-top: 5px;

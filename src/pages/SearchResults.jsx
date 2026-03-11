@@ -60,7 +60,7 @@ export default function SearchResults() {
         {/* Error */}
         {error && (
           <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-6 text-center text-red-400">
-            ⚠️ {error}
+            {error}
           </div>
         )}
 
@@ -74,7 +74,12 @@ export default function SearchResults() {
         {/* Flight Cards */}
         <div className="flex flex-col gap-4">
           {flights.map((flight, index) => (
-            <FlightCard key={index} flight={flight} />
+            <FlightCard
+              key={index}
+              flight={flight}
+              date={date}
+              passengers={passengers}
+            />
           ))}
         </div>
       </div>

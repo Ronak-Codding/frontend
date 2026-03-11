@@ -75,66 +75,65 @@ const Register = ({ onRegister }) => {
   };
 
   const handleSendOTP = async () => {
-    // Validate phone number first
-    if (!formData.phone) {
-      setErrors((prev) => ({ ...prev, phone: "Phone number is required" }));
+    // Phone validation hata ke email validation karo
+    if (!formData.email) {
+      setErrors((prev) => ({ ...prev, email: "Email is required" }));
       return;
     }
-
-    const phoneRegex = /^\d{10}$/.test(formData.phone.replace(/\D/g, ""));
-    if (!phoneRegex) {
-      setErrors((prev) => ({
-        ...prev,
-        phone: "Phone number must be 10 digits",
-      }));
+    if (!/\S+@\S+\.\S+/.test(formData.email)) {
+      setErrors((prev) => ({ ...prev, email: "Valid email required" }));
       return;
     }
 
     setIsLoading(true);
-
     try {
-      // In production, you would call your backend API to send OTP
-      // const response = await fetch("http://localhost:5000/api/send-otp", {
-      //   method: "POST",
-      //   headers: { "Content-Type": "application/json" },
-      //   body: JSON.stringify({ phone: formData.phone }),
-      // });
+      const res = await fetch("http://localhost:5000/api/otp/send", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: formData.email }),
+      });
 
-      // For demo, generate OTP locally
-      const generatedOtp = generateOTP();
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to send OTP");
 
       setOtpState((prev) => ({
         ...prev,
         showOtpInput: true,
-        generatedOtp: generatedOtp,
         timer: 60,
         canResend: false,
       }));
 
-      // In production, you would show a success message
-      // For demo, show OTP in console (remove in production)
-      console.log(`OTP for ${formData.phone}: ${generatedOtp}`);
-
-      // Show success message (in production, don't show OTP)
-      alert(`Demo OTP: ${generatedOtp}`); // Remove this in production
+      alert(`OTP sent to ${formData.email}! Check your inbox.`);
     } catch (error) {
-      setErrors((prev) => ({ ...prev, otp: "Failed to send OTP" }));
+      setErrors((prev) => ({ ...prev, otp: error.message }));
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleVerifyOTP = () => {
+  const handleVerifyOTP = async () => {
     if (!otpState.otp) {
       setErrors((prev) => ({ ...prev, otp: "Please enter OTP" }));
       return;
     }
 
-    if (otpState.otp === otpState.generatedOtp) {
+    setIsLoading(true);
+    try {
+      const res = await fetch("http://localhost:5000/api/otp/verify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: formData.email, otp: otpState.otp }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Verification failed");
+
       setOtpState((prev) => ({ ...prev, isVerified: true }));
       setErrors((prev) => ({ ...prev, otp: "" }));
-    } else {
-      setErrors((prev) => ({ ...prev, otp: "Invalid OTP. Please try again." }));
+    } catch (error) {
+      setErrors((prev) => ({ ...prev, otp: error.message }));
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -367,37 +366,18 @@ const Register = ({ onRegister }) => {
                   </div>
                 </div>
 
-                <div className="form-group">
+                <div className="form-group phone-otp-group">
                   <label>
                     <i className="fas fa-envelope"></i> Email Address
                   </label>
-                  <input
-                    type="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleChange}
-                    placeholder="Enter your email"
-                    className={errors.email ? "error" : ""}
-                    disabled={isLoading}
-                  />
-                  {errors.email && (
-                    <span className="error-message">{errors.email}</span>
-                  )}
-                </div>
-
-                {/* Phone Number with OTP Section */}
-                <div className="form-group phone-otp-group">
-                  <label>
-                    <i className="fas fa-phone"></i> Phone Number
-                  </label>
                   <div className="phone-input-wrapper">
                     <input
-                      type="tel"
-                      name="phone"
-                      value={formData.phone}
+                      type="email"
+                      name="email"
+                      value={formData.email}
                       onChange={handleChange}
-                      placeholder="Enter your 10-digit phone number"
-                      className={`phone-input ${errors.phone ? "error" : ""} ${otpState.isVerified ? "verified" : ""}`}
+                      placeholder="Enter your email"
+                      className={`phone-input ${errors.email ? "error" : ""} ${otpState.isVerified ? "verified" : ""}`}
                       disabled={isLoading || otpState.isVerified}
                     />
                     {!otpState.isVerified ? (
@@ -405,7 +385,7 @@ const Register = ({ onRegister }) => {
                         type="button"
                         onClick={handleSendOTP}
                         disabled={
-                          isLoading || !formData.phone || otpState.timer > 0
+                          isLoading || !formData.email || otpState.timer > 0
                         }
                         className="send-otp-btn"
                       >
@@ -423,8 +403,8 @@ const Register = ({ onRegister }) => {
                       </span>
                     )}
                   </div>
-                  {errors.phone && (
-                    <span className="error-message">{errors.phone}</span>
+                  {errors.email && (
+                    <span className="error-message">{errors.email}</span>
                   )}
                 </div>
 
@@ -472,6 +452,24 @@ const Register = ({ onRegister }) => {
                     )}
                   </div>
                 )}
+
+                <div className="form-group">
+                  <label>
+                    <i className="fas fa-phone"></i> Phone Number
+                  </label>
+                    <input
+                      type="tel"
+                      name="phone"
+                      value={formData.phone}
+                      onChange={handleChange}
+                      placeholder="Enter your 10-digit phone number"
+                      className={errors.phone ? "error" : ""}
+                      disabled={isLoading}
+                    />
+                  {errors.phone && (
+                    <span className="error-message">{errors.phone}</span>
+                  )}
+                </div>
 
                 <div className="form-row">
                   <div className="form-group">

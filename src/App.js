@@ -32,6 +32,11 @@ import TermsOfService from "./pages/TermsOfService";
 import Services from "./components/Services";
 import SearchResults from "./pages/SearchResults";
 import SeatSelection from "./pages/SeatSelection";
+import PassengerDetails from "./pages/PassengerDetails";
+import Checkout from "./pages/Checkout";
+import BookingConfirmation from "./pages/BookingConfirmation";
+
+
 
 export default function App() {
   return (
@@ -50,6 +55,9 @@ export default function App() {
         <Route path="/termofservice" element={<TermsOfService />} />
         <Route path="/results" element={<SearchResults />} />
         <Route path="/seats" element={<SeatSelection />} />
+        <Route path="/passengers" element={<PassengerDetails />} />
+        <Route path="/checkout" element={<Checkout />} />
+        <Route path="/confirmation" element={<BookingConfirmation />} />
         <Route path="/admin-login" element={<AdminLogin />} />
 
         {/* Admin */}

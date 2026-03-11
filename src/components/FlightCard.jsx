@@ -1,7 +1,7 @@
 import { Plane, Clock, IndianRupee } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
-export default function FlightCard({ flight }) {
+export default function FlightCard({ flight, date, passengers }) {
   const navigate = useNavigate();
   const offer = flight.itineraries[0];
   const segment = offer.segments[0];
@@ -14,8 +14,8 @@ export default function FlightCard({ flight }) {
 
   const handleSelect = () => {
     const searchParams = new URLSearchParams(window.location.search);
-    navigate(
-      `/seats?flight=${segment.carrierCode}${segment.number}&price=${price}&from=${segment.departure.iataCode}&to=${segment.arrival.iataCode}&passengers=${searchParams.get("passengers") || 1}`,
+   navigate(
+      `/seats?flight=${segment.carrierCode}${segment.number}&price=${price}&from=${segment.departure.iataCode}&to=${segment.arrival.iataCode}&passengers=${passengers || 1}&date=${date || ""}`
     );
   };
 

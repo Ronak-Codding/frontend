@@ -88,8 +88,9 @@ export default function SeatSelection() {
   const totalPrice = (parseFloat(price) || 0) + extraCost;
 
   const handleContinue = () => {
+    // /checkout ki jagah /passengers
     navigate(
-      `/checkout?flight=${flight}&seats=${selectedSeats.join(",")}&price=${totalPrice}&from=${from}&to=${to}&passengers=${passengers}`,
+      `/passengers?flight=${flight}&seats=${selectedSeats.join(",")}&price=${totalPrice}&from=${from}&to=${to}&passengers=${passengers}&date=${searchParams.get("date") || ""}`,
     );
   };
 

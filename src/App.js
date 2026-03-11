@@ -31,6 +31,7 @@ import PrivacyPolicy from "./pages/Privacy";
 import TermsOfService from "./pages/TermsOfService";
 import Services from "./components/Services";
 import SearchResults from "./pages/SearchResults";
+import SeatSelection from "./pages/SeatSelection";
 
 export default function App() {
   return (
@@ -48,6 +49,7 @@ export default function App() {
         <Route path="/privacy" element={<PrivacyPolicy />} />
         <Route path="/termofservice" element={<TermsOfService />} />
         <Route path="/results" element={<SearchResults />} />
+        <Route path="/seats" element={<SeatSelection />} />
         <Route path="/admin-login" element={<AdminLogin />} />
 
         {/* Admin */}

@@ -1,6 +1,8 @@
 import { Plane, Clock, IndianRupee } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 export default function FlightCard({ flight }) {
+  const navigate = useNavigate();
   const offer = flight.itineraries[0];
   const segment = offer.segments[0];
   const price = flight.price.total;
@@ -9,6 +11,13 @@ export default function FlightCard({ flight }) {
 
   const departure = segment.departure.at.split("T"); // ["2026-04-01", "06:00:00"]
   const arrival = segment.arrival.at.split("T");
+
+  const handleSelect = () => {
+    const searchParams = new URLSearchParams(window.location.search);
+    navigate(
+      `/seats?flight=${segment.carrierCode}${segment.number}&price=${price}&from=${segment.departure.iataCode}&to=${segment.arrival.iataCode}&passengers=${searchParams.get("passengers") || 1}`,
+    );
+  };
 
   return (
     <div className="rounded-2xl border border-border/50 bg-card/80 p-6 shadow-md backdrop-blur-xl hover:border-primary/40 transition-all">
@@ -63,7 +72,7 @@ export default function FlightCard({ flight }) {
               {parseFloat(price).toLocaleString("en-IN")}
             </span>
           </div>
-          <button className="rounded-xl bg-primary px-6 py-2.5 text-sm font-semibold text-primary-foreground hover:opacity-90 transition-all">
+          <button className="rounded-xl bg-primary px-6 py-2.5 text-sm font-semibold text-primary-foreground hover:opacity-90 transition-all" onClick={handleSelect}>
             Select
           </button>
         </div>

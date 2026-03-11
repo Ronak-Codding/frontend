@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import "./Services.css";
 import Navbar from "./Navbar";
 import Breadcrumb from "./Breadcrumb";
 import Footer from "./Footer";
@@ -341,69 +342,13 @@ export default function Services() {
 
   return (
     <div style={S.root}>
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap');
-        *{box-sizing:border-box;margin:0;padding:0}
-        html{scroll-behavior:smooth}
-        body{background:#060e1e;overflow-x:hidden}
-        .nav-link{transition:color .3s}.nav-link:hover{color:#C9A84C!important}
-        .service-card{transition:transform .4s cubic-bezier(.23,1,.32,1),box-shadow .4s ease;cursor:pointer}
-        .service-card:hover{transform:translateY(-10px) scale(1.02);box-shadow:0 30px 80px rgba(0,0,0,.6),0 0 0 1px rgba(201,168,76,.3)!important}
-        .feat-tag{transition:background .3s,color .3s}.feat-tag:hover{background:rgba(201,168,76,.2)!important;color:#C9A84C!important}
-        .cta-btn{transition:all .3s cubic-bezier(.23,1,.32,1);position:relative;overflow:hidden}
-        .cta-btn::before{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.1),transparent);transform:translateX(-100%);transition:transform .5s}
-        .cta-btn:hover::before{transform:translateX(100%)}
-        .cta-btn:hover{transform:translateY(-2px);box-shadow:0 12px 40px rgba(201,168,76,.4)}
-        .stat-card{transition:transform .3s,background .3s}.stat-card:hover{transform:translateY(-4px);background:rgba(201,168,76,.12)!important}
-        .dest-card{transition:transform .35s cubic-bezier(.23,1,.32,1),box-shadow .35s}.dest-card:hover{transform:translateY(-8px);box-shadow:0 24px 60px rgba(0,0,0,.5)!important}
-        .deal-card{transition:transform .3s}.deal-card:hover{transform:translateY(-6px)}
-        .faq-item{transition:background .3s,border-color .3s;cursor:pointer}
-        @keyframes fadeInUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
-        @keyframes fadeIn{from{opacity:0}to{opacity:1}}
-        @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
-        @keyframes shimmer{0%{background-position:-200% center}100%{background-position:200% center}}
-        @keyframes chatPop{from{opacity:0;transform:scale(.8) translateY(20px)}to{opacity:1;transform:scale(1) translateY(0)}}
-        @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(201,168,76,.5)}70%{box-shadow:0 0 0 12px rgba(201,168,76,0)}}
-        @keyframes slideDown{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
-        .hero-title{animation:fadeInUp .9s ease both;animation-delay:.2s}
-        .hero-sub{animation:fadeInUp .9s ease both;animation-delay:.4s}
-        .hero-cta{animation:fadeInUp .9s ease both;animation-delay:.6s}
-        .hero-plane{animation:float 4s ease-in-out infinite;display:inline-block}
-        .gold-shimmer{background:linear-gradient(90deg,#C9A84C,#f0d070,#C9A84C,#f0d070);background-size:200% auto;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:shimmer 3s linear infinite}
-        .divider-line{background:linear-gradient(90deg,transparent,#C9A84C,transparent);height:1px;width:100%}
-        .hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;background:none;border:none;padding:4px}
-        .hamburger span{display:block;width:22px;height:2px;background:#e8edf3;border-radius:2px;transition:all .3s}
-        input,select,textarea{font-family:'DM Sans',sans-serif}
-        input:focus,select:focus,textarea:focus{outline:2px solid #C9A84C;outline-offset:2px}
-        @media(max-width:768px){
-          .grid-3,.grid-2{grid-template-columns:1fr!important}
-          .grid-4{grid-template-columns:1fr 1fr!important}
-          .stats-row{grid-template-columns:1fr 1fr!important}
-          .nav-links-desk,.nav-book-desk{display:none!important}
-          .hamburger{display:flex!important}
-          .s-row{flex-direction:column!important}
-          .s-row>*{width:100%!important}
-          .footer-row{flex-direction:column;text-align:center}
-          .testi-inner{flex-direction:column!important;gap:12px!important}
-          .chat-panel{width:300px!important;right:12px!important}
-          .chat-fab{right:16px!important;bottom:16px!important}
-        }
-        @media(max-width:480px){
-          .stats-row{grid-template-columns:1fr!important}
-          .grid-4{grid-template-columns:1fr!important}
-        }
-        @media(min-width:769px) and (max-width:1100px){
-          .grid-3{grid-template-columns:1fr 1fr!important}
-          .grid-4{grid-template-columns:1fr 1fr!important}
-        }
-      `}</style>
 
       <Navbar />
 
      <Breadcrumb title="Our Services" />
 
       {/* ══ FEATURE 1: FLIGHT SEARCH FORM ══ */}
-      <section
+      {/* <section
         style={{
           padding: "80px 24px",
           background: "linear-gradient(180deg,#060e1e,#071220)",
@@ -621,12 +566,12 @@ export default function Services() {
                   borderRadius: 10,
                 }}
               >
-                🔍 Search Flights
+                Search Flights
               </button>
             </div>
           </div>
         </div>
-      </section>
+      </section> */}
 
       {/* ══ SERVICES GRID ══ */}
       <section style={{ padding: "100px 0" }}>

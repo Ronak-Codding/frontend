@@ -70,10 +70,6 @@ const Register = ({ onRegister }) => {
     }
   };
 
-  const generateOTP = () => {
-    return Math.floor(100000 + Math.random() * 900000).toString();
-  };
-
   const handleSendOTP = async () => {
     // Phone validation hata ke email validation karo
     if (!formData.email) {
@@ -240,6 +236,18 @@ const Register = ({ onRegister }) => {
         setIsLoading(false);
         return;
       }
+
+      // Send login details email
+      await fetch("http://localhost:5000/api/otp/send-login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password,
+        }),
+      });
 
       setRegistrationSuccess(true);
       setIsLoading(false);
@@ -457,15 +465,15 @@ const Register = ({ onRegister }) => {
                   <label>
                     <i className="fas fa-phone"></i> Phone Number
                   </label>
-                    <input
-                      type="tel"
-                      name="phone"
-                      value={formData.phone}
-                      onChange={handleChange}
-                      placeholder="Enter your 10-digit phone number"
-                      className={errors.phone ? "error" : ""}
-                      disabled={isLoading}
-                    />
+                  <input
+                    type="tel"
+                    name="phone"
+                    value={formData.phone}
+                    onChange={handleChange}
+                    placeholder="Enter your 10-digit phone number"
+                    className={errors.phone ? "error" : ""}
+                    disabled={isLoading}
+                  />
                   {errors.phone && (
                     <span className="error-message">{errors.phone}</span>
                   )}

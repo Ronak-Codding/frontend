@@ -14,19 +14,17 @@ const footerLinks = {
     { label: "Home", href: "/" },
     { label: "About Us", href: "/about" },
     { label: "Services", href: "/services" },
-    { label: "Blog", href: "#" },
   ],
   support: [
-    { label: "Help Center", href: "#" },
+    { label: "Help Center", href: "/helpcenter" },
     { label: "Contact Us", href: "/contact" },
     { label: "FAQs", href: "/faqs" },
-    { label: "Baggage Info", href: "#" },
+ 
   ],
   legal: [
     { label: "Privacy Policy", href: "/privacy" },
     { label: "Terms of Service", href: "/termofservice" },
-    { label: "Cookie Policy", href: "#" },
-    { label: "Accessibility", href: "#" },
+    { label: "Cookie Policy", href: "/cookiepolicy" },
   ],
 };
 
@@ -128,7 +126,7 @@ export default function Footer() {
         {/* Bottom Bar */}
         <div className="mt-12 flex flex-col items-center justify-between gap-6 border-t border-border pt-8 sm:flex-row">
           <p className="text-sm text-muted-foreground">
-            &copy; {new Date().getFullYear()} SkyVoyage Airlines. All rights
+            &copy; {new Date().getFullYear()} SkyJet Airlines. All rights
             reserved.
           </p>
 

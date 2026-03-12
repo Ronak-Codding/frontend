@@ -322,7 +322,7 @@ body {
   min-width: 0;
 }
 .section-card {
-  background: white;
+  background: rgb(15, 14, 14);
   border: 1px solid rgba(0, 0, 0, 0.07);
   border-radius: 16px;
   padding: 40px 44px;
@@ -355,7 +355,14 @@ body {
   align-items: flex-start;
   gap: 16px;
   margin-bottom: 24px;
+  background: #053e88;
 }
+
+.section-header:hover {
+  background: #82a4d6;
+}
+
+
 .section-num-badge {
   font-family: "Playfair Display", serif;
   font-size: 0.75rem;

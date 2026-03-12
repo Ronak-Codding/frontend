@@ -43,7 +43,7 @@ export default function Features() {
             Why Choose Us
           </p>
           <h2 className="font-display text-4xl font-bold tracking-tight text-foreground md:text-5xl">
-            The SkyVoyage Difference
+            The SkyJet Difference
           </h2>
         </div>
 

@@ -127,25 +127,6 @@ export default function TermsOfService() {
     <>
       <Navbar />
 
-      {/* Mobile nav overlay */}
-      <div className={`mobile-overlay${mobileNavOpen ? " open" : ""}`}>
-        <button
-          className="mobile-close"
-          onClick={() => setMobileNavOpen(false)}
-        >
-          ✕
-        </button>
-        <ul className="mobile-nav-list">
-          {sections.map((s) => (
-            <li key={s.id}>
-              <button onClick={() => scrollTo(s.id)}>
-                <span>{s.number}</span>
-                <span>{s.title}</span>
-              </button>
-            </li>
-          ))}
-        </ul>
-      </div>
 
       {/* Hero */}
       <Breadcrumb title="Term of Service" />

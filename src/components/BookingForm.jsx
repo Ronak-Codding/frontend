@@ -95,7 +95,7 @@ export default function BookingForm() {
                   type="date"
                   value={departureDate}
                   onChange={(e) => setDepartureDate(e.target.value)}
-                  className="w-full rounded-xl border border-border bg-secondary/50 px-4 py-4 pr-10"
+                  className="w-full rounded-xl border border-border bg-secondary/50 px-4 py-4 pr-10 text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
                 />
               </div>
             </div>
@@ -125,7 +125,7 @@ export default function BookingForm() {
                 <select
                   value={passengers}
                   onChange={(e) => setPassengers(e.target.value)}
-                  className="w-full appearance-none rounded-xl border border-border bg-secondary/50 px-4 py-4 pr-10"
+                  className=" w-full rounded-xl border border-border bg-secondary/50 px-4 py-4 pr-10 text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 appearance-none"
                 >
                   <option value="1">1 Adult</option>
                   <option value="2">2 Adult</option>

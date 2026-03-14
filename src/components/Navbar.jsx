@@ -71,9 +71,9 @@ export default function Navbar() {
           >
             Register Now
           </button>
-          <button className="rounded-full bg-primary px-6 py-2.5 text-sm font-semibold uppercase tracking-wider text-primary-foreground transition-all hover:shadow-[0_0_20px_rgba(212,168,83,0.3)]">
+          {/* <button className="rounded-full bg-primary px-6 py-2.5 text-sm font-semibold uppercase tracking-wider text-primary-foreground transition-all hover:shadow-[0_0_20px_rgba(212,168,83,0.3)]">
             Book Now
-          </button>
+          </button> */}
         </div>
 
         {/* Mobile Menu Button */}

@@ -73,14 +73,14 @@ const AirportAutocomplete = ({
 
   return (
     <div className="mb-3 position-relative" ref={wrapperRef}>
-      <label className="fw-semibold mb-2">
+      <label className="mb-2 block text-xs font-medium uppercase tracking-wider text-muted-foreground">
         <i className={`fas ${icon} me-2 text-info`}></i>
         {label}
       </label>
 
       <input
         type="text"
-        className="w-full rounded-xl border border-border bg-secondary/50 px-4 py-4 pr-10 text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+        className="w-full rounded-xl border border-border bg-secondary/100 px-4 py-4 pr-10 text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
         placeholder="Search airport"
         value={search}
         onChange={(e) => setSearch(e.target.value)}
@@ -90,7 +90,7 @@ const AirportAutocomplete = ({
 
       {showDropdown && (
         <div
-          className="position-absolute w-100 bg-black shadow rounded mt-1"
+          className="position-absolute w-100 bg-white shadow rounded mt-1"
           style={{
             zIndex: 1050,
             maxHeight: "250px",

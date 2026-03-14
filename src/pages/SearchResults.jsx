@@ -53,7 +53,7 @@ export default function SearchResults() {
         {loading && (
           <div className="flex flex-col items-center justify-center py-20 gap-4">
             <Loader2 className="h-10 w-10 animate-spin text-primary" />
-            <p className="text-muted-foreground">Flights dhundh rahe hain...</p>
+            <p className="text-muted-foreground">Flights Searching...</p>
           </div>
         )}
 
@@ -67,7 +67,7 @@ export default function SearchResults() {
         {/* No Results */}
         {!loading && !error && flights.length === 0 && (
           <div className="rounded-xl border border-border p-10 text-center text-muted-foreground">
-            Is route pe koi flight nahi mili. Dates change karke try karo.
+            Flight not Found...
           </div>
         )}
 

@@ -39,7 +39,7 @@ const Register = ({ onRegister }) => {
           timer: prev.timer - 1,
           canResend: false,
         }));
-      }, 1000);
+      }, 2000);
     } else {
       setOtpState((prev) => ({ ...prev, canResend: true }));
     }

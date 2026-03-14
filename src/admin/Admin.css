@@ -1,11 +1,25 @@
 body {
   margin: 0;
   padding: 0;
-  font-family: 'Segoe UI', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family:
+    "Segoe UI",
+    "Inter",
+    -apple-system,
+    BlinkMacSystemFont,
+    sans-serif;
   transition: background-color 0.3s ease;
   overflow-x: hidden;
+  background: #f8fafc !important;
+  color: #1e293b !important;
+}
+::-webkit-scrollbar {
+  width: 8px;
 }
 
+::-webkit-scrollbar-thumb {
+  background: #f8f9fa;
+  border-radius: 10px;
+}
 /* =======================
    Main Wrapper & Layout
 ======================= */
@@ -21,7 +35,7 @@ body {
   --bg-primary: #ffffff;
   --bg-secondary: #f8f9fa;
   --bg-sidebar: #ffffff;
-  --bg-topbar: linear-gradient(135deg, #0d1355 0%, #311b92 100%);
+  --bg-topbar: linear-gradient(135deg, #050934 0%, #140556 100%);
   --text-primary: #2d3748;
   --text-secondary: #718096;
   --border-color: #e2e8f0;
@@ -34,7 +48,7 @@ body {
   --bg-primary: #0f172a;
   --bg-secondary: #1e293b;
   --bg-sidebar: #1e293b;
-  --bg-topbar: linear-gradient(135deg, #0f1b47 0%, #1a0d36 100%);
+  --bg-topbar: linear-gradient(135deg, #05154c 0%, #1a0d36 100%);
   --text-primary: #f1f5f9;
   --text-secondary: #cbd5e1;
   --border-color: #334155;
@@ -164,7 +178,6 @@ body {
   transform: translateX(-280px);
 }
 
-
 /* =======================
    Page Content Area
 ======================= */
@@ -187,7 +200,7 @@ body {
    Top Navigation Bar - UPDATED
 ======================= */
 .admin-navbar {
-  background: var(--bg-topbar);
+  background: linear-gradient(135deg, #1a237e, #512da8);
   padding: 0 1.5rem;
   height: 70px;
   display: flex;
@@ -250,7 +263,7 @@ body {
 }
 
 .page-title::before {
-  content: '';
+  content: "";
   display: block;
   width: 4px;
   height: 24px;
@@ -342,9 +355,6 @@ body {
   flex-shrink: 0;
 }
 
-
-
-
 /* Notification Bell */
 .notification-container {
   position: relative;
@@ -391,9 +401,15 @@ body {
 }
 
 @keyframes pulse {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.1); }
-  100% { transform: scale(1); }
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+  }
 }
 
 /* Theme Toggle */
@@ -515,7 +531,11 @@ body {
 .dropdown-header {
   padding: 1.25rem;
   border-bottom: 1px solid var(--border-color);
-  background: linear-gradient(135deg, rgba(33, 150, 243, 0.1), rgba(3, 169, 244, 0.1));
+  background: linear-gradient(
+    135deg,
+    rgba(33, 150, 243, 0.1),
+    rgba(3, 169, 244, 0.1)
+  );
   display: flex;
   align-items: center;
   gap: 0.875rem;
@@ -734,7 +754,6 @@ body {
   margin-bottom: 2rem;
 }
 
-
 .stat-card {
   background: var(--card-bg);
   border-radius: 1rem;
@@ -770,7 +789,7 @@ body {
   font-size: 1.75rem;
   font-weight: 700;
   color: var(--text-primary);
-    color: #ffffff;
+  color: #ffffff;
 }
 
 .stat-info p {
@@ -808,7 +827,9 @@ body {
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .loading-overlay .text-white {
@@ -839,8 +860,14 @@ body {
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* =======================
@@ -852,11 +879,11 @@ body {
   .search-container {
     max-width: 300px;
   }
-  
+
   .topbar-stats {
     gap: 1rem;
   }
-  
+
   .quick-actions {
     padding-right: 0.75rem;
   }
@@ -867,26 +894,26 @@ body {
     transform: translateX(-280px);
     box-shadow: none;
   }
-  
+
   #wrapper.toggled #sidebar-wrapper {
     transform: translateX(0);
     box-shadow: 0 0 30px rgba(0, 0, 0, 0.3);
   }
-  
+
   #page-content-wrapper {
     margin-left: 0;
     width: 100%;
   }
-  
+
   .sidebar-toggle {
     display: flex;
   }
-  
+
   .search-container {
     margin-left: 1rem;
     max-width: 250px;
   }
-  
+
   .page-title span {
     font-size: 1.3rem;
   }
@@ -897,23 +924,23 @@ body {
   .page-title span {
     display: none;
   }
-  
+
   .page-title::before {
     height: 20px;
   }
-  
+
   .search-container {
     max-width: 200px;
   }
-  
+
   .quick-actions {
     display: none;
   }
-  
+
   .topbar-stats {
     display: none;
   }
-  
+
   .notifications-dropdown {
     width: 320px;
     right: -50%;
@@ -926,42 +953,42 @@ body {
     padding: 0 1rem;
     height: 60px;
   }
-  
+
   .sidebar-toggle {
     width: 36px;
     height: 36px;
     font-size: 1.1rem;
   }
-  
+
   .search-container {
     display: none;
   }
-  
+
   .admin-profile-info {
     display: none;
   }
-  
+
   .admin-profile-arrow {
     display: none;
   }
-  
+
   .admin-top-profile {
     padding: 0.25rem;
     background: none;
     border: none;
   }
-  
+
   .admin-top-profile:hover {
     background: none;
   }
-  
+
   .notification-bell,
   .theme-toggle-btn {
     width: 36px;
     height: 36px;
     font-size: 1.1rem;
   }
-  
+
   .admin-profile-dropdown-right {
     position: fixed;
     top: 60px;
@@ -969,7 +996,7 @@ body {
     left: 1rem;
     width: auto;
   }
-  
+
   .notifications-dropdown {
     position: fixed;
     top: 60px;
@@ -978,26 +1005,26 @@ body {
     width: auto;
     max-height: 70vh;
   }
-  
+
   .container-fluid.p-4 {
     padding: 1rem;
   }
-  
+
   .dashboard-stats {
     grid-template-columns: 1fr;
     gap: 1rem;
   }
-  
+
   .stat-card {
     padding: 1rem;
   }
-  
+
   .stat-icon {
     width: 48px;
     height: 48px;
     font-size: 1.25rem;
   }
-  
+
   .stat-info h3 {
     font-size: 1.5rem;
   }
@@ -1008,17 +1035,17 @@ body {
   .admin-navbar-left {
     gap: 0.75rem;
   }
-  
+
   .page-title {
     font-size: 1.2rem;
   }
-  
+
   .admin-profile-img {
     width: 32px;
     height: 32px;
     font-size: 1rem;
   }
-  
+
   .notification-badge {
     min-width: 16px;
     height: 16px;
@@ -1031,21 +1058,21 @@ body {
   .sidebar-heading h2 {
     font-size: 1.25rem;
   }
-  
+
   .list-group-item {
     padding: 0.75rem 1rem;
     font-size: 0.9rem;
   }
-  
+
   .list-group-item i {
     font-size: 1rem;
     margin-right: 10px;
   }
-  
+
   .notification-bell {
     padding: 0.25rem;
   }
-  
+
   .theme-toggle-btn {
     width: 32px;
     height: 32px;
@@ -1061,12 +1088,12 @@ body {
   .loading-overlay {
     display: none !important;
   }
-  
+
   #page-content-wrapper {
     margin-left: 0 !important;
     width: 100% !important;
   }
-  
+
   .container-fluid.p-4 {
     padding: 0 !important;
   }

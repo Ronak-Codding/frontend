@@ -1,22 +1,32 @@
 import { useState } from "react";
 import { Plane, Users, ArrowRightLeft, Search } from "lucide-react";
 import AirportAutocomplete from "../components/AirportAutocomplete";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
 export default function BookingForm() {
+  const [searchParams] = useSearchParams();
   const [tripType, setTripType] = useState("roundtrip");
+  const fromCode = searchParams.get("from");
+  const toCode = searchParams.get("to");
 
-  const [departureDate, setDepartureDate] = useState("");
-  const [passengers, setPassengers] = useState("1");
+  const [departureDate, setDepartureDate] = useState(
+    searchParams.get("date") || "",
+  );
+  const [passengers, setPassengers] = useState(
+    searchParams.get("passengers") || "1",
+  );
 
-  // Airport Selection State
-  const [fromAirport, setFromAirport] = useState(null);
-  const [toAirport, setToAirport] = useState(null);
+  const [fromAirport, setFromAirport] = useState(
+    fromCode ? { airport_code: fromCode, city: fromCode } : null,
+  );
+  const [toAirport, setToAirport] = useState(
+    toCode ? { airport_code: toCode, city: toCode } : null,
+  );
   const navigate = useNavigate();
 
   const handleSearch = () => {
-    console.log("fromAirport:", fromAirport); 
-    console.log("toAirport:", toAirport); 
+    console.log("fromAirport:", fromAirport);
+    console.log("toAirport:", toAirport);
     if (!fromAirport || !toAirport) return;
     navigate(
       `/results?from=${fromAirport.airport_code}&to=${toAirport.airport_code}&date=${departureDate}&passengers=${passengers}`,
@@ -24,7 +34,7 @@ export default function BookingForm() {
   };
 
   return (
-    <section className="relative -mt-32 z-20 px-4 pb-20">
+    <section id="flight-search" className="relative -mt-32 z-20 px-4 pb-20">
       <div className="mx-auto max-w-6xl">
         <div className="rounded-2xl border border-border/50 bg-card/80 p-6 shadow-2xl backdrop-blur-xl md:p-8">
           {/* Trip Type Toggle */}

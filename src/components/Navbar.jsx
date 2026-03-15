@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Menu, X, Plane } from "lucide-react";
 
 const navLinks = [
   { label: "Home", href: "/" },
+  { label: "Flight Search", href: "#flight-search" },
   { label: "About", href: "/about" },
   { label: "FAQs", href: "/faqs" },
   { label: "Contact", href: "/contact" },
@@ -12,6 +13,7 @@ const navLinks = [
 
 export default function Navbar() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -23,6 +25,26 @@ export default function Navbar() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  const handleNavClick = (e, href) => {
+    if (href === "#flight-search") {
+      e.preventDefault();
+      if (location.pathname === "/") {
+        // Home pe hai — scroll karo
+        document
+          .getElementById("flight-search")
+          ?.scrollIntoView({ behavior: "smooth" });
+      } else {
+        // Doosre page pe hai — home pe jao aur scroll karo
+        navigate("/");
+        setTimeout(() => {
+          document
+            .getElementById("flight-search")
+            ?.scrollIntoView({ behavior: "smooth" });
+        }, 300);
+      }
+      setIsMobileMenuOpen(false);
+    }
+  };
   return (
     <nav
       className={`fixed left-0 right-0 top-0 z-50 transition-all duration-500 ${
@@ -49,6 +71,7 @@ export default function Navbar() {
             <a
               key={link.label}
               href={link.href}
+              onClick={(e) => handleNavClick(e, link.href)}
               className="group relative text-sm font-medium uppercase tracking-wider text-white/80 transition-colors hover:text-white"
             >
               {link.label}
@@ -102,7 +125,10 @@ export default function Navbar() {
               key={link.label}
               href={link.href}
               className="rounded-lg px-4 py-3 text-sm font-medium uppercase tracking-wider text-white/80 transition-colors hover:bg-white/5 hover:text-white"
-              onClick={() => setIsMobileMenuOpen(false)}
+              onClick={(e) => {
+                handleNavClick(e, link.href);
+                setIsMobileMenuOpen(false);
+              }}
             >
               {link.label}
             </a>

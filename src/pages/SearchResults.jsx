@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import FlightCard from "../components/FlightCard";
 import { Plane, Loader2 } from "lucide-react";
+import BookingForm from "../components/BookingForm";
 
 export default function SearchResults() {
   const [searchParams] = useSearchParams();
@@ -37,6 +38,9 @@ export default function SearchResults() {
 
   return (
     <div className="min-h-screen bg-background px-4 py-10">
+      <div className="pt-24 bg-card/50 border-b border-border/50 shadow-md">
+        <BookingForm />
+      </div>
       <div className="mx-auto max-w-4xl">
         {/* Header */}
         <div className="mb-8 flex items-center gap-3">

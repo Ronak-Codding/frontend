@@ -148,14 +148,6 @@ const TOP_DESTINATIONS = [
   },
 ];
 
-// SVG world map paths (simplified continents)
-const WORLD_PATH = `
-  M 45,22 Q 48,20 52,21 Q 56,19 60,22 Q 62,25 60,30 Q 56,35 50,33 Q 44,30 45,22 Z
-  M 20,25 Q 25,20 32,22 Q 38,24 40,30 Q 42,38 35,42 Q 28,45 22,40 Q 17,35 20,25 Z
-  M 46,28 Q 52,26 56,30 Q 58,36 55,42 Q 50,46 45,44 Q 41,40 43,34 Q 44,30 46,28 Z
-  M 62,30 Q 70,26 78,28 Q 84,32 86,40 Q 84,50 76,52 Q 68,54 63,48 Q 58,42 60,36 Q 61,32 62,30 Z
-  M 80,62 Q 86,60 90,65 Q 92,72 88,76 Q 84,80 80,78 Q 76,74 78,68 Q 79,64 80,62 Z
-`;
 
 // Route lines between hub airports
 const ROUTES = [

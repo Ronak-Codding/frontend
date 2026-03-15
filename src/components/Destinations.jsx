@@ -102,7 +102,7 @@ export default function Destinations() {
                 </div>
 
                 {/* Hover Overlay */}
-                <div className="absolute inset-0 flex items-center justify-center bg-primary/20 opacity-0 backdrop-blur-sm transition-opacity group-hover:opacity-100">
+                <div className="absolute inset-0 flex items-center justify-center bg-primary/20 opacity-0 transition-opacity group-hover:opacity-100">
                   <span className="rounded-full border-2 border-white px-4 sm:px-6 py-2 sm:py-3 text-xs sm:text-sm font-semibold uppercase tracking-wider text-white">
                     Explore
                   </span>

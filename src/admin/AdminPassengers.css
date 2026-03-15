@@ -1,0 +1,318 @@
+/* ══════════════════════════════════════════════════════════
+   ADMIN PASSENGERS CSS
+   Dedicated modal system (pax-*) to avoid overflow issues
+══════════════════════════════════════════════════════════ */
+
+/* ── Search Row ── */
+.pax-search-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.pax-gender-select {
+  min-width: 140px;
+}
+
+@media (max-width: 600px) {
+  .pax-search-row {
+    flex-direction: column;
+  }
+  .pax-gender-select {
+    width: 100%;
+    min-width: unset;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════
+   PAX MODAL SYSTEM — Replaces admin-modal for passengers
+   Fixes: header cut-off, overflow issues
+══════════════════════════════════════════════════════════ */
+
+/* ── Overlay ── */
+.pax-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+}
+
+/* ── Modal Base ── */
+.pax-modal {
+  position: relative;
+  width: 100%;
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 1rem;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.4);
+  display: flex;
+  flex-direction: column; /* key: header + body + footer stack */
+  max-height: 90vh; /* key: constrain total height */
+  overflow: hidden; /* key: clip inside, not the modal itself */
+}
+
+/* ── Modal Sizes ── */
+.pax-modal-sm {
+  max-width: 32rem;
+}
+.pax-modal-md {
+  max-width: 48rem;
+}
+.pax-modal-lg {
+  max-width: 44rem;
+}
+
+/* ── Header — always visible, never scrolls away ── */
+.pax-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid var(--border-color);
+  background: var(--card-bg);
+  flex-shrink: 0; /* key: header never shrinks */
+}
+
+.pax-modal-title {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.pax-modal-close {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.375rem;
+  border-radius: 0.5rem;
+  transition:
+    background 0.2s,
+    color 0.2s;
+}
+
+.pax-modal-close:hover {
+  background: var(--hover-color);
+  color: var(--text-primary);
+}
+
+/* ── Body — scrolls independently ── */
+.pax-modal-body {
+  padding: 1.5rem;
+  overflow-y: auto; /* key: only body scrolls */
+  flex: 1; /* key: fills remaining space */
+}
+
+/* ── Footer — always visible, never scrolls away ── */
+.pax-modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  padding: 1rem 1.5rem;
+  border-top: 1px solid var(--border-color);
+  background: var(--card-bg);
+  flex-shrink: 0; /* key: footer never shrinks */
+}
+
+/* ══════════════════════════════════════════════════════════
+   PAX FORM STYLES
+══════════════════════════════════════════════════════════ */
+
+/* Stack layout for PassengerModal */
+.pax-form-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* Grid layout for AdminPassengers edit modal */
+.pax-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+/* Side-by-side row (age + gender) */
+.pax-form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.pax-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+.pax-form-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.pax-required {
+  color: #f87171;
+  margin-left: 0.2rem;
+}
+
+.pax-optional {
+  font-size: 0.7rem;
+  color: var(--text-secondary);
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: 0;
+  margin-left: 0.25rem;
+}
+
+.pax-form-input {
+  width: 100%;
+  padding: 0.625rem 0.875rem;
+  border: 1px solid var(--border-color);
+  border-radius: 0.625rem;
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  font-size: 0.875rem;
+  outline: none;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
+  box-sizing: border-box;
+}
+
+.pax-form-input:focus {
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15);
+}
+
+.pax-form-input::placeholder {
+  color: var(--text-secondary);
+  opacity: 0.6;
+}
+
+.pax-form-select {
+  width: 100%;
+  padding: 0.625rem 0.875rem;
+  border: 1px solid var(--border-color);
+  border-radius: 0.625rem;
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  font-size: 0.875rem;
+  outline: none;
+  cursor: pointer;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
+  box-sizing: border-box;
+}
+
+.pax-form-select:focus {
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15);
+}
+
+/* ══════════════════════════════════════════════════════════
+   PAX VIEW MODAL SECTIONS
+══════════════════════════════════════════════════════════ */
+
+.pax-section {
+  margin-bottom: 1.25rem;
+}
+
+.pax-section:last-child {
+  margin-bottom: 0;
+}
+
+.pax-section-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 0.625rem;
+}
+
+.pax-detail-grid {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 0.75rem;
+  padding: 0.5rem 0.875rem;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+}
+
+.pax-detail-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.pax-detail-row:nth-child(odd):last-child,
+.pax-detail-row:nth-child(even):last-child,
+.pax-detail-row:last-child {
+  border-bottom: none;
+}
+
+.pax-detail-label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.pax-detail-value {
+  font-size: 0.875rem;
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+/* ── Checkbox button ── */
+.passengers-check-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+/* ── Responsive ── */
+@media (max-width: 640px) {
+  .pax-form-grid {
+    grid-template-columns: 1fr;
+  }
+  .pax-form-row {
+    grid-template-columns: 1fr;
+  }
+  .pax-detail-grid {
+    grid-template-columns: 1fr;
+  }
+  .pax-modal-body {
+    padding: 1rem;
+  }
+  .pax-modal-header {
+    padding: 1rem;
+  }
+  .pax-modal-footer {
+    padding: 0.875rem 1rem;
+  }
+}

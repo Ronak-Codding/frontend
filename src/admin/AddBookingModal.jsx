@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { X, Save } from "lucide-react";
 import "./AdminTables.css";
 import "./AdminUsers.css";
+import "./AdminPassengers.css";
 
 const AddBookingModal = ({ onClose, onSuccess }) => {
   const [users, setUsers] = useState([]);
@@ -76,55 +77,37 @@ const AddBookingModal = ({ onClose, onSuccess }) => {
   };
 
   return (
-    <div className="admin-modal-overlay" onClick={onClose}>
+    <div className="pax-modal-overlay" onClick={onClose}>
       <div
-        className="admin-modal"
-        style={{ maxWidth: "36rem" }}
+        className="pax-modal pax-modal-md"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* ── Header ── */}
-        <div className="admin-modal-header">
-          <h2 className="admin-modal-title">Add New Booking</h2>
-          <button className="admin-modal-close" onClick={onClose}>
+        {/* Header */}
+        <div className="pax-modal-header">
+          <h2 className="pax-modal-title">Add New Booking</h2>
+          <button className="pax-modal-close" onClick={onClose}>
             <X size={20} />
           </button>
         </div>
 
-        {/* ── Error ── */}
-        {error && (
-          <div
-            style={{
-              margin: "1rem 1.5rem 0",
-              padding: "0.75rem 1rem",
-              borderRadius: "0.75rem",
-              border: "1px solid rgba(239,68,68,0.3)",
-              background: "rgba(239,68,68,0.1)",
-              color: "#f87171",
-              fontSize: "0.875rem",
-            }}
-          >
-            {error}
-          </div>
-        )}
+        {/* Error */}
+        {error && <div className="booking-error-msg">{error}</div>}
 
-        {/* ── Form ── */}
+        {/* Form */}
         <form onSubmit={handleSubmit}>
-          <div className="admin-modal-body">
-            <div
-              style={{ display: "flex", flexDirection: "column", gap: "1rem" }}
-            >
+          <div className="pax-modal-body">
+            <div className="pax-form-stack">
               {/* User */}
-              <div className="admin-form-group">
-                <label className="admin-form-label">
-                  User <span style={{ color: "#f87171" }}>*</span>
+              <div className="pax-form-group">
+                <label className="pax-form-label">
+                  User <span className="pax-required">*</span>
                 </label>
                 <select
                   name="user_id"
                   value={formData.user_id}
                   onChange={handleChange}
                   required
-                  className="admin-select"
-                  style={{ width: "100%" }}
+                  className="pax-form-select"
                 >
                   <option value="">Select User</option>
                   {users.map((u) => (
@@ -136,17 +119,16 @@ const AddBookingModal = ({ onClose, onSuccess }) => {
               </div>
 
               {/* Flight */}
-              <div className="admin-form-group">
-                <label className="admin-form-label">
-                  Flight <span style={{ color: "#f87171" }}>*</span>
+              <div className="pax-form-group">
+                <label className="pax-form-label">
+                  Flight <span className="pax-required">*</span>
                 </label>
                 <select
                   name="flight_id"
                   value={formData.flight_id}
                   onChange={handleChange}
                   required
-                  className="admin-select"
-                  style={{ width: "100%" }}
+                  className="pax-form-select"
                 >
                   <option value="">Select Flight</option>
                   {flights.map((f) => (
@@ -159,10 +141,9 @@ const AddBookingModal = ({ onClose, onSuccess }) => {
               </div>
 
               {/* Passengers */}
-              <div className="admin-form-group">
-                <label className="admin-form-label">
-                  Number of Passengers{" "}
-                  <span style={{ color: "#f87171" }}>*</span>
+              <div className="pax-form-group">
+                <label className="pax-form-label">
+                  Number of Passengers <span className="pax-required">*</span>
                 </label>
                 <input
                   type="number"
@@ -171,39 +152,28 @@ const AddBookingModal = ({ onClose, onSuccess }) => {
                   value={formData.total_passengers}
                   onChange={handleChange}
                   required
-                  className="admin-input"
+                  className="pax-form-input"
                 />
               </div>
 
               {/* Total Amount */}
-              <div className="admin-form-group">
-                <label className="admin-form-label">Total Amount (₹)</label>
+              <div className="pax-form-group">
+                <label className="pax-form-label">Total Amount (₹)</label>
                 <input
                   type="number"
                   readOnly
                   value={formData.total_amount}
-                  className="admin-input"
-                  style={{
-                    background: "var(--bg-secondary)",
-                    cursor: "not-allowed",
-                    opacity: 0.7,
-                  }}
+                  className="pax-form-input pax-form-input-readonly"
                 />
-                <p
-                  style={{
-                    fontSize: "0.75rem",
-                    color: "var(--text-secondary)",
-                    marginTop: "0.25rem",
-                  }}
-                >
+                <p className="pax-form-hint">
                   Auto-calculated based on flight price × passengers
                 </p>
               </div>
             </div>
           </div>
 
-          {/* ── Footer ── */}
-          <div className="admin-modal-footer">
+          {/* Footer */}
+          <div className="pax-modal-footer">
             <button type="button" className="btn-secondary" onClick={onClose}>
               Cancel
             </button>

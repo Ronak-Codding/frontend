@@ -80,8 +80,7 @@ const AdminBookings = () => {
         const res = await fetch(
           `http://localhost:5000/api/bookings/search?q=${query}`,
         );
-        const data = await res.json();
-        setBookings(data);
+        setBookings(await res.json());
       } catch {
         showNotification("Search failed", "error");
       } finally {
@@ -112,23 +111,23 @@ const AdminBookings = () => {
 
   const sortedBookings = () => {
     return [...filteredBookingsData()].sort((a, b) => {
-      let aVal = a[sortConfig.key],
-        bVal = b[sortConfig.key];
+      let av = a[sortConfig.key],
+        bv = b[sortConfig.key];
       if (sortConfig.key === "booking_date") {
-        aVal = new Date(aVal).getTime();
-        bVal = new Date(bVal).getTime();
+        av = new Date(av).getTime();
+        bv = new Date(bv).getTime();
       } else if (sortConfig.key === "total_amount") {
-        aVal = Number(aVal);
-        bVal = Number(bVal);
+        av = Number(av);
+        bv = Number(bv);
       } else if (sortConfig.key === "user") {
-        aVal = `${a.user_id?.firstName} ${a.user_id?.lastName}`;
-        bVal = `${b.user_id?.firstName} ${b.user_id?.lastName}`;
+        av = `${a.user_id?.firstName} ${a.user_id?.lastName}`;
+        bv = `${b.user_id?.firstName} ${b.user_id?.lastName}`;
       } else if (sortConfig.key === "flight") {
-        aVal = a.flight_id?.flight_number || "";
-        bVal = b.flight_id?.flight_number || "";
+        av = a.flight_id?.flight_number || "";
+        bv = b.flight_id?.flight_number || "";
       }
-      if (aVal < bVal) return sortConfig.direction === "asc" ? -1 : 1;
-      if (aVal > bVal) return sortConfig.direction === "asc" ? 1 : -1;
+      if (av < bv) return sortConfig.direction === "asc" ? -1 : 1;
+      if (av > bv) return sortConfig.direction === "asc" ? 1 : -1;
       return 0;
     });
   };
@@ -327,7 +326,7 @@ const AdminBookings = () => {
 
   return (
     <div>
-      {/* ── Loading Overlay ── */}
+      {/* Loading */}
       {loading && (
         <div className="users-loading-overlay">
           <div className="users-loading-box">
@@ -337,7 +336,7 @@ const AdminBookings = () => {
         </div>
       )}
 
-      {/* ── Notification ── */}
+      {/* Notification */}
       {notification.show && (
         <div
           className={`users-notification ${notification.type === "error" ? "users-notification-error" : "users-notification-success"}`}
@@ -349,87 +348,82 @@ const AdminBookings = () => {
       {/* ── View Booking Modal ── */}
       {showViewModal && viewBooking && (
         <div
-          className="admin-modal-overlay"
+          className="pax-modal-overlay"
           onClick={() => setShowViewModal(false)}
         >
           <div
-            className="admin-modal"
-            style={{ maxWidth: "42rem", maxHeight: "90vh", overflowY: "auto" }}
+            className="pax-modal pax-modal-lg"
             onClick={(e) => e.stopPropagation()}
           >
-            <div
-              className="admin-modal-header"
-              style={{
-                position: "sticky",
-                top: 0,
-                background: "var(--card-bg)",
-                zIndex: 10,
-              }}
-            >
+            <div className="pax-modal-header">
               <div>
-                <h2 className="admin-modal-title">Booking Details</h2>
-                <p className="admin-modal-subtitle">
+                <h2 className="pax-modal-title">Booking Details</h2>
+                <p
+                  style={{
+                    fontSize: "0.8rem",
+                    color: "var(--text-secondary)",
+                    margin: 0,
+                  }}
+                >
                   {viewBooking.bookingReference}
                 </p>
               </div>
               <button
-                className="admin-modal-close"
+                className="pax-modal-close"
                 onClick={() => setShowViewModal(false)}
               >
                 <X size={20} />
               </button>
             </div>
-            <div className="admin-modal-body">
-              {[
-                ["Booking Reference", viewBooking.bookingReference],
-                [
-                  "User Name",
-                  `${viewBooking.user_id?.firstName} ${viewBooking.user_id?.lastName}`,
-                ],
-                ["Email", viewBooking.user_id?.email],
-                ["Phone", viewBooking.user_id?.phone],
-                ["Flight Number", viewBooking.flight_id?.flight_number],
-                [
-                  "Route",
-                  `${viewBooking.flight_id?.from_airport?.city} (${viewBooking.flight_id?.from_airport?.airport_code}) → ${viewBooking.flight_id?.to_airport?.city} (${viewBooking.flight_id?.to_airport?.airport_code})`,
-                ],
-                [
-                  "Departure",
-                  new Date(
-                    viewBooking.flight_id?.departure_time,
-                  ).toLocaleString("en-IN"),
-                ],
-                [
-                  "Arrival",
-                  new Date(viewBooking.flight_id?.arrival_time).toLocaleString(
-                    "en-IN",
-                  ),
-                ],
-                ["Total Passengers", viewBooking.total_passengers],
-                [
-                  "Total Amount",
-                  `₹${viewBooking.total_amount?.toLocaleString("en-IN")}`,
-                ],
-                [
-                  "Booking Date",
-                  new Date(viewBooking.booking_date).toLocaleString("en-IN"),
-                ],
-              ].map(([label, value]) => (
-                <div className="users-detail-row" key={label}>
-                  <span className="users-detail-label">{label}</span>
-                  <span className="users-detail-value">{value || "—"}</span>
-                </div>
-              ))}
-              <div className="users-detail-row">
-                <span className="users-detail-label">Status</span>
-                <span
-                  className={`badge-${viewBooking.status?.toLowerCase() || "pending"}`}
-                >
-                  {viewBooking.status}
-                </span>
+            <div className="pax-modal-body">
+              <div className="pax-detail-grid">
+                {[
+                  ["Booking Reference", viewBooking.bookingReference],
+                  [
+                    "User Name",
+                    `${viewBooking.user_id?.firstName} ${viewBooking.user_id?.lastName}`,
+                  ],
+                  ["Email", viewBooking.user_id?.email],
+                  ["Phone", viewBooking.user_id?.phone],
+                  ["Flight Number", viewBooking.flight_id?.flight_number],
+                  [
+                    "Route",
+                    `${viewBooking.flight_id?.from_airport?.city} (${viewBooking.flight_id?.from_airport?.airport_code}) → ${viewBooking.flight_id?.to_airport?.city} (${viewBooking.flight_id?.to_airport?.airport_code})`,
+                  ],
+                  [
+                    "Departure",
+                    new Date(
+                      viewBooking.flight_id?.departure_time,
+                    ).toLocaleString("en-IN"),
+                  ],
+                  [
+                    "Arrival",
+                    new Date(
+                      viewBooking.flight_id?.arrival_time,
+                    ).toLocaleString("en-IN"),
+                  ],
+                  ["Total Passengers", viewBooking.total_passengers],
+                  [
+                    "Total Amount",
+                    `₹${viewBooking.total_amount?.toLocaleString("en-IN")}`,
+                  ],
+                  ["Status", viewBooking.status],
+                  [
+                    "Booking Date",
+                    new Date(viewBooking.booking_date).toLocaleString("en-IN"),
+                  ],
+                  ...(viewBooking.payment_status
+                    ? [["Payment Status", viewBooking.payment_status]]
+                    : []),
+                ].map(([label, value]) => (
+                  <div className="pax-detail-row" key={label}>
+                    <span className="pax-detail-label">{label}</span>
+                    <span className="pax-detail-value">{value || "—"}</span>
+                  </div>
+                ))}
               </div>
             </div>
-            <div className="admin-modal-footer">
+            <div className="pax-modal-footer">
               <button
                 className="btn-secondary"
                 onClick={() => setShowViewModal(false)}
@@ -644,11 +638,7 @@ const AdminBookings = () => {
                         onChange={() => toggleBookingSelection(b._id)}
                       />
                     </td>
-
-                    {/* Booking Ref */}
                     <td className="cell-accent">{b.bookingReference}</td>
-
-                    {/* User */}
                     <td>
                       <div className="admin-avatar-cell">
                         <div className="admin-avatar">
@@ -661,37 +651,26 @@ const AdminBookings = () => {
                         </div>
                       </div>
                     </td>
-
                     <td className="cell-muted" style={{ fontSize: "0.75rem" }}>
                       {b.user_id?.email}
                     </td>
-
-                    {/* Flight */}
                     <td>
                       <span className="airline-code-tag">
                         {b.flight_id?.flight_number || "—"}
                       </span>
                     </td>
-
-                    {/* Route */}
                     <td className="cell-muted">
                       {b.flight_id?.from_airport?.airport_code} →{" "}
                       {b.flight_id?.to_airport?.airport_code}
                     </td>
-
-                    {/* Passengers */}
                     <td>
                       <span className="booking-passengers-badge">
                         {b.total_passengers}
                       </span>
                     </td>
-
-                    {/* Amount */}
                     <td className="cell-success">
                       ₹{b.total_amount?.toLocaleString("en-IN")}
                     </td>
-
-                    {/* Status */}
                     <td>
                       <span
                         className={
@@ -701,8 +680,6 @@ const AdminBookings = () => {
                         {b.status}
                       </span>
                     </td>
-
-                    {/* Date */}
                     <td className="cell-muted" style={{ fontSize: "0.75rem" }}>
                       {new Date(b.booking_date).toLocaleDateString("en-IN", {
                         day: "numeric",
@@ -710,8 +687,6 @@ const AdminBookings = () => {
                         year: "numeric",
                       })}
                     </td>
-
-                    {/* Actions */}
                     <td>
                       <div className="cell-actions">
                         <button

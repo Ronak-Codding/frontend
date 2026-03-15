@@ -284,6 +284,7 @@
 .admin-table thead tr {
   border-bottom: 1px solid var(--border-color);
   background: var(--bg-secondary);
+  font-family: Arial, Helvetica, sans-serif;
 }
 
 .admin-table th {
@@ -609,6 +610,7 @@
   backdrop-filter: blur(4px);
   padding: 1rem;
   animation: fadeIn 0.2s ease;
+  /* position: sticky; */
 }
 
 .admin-modal {

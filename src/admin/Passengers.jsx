@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import {
   Search,
   Download,
-  Plus,
   Edit2,
   Trash2,
   Loader2,
@@ -11,22 +10,41 @@ import {
   X,
   Save,
   Users,
+  Eye,
+  CheckSquare,
+  Square,
+  Mail,
+  MapPin,
+  FileText,
 } from "lucide-react";
 import "./AdminTables.css";
+import "./AdminUsers.css";
+import "./AdminPassengers.css";
 
 export default function AdminPassengers({ token }) {
-  const [passengers, setPassengers] = useState([]);
+  const [filteredPassengers, setFilteredPassengers] = useState([]);
   const [loading, setLoading] = useState(false);
   const [total, setTotal] = useState(0);
   const [pages, setPages] = useState(1);
   const [page, setPage] = useState(1);
-  const [search, setSearch] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
   const [gender, setGender] = useState("all");
-  const [minAge, setMinAge] = useState("");
-  const [maxAge, setMaxAge] = useState("");
   const [showModal, setShowModal] = useState(false);
-  const [modalMode, setModalMode] = useState("add");
+  const [showViewModal, setShowViewModal] = useState(false);
+  const [viewPassenger, setViewPassenger] = useState(null);
   const [editData, setEditData] = useState(null);
+  const [notification, setNotification] = useState({
+    show: false,
+    message: "",
+    type: "",
+  });
+  const [selectedPassengers, setSelectedPassengers] = useState([]);
+  const [selectAll, setSelectAll] = useState(false);
+  const [sortConfig, setSortConfig] = useState({
+    key: "fullName",
+    direction: "asc",
+  });
+  const [exportFormat, setExportFormat] = useState("csv");
   const [formData, setFormData] = useState({
     fullName: "",
     gender: "",
@@ -48,9 +66,24 @@ export default function AdminPassengers({ token }) {
     Authorization: `Bearer ${token}`,
   };
 
+  const showNotification = (message, type = "success") => {
+    setNotification({ show: true, message, type });
+    setTimeout(
+      () => setNotification({ show: false, message: "", type: "" }),
+      3000,
+    );
+  };
+
   useEffect(() => {
     fetchPassengers();
-  }, [page, gender]);
+  }, [page]);
+  useEffect(() => {
+    const t = setTimeout(() => {
+      setPage(1);
+      fetchPassengers();
+    }, 400);
+    return () => clearTimeout(t);
+  }, [searchTerm, gender]);
 
   const fetchPassengers = async () => {
     setLoading(true);
@@ -58,128 +91,240 @@ export default function AdminPassengers({ token }) {
       const params = new URLSearchParams({
         page,
         limit: 10,
-        search,
-        gender,
-        minAge,
-        maxAge,
+        search: searchTerm,
+        ...(gender !== "all" && { gender }),
       });
       const res = await fetch(
         `http://localhost:5000/api/admin/passengers?${params}`,
         { headers: authHeaders },
       );
       const data = await res.json();
-      setPassengers(data.passengers || []);
+      setFilteredPassengers(data.passengers || []);
       setTotal(data.total || 0);
       setPages(data.pages || 1);
-    } catch (err) {
-      console.error(err);
+    } catch {
+      showNotification("Failed to fetch passengers", "error");
     } finally {
       setLoading(false);
     }
   };
 
-  const handleDelete = async (bookingId, passengerIndex) => {
+  const requestSort = (key) => {
+    const dir =
+      sortConfig.key === key && sortConfig.direction === "asc" ? "desc" : "asc";
+    setSortConfig({ key, direction: dir });
+    setFilteredPassengers(
+      [...filteredPassengers].sort((a, b) => {
+        let av = a[key],
+          bv = b[key];
+        if (key === "createdAt") {
+          av = new Date(av).getTime();
+          bv = new Date(bv).getTime();
+        } else if (key === "age") {
+          av = parseInt(a.age) || 0;
+          bv = parseInt(b.age) || 0;
+        }
+        return dir === "asc"
+          ? av < bv
+            ? -1
+            : av > bv
+              ? 1
+              : 0
+          : bv < av
+            ? -1
+            : bv > av
+              ? 1
+              : 0;
+      }),
+    );
+  };
+  const SortIcon = ({ col }) =>
+    sortConfig.key === col
+      ? sortConfig.direction === "asc"
+        ? " ↑"
+        : " ↓"
+      : "";
+
+  const handleDelete = async (bId, pIdx) => {
     if (!window.confirm("Delete this passenger?")) return;
+    setLoading(true);
     try {
-      await fetch(
-        `http://localhost:5000/api/admin/passengers/${bookingId}/${passengerIndex}`,
-        {
-          method: "DELETE",
-          headers: authHeaders,
-        },
-      );
+      await fetch(`http://localhost:5000/api/admin/passengers/${bId}/${pIdx}`, {
+        method: "DELETE",
+        headers: authHeaders,
+      });
+      showNotification("Passenger deleted");
       fetchPassengers();
-    } catch (err) {
-      console.error(err);
+    } catch {
+      showNotification("Failed to delete", "error");
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleEdit = (passenger) => {
-    setModalMode("edit");
-    setEditData(passenger);
+  const handleEdit = (p) => {
+    setEditData(p);
     setFormData({
-      fullName: passenger.fullName || "",
-      gender: passenger.gender || "",
-      dob: passenger.dob || "",
-      nationality: passenger.nationality || "",
-      passportNumber: passenger.passportNumber || "",
-      passportExpiry: passenger.passportExpiry || "",
-      email: passenger.email || "",
-      phone: passenger.phone || "",
-      flightNumber: passenger.flightNumber || "",
-      from: passenger.from || "",
-      to: passenger.to || "",
-      seat: passenger.seat || "",
-      totalPrice: passenger.totalPrice || "",
-    });
-    setShowModal(true);
-  };
-
-  const handleAdd = () => {
-    setModalMode("add");
-    setEditData(null);
-    setFormData({
-      fullName: "",
-      gender: "",
-      dob: "",
-      nationality: "",
-      passportNumber: "",
-      passportExpiry: "",
-      email: "",
-      phone: "",
-      flightNumber: "",
-      from: "",
-      to: "",
-      seat: "",
-      totalPrice: "",
+      fullName: p.fullName || "",
+      gender: p.gender || "",
+      dob: p.dob || "",
+      nationality: p.nationality || "",
+      passportNumber: p.passportNumber || "",
+      passportExpiry: p.passportExpiry || "",
+      email: p.email || "",
+      phone: p.phone || "",
+      flightNumber: p.flightNumber || "",
+      from: p.from || "",
+      to: p.to || "",
+      seat: p.seat || "",
+      totalPrice: p.totalPrice || "",
     });
     setShowModal(true);
   };
 
   const handleSave = async () => {
+    setLoading(true);
     try {
-      if (modalMode === "edit" && editData) {
-        const [bookingId, pIndex] = editData._id.split("_");
-        await fetch(
-          `http://localhost:5000/api/admin/passengers/${bookingId}/${pIndex}`,
-          {
-            method: "PUT",
-            headers: authHeaders,
-            body: JSON.stringify(formData),
-          },
-        );
-      } else {
-        await fetch("http://localhost:5000/api/admin/passengers", {
-          method: "POST",
-          headers: authHeaders,
-          body: JSON.stringify({
-            flightNumber: formData.flightNumber,
-            from: formData.from,
-            to: formData.to,
-            seats: [formData.seat],
-            totalPrice: parseFloat(formData.totalPrice) || 0,
-            passengers: [
-              {
-                fullName: formData.fullName,
-                gender: formData.gender,
-                dob: formData.dob,
-                nationality: formData.nationality,
-                passportNumber: formData.passportNumber,
-                passportExpiry: formData.passportExpiry,
-                email: formData.email,
-                phone: formData.phone,
-              },
-            ],
-          }),
-        });
-      }
+      const [bId, pIdx] = editData._id.split("_");
+      await fetch(`http://localhost:5000/api/admin/passengers/${bId}/${pIdx}`, {
+        method: "PUT",
+        headers: authHeaders,
+        body: JSON.stringify(formData),
+      });
+      showNotification("Passenger updated");
       setShowModal(false);
       fetchPassengers();
-    } catch (err) {
-      console.error(err);
+    } catch {
+      showNotification("Operation failed", "error");
+    } finally {
+      setLoading(false);
     }
   };
 
+  const handleSelectAll = () => {
+    setSelectAll(!selectAll);
+    setSelectedPassengers(
+      selectAll ? [] : filteredPassengers.map((p) => p._id),
+    );
+  };
+  const toggleSelect = (id) =>
+    setSelectedPassengers((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
+    );
+
+  const handleBulkDelete = async () => {
+    if (!window.confirm(`Delete ${selectedPassengers.length} passengers?`))
+      return;
+    setLoading(true);
+    try {
+      await Promise.all(
+        selectedPassengers.map((id) => {
+          const [b, i] = id.split("_");
+          return fetch(`http://localhost:5000/api/admin/passengers/${b}/${i}`, {
+            method: "DELETE",
+            headers: authHeaders,
+          });
+        }),
+      );
+      showNotification(`${selectedPassengers.length} deleted`);
+      setSelectedPassengers([]);
+      setSelectAll(false);
+      fetchPassengers();
+    } catch {
+      showNotification("Failed", "error");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleBulkGenderUpdate = async (newGender) => {
+    if (!newGender) return;
+    setLoading(true);
+    try {
+      await Promise.all(
+        selectedPassengers.map((id) => {
+          const [b, i] = id.split("_");
+          return fetch(`http://localhost:5000/api/admin/passengers/${b}/${i}`, {
+            method: "PUT",
+            headers: authHeaders,
+            body: JSON.stringify({ gender: newGender }),
+          });
+        }),
+      );
+      showNotification(
+        `${selectedPassengers.length} passengers updated to ${newGender}`,
+      );
+      setSelectedPassengers([]);
+      setSelectAll(false);
+      fetchPassengers();
+    } catch {
+      showNotification("Failed to update", "error");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const exportPassengers = () => {
+    const data = filteredPassengers;
+    if (exportFormat === "csv") {
+      const h = [
+        "Full Name",
+        "Age",
+        "Gender",
+        "Seat",
+        "Booking Ref",
+        "Flight",
+        "From",
+        "To",
+        "Email",
+        "Phone",
+        "Booked On",
+      ];
+      const csv = [
+        h,
+        ...data.map((p) => [
+          p.fullName,
+          p.age,
+          p.gender,
+          p.seat,
+          p.bookingRef,
+          p.flightNumber,
+          p.from,
+          p.to,
+          p.email,
+          p.phone,
+          formatDate(p.createdAt),
+        ]),
+      ]
+        .map((r) => r.map((c) => `"${c || ""}"`).join(","))
+        .join("\n");
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv" }));
+      a.download = `passengers_${new Date().toISOString().split("T")[0]}.csv`;
+      a.click();
+    } else {
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(
+        new Blob([JSON.stringify(data, null, 2)], { type: "application/json" }),
+      );
+      a.download = `passengers_${new Date().toISOString().split("T")[0]}.json`;
+      a.click();
+    }
+    showNotification(`Exported ${data.length} passengers`);
+  };
+
+  const calculateAge = (dob) => {
+    if (!dob) return null;
+    const b = new Date(dob),
+      t = new Date();
+    let a = t.getFullYear() - b.getFullYear();
+    if (
+      t.getMonth() - b.getMonth() < 0 ||
+      (t.getMonth() === b.getMonth() && t.getDate() < b.getDate())
+    )
+      a--;
+    return a;
+  };
   const formatDate = (d) =>
     d
       ? new Date(d).toLocaleDateString("en-IN", {
@@ -241,7 +386,228 @@ export default function AdminPassengers({ token }) {
 
   return (
     <div>
-      {/* ── Header ── */}
+      {/* Loading */}
+      {loading && (
+        <div className="users-loading-overlay">
+          <div className="users-loading-box">
+            <div className="users-spinner" />
+            <p>Loading...</p>
+          </div>
+        </div>
+      )}
+
+      {/* Notification */}
+      {notification.show && (
+        <div
+          className={`users-notification ${notification.type === "error" ? "users-notification-error" : "users-notification-success"}`}
+        >
+          {notification.message}
+        </div>
+      )}
+
+      {/* ── View Modal ── */}
+      {showViewModal && viewPassenger && (
+        <div
+          className="pax-modal-overlay"
+          onClick={() => setShowViewModal(false)}
+        >
+          <div
+            className="pax-modal pax-modal-lg"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="pax-modal-header">
+              <h2 className="pax-modal-title">Passenger Details</h2>
+              <button
+                className="pax-modal-close"
+                onClick={() => setShowViewModal(false)}
+              >
+                <X size={20} />
+              </button>
+            </div>
+            <div className="pax-modal-body">
+              <div className="pax-section">
+                <h3 className="pax-section-title">
+                  <Users size={14} /> Personal Information
+                </h3>
+                <div className="pax-detail-grid">
+                  {[
+                    ["Full Name", viewPassenger.fullName],
+                    [
+                      "Age",
+                      viewPassenger.age || calculateAge(viewPassenger.dob),
+                    ],
+                    ["Gender", viewPassenger.gender],
+                    ["Date of Birth", formatDate(viewPassenger.dob)],
+                    ["Nationality", viewPassenger.nationality],
+                  ].map(([l, v]) => (
+                    <div className="pax-detail-row" key={l}>
+                      <span className="pax-detail-label">{l}</span>
+                      <span className="pax-detail-value">{v || "—"}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="pax-section">
+                <h3 className="pax-section-title">
+                  <Mail size={14} /> Contact
+                </h3>
+                <div className="pax-detail-grid">
+                  {[
+                    ["Email", viewPassenger.email],
+                    ["Phone", viewPassenger.phone],
+                  ].map(([l, v]) => (
+                    <div className="pax-detail-row" key={l}>
+                      <span className="pax-detail-label">{l}</span>
+                      <span className="pax-detail-value">{v || "—"}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              {(viewPassenger.passportNumber ||
+                viewPassenger.passportExpiry) && (
+                <div className="pax-section">
+                  <h3 className="pax-section-title">
+                    <FileText size={14} /> Passport
+                  </h3>
+                  <div className="pax-detail-grid">
+                    {[
+                      ["Passport Number", viewPassenger.passportNumber],
+                      ["Expiry", formatDate(viewPassenger.passportExpiry)],
+                    ].map(([l, v]) => (
+                      <div className="pax-detail-row" key={l}>
+                        <span className="pax-detail-label">{l}</span>
+                        <span className="pax-detail-value">{v || "—"}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              <div className="pax-section">
+                <h3 className="pax-section-title">
+                  <MapPin size={14} /> Flight Info
+                </h3>
+                <div className="pax-detail-grid">
+                  {[
+                    ["Booking Ref", viewPassenger.bookingRef],
+                    ["Flight", viewPassenger.flightNumber],
+                    ["From", viewPassenger.from],
+                    ["To", viewPassenger.to],
+                    ["Seat", viewPassenger.seat],
+                    [
+                      "Total Price",
+                      viewPassenger.totalPrice
+                        ? `₹${viewPassenger.totalPrice}`
+                        : "—",
+                    ],
+                    ["Booked On", formatDate(viewPassenger.createdAt)],
+                  ].map(([l, v]) => (
+                    <div className="pax-detail-row" key={l}>
+                      <span className="pax-detail-label">{l}</span>
+                      <span className="pax-detail-value">{v || "—"}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+            <div className="pax-modal-footer">
+              <button
+                className="btn-secondary"
+                onClick={() => setShowViewModal(false)}
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Edit Modal ── */}
+      {showModal && (
+        <div className="pax-modal-overlay" onClick={() => setShowModal(false)}>
+          <div
+            className="pax-modal pax-modal-md"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="pax-modal-header">
+              <h2 className="pax-modal-title">Edit Passenger</h2>
+              <button
+                className="pax-modal-close"
+                onClick={() => setShowModal(false)}
+              >
+                <X size={20} />
+              </button>
+            </div>
+            <div className="pax-modal-body">
+              <div className="pax-form-grid">
+                {FORM_FIELDS.map(({ label, field, type, placeholder }) => (
+                  <div className="pax-form-group" key={field}>
+                    <label className="pax-form-label">{label}</label>
+                    <input
+                      type={type}
+                      placeholder={placeholder}
+                      value={formData[field]}
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          [field]: e.target.value,
+                        }))
+                      }
+                      className="pax-form-input"
+                    />
+                  </div>
+                ))}
+                <div className="pax-form-group">
+                  <label className="pax-form-label">Gender</label>
+                  <select
+                    className="pax-form-select"
+                    value={formData.gender}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        gender: e.target.value,
+                      }))
+                    }
+                  >
+                    <option value="">Select Gender</option>
+                    <option value="male">Male</option>
+                    <option value="female">Female</option>
+                    <option value="other">Other</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+            <div className="pax-modal-footer">
+              <button
+                className="btn-secondary"
+                onClick={() => setShowModal(false)}
+              >
+                Cancel
+              </button>
+              <button
+                className="btn-primary"
+                onClick={handleSave}
+                disabled={loading}
+              >
+                {loading ? (
+                  <>
+                    <div
+                      className="users-spinner"
+                      style={{ width: 16, height: 16, borderWidth: 2 }}
+                    />{" "}
+                    Processing...
+                  </>
+                ) : (
+                  <>
+                    <Save size={16} /> Save Changes
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Page Header ── */}
       <div className="admin-page-header">
         <div>
           <h1 className="admin-page-title">Passengers Management</h1>
@@ -250,87 +616,86 @@ export default function AdminPassengers({ token }) {
           </p>
         </div>
         <div className="admin-header-actions">
-          <button
-            className="btn-secondary"
-            onClick={() =>
-              window.open(
-                "http://localhost:5000/api/admin/passengers/export/csv",
-                "_blank",
-              )
-            }
+          <select
+            className="admin-select"
+            value={exportFormat}
+            onChange={(e) => setExportFormat(e.target.value)}
           >
-            <Download size={16} /> Export CSV
-          </button>
-          <button className="btn-primary" onClick={handleAdd}>
-            <Plus size={16} /> Add Passenger
+            <option value="csv">CSV</option>
+            <option value="json">JSON</option>
+          </select>
+          <button className="btn-secondary" onClick={exportPassengers}>
+            <Download size={16} /> Export
           </button>
         </div>
       </div>
 
-      {/* ── Filters ── */}
-      <div className="admin-filters">
-        <form
-          className="admin-search-form"
-          onSubmit={(e) => {
-            e.preventDefault();
-            setPage(1);
-            fetchPassengers();
-          }}
-        >
-          <div className="admin-search-wrapper">
+      {/* ── Search + Gender ── */}
+      <div className="users-filter-card">
+        <div className="pax-search-row">
+          <div className="admin-search-wrapper" style={{ flex: 1 }}>
             <Search size={16} className="admin-search-icon" />
             <input
               type="text"
               placeholder="Search by Name, Booking Ref, Seat, Passport..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
               className="admin-input admin-input-search"
             />
           </div>
-          <button type="submit" className="btn-search">
-            Search
-          </button>
-        </form>
-
-        <select
-          className="admin-select"
-          value={gender}
-          onChange={(e) => {
-            setGender(e.target.value);
-            setPage(1);
-          }}
-        >
-          <option value="all">All Genders</option>
-          <option value="male">Male</option>
-          <option value="female">Female</option>
-          <option value="other">Other</option>
-        </select>
-
-        <input
-          type="number"
-          placeholder="Min Age"
-          value={minAge}
-          onChange={(e) => setMinAge(e.target.value)}
-          className="admin-input admin-input-sm"
-        />
-        <input
-          type="number"
-          placeholder="Max Age"
-          value={maxAge}
-          onChange={(e) => setMaxAge(e.target.value)}
-          className="admin-input admin-input-sm"
-        />
-        <button
-          className="btn-secondary"
-          onClick={() => {
-            setPage(1);
-            fetchPassengers();
-          }}
-        >
-          Apply
-        </button>
+          <select
+            className="admin-select pax-gender-select"
+            value={gender}
+            onChange={(e) => {
+              setGender(e.target.value);
+              setPage(1);
+            }}
+          >
+            <option value="all">All Genders</option>
+            <option value="male">Male</option>
+            <option value="female">Female</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
       </div>
 
+      {/* ── Bulk Bar ── */}
+      {selectedPassengers.length > 0 && (
+        <div className="users-bulk-bar">
+          <span className="users-bulk-count">
+            {selectedPassengers.length} passenger(s) selected
+          </span>
+          <div className="users-bulk-actions">
+            <select
+              className="admin-select"
+              defaultValue=""
+              onChange={(e) => handleBulkGenderUpdate(e.target.value)}
+            >
+              <option value="" disabled>
+                Change Gender
+              </option>
+              <option value="male">Set Male</option>
+              <option value="female">Set Female</option>
+              <option value="other">Set Other</option>
+            </select>
+            <button
+              className="users-bulk-btn users-bulk-blocked"
+              onClick={handleBulkDelete}
+            >
+              Delete Selected
+            </button>
+            <button
+              className="users-bulk-btn users-bulk-clear"
+              onClick={() => {
+                setSelectedPassengers([]);
+                setSelectAll(false);
+              }}
+            >
+              Clear
+            </button>
+          </div>
+        </div>
+      )}
       {/* ── Table ── */}
       <div className="admin-table-container">
         <div className="admin-table-scroll">
@@ -338,27 +703,62 @@ export default function AdminPassengers({ token }) {
             <thead>
               <tr>
                 <th>
-                  <input type="checkbox" />
+                  <button
+                    onClick={handleSelectAll}
+                    className="passengers-check-btn"
+                  >
+                    {selectAll ? (
+                      <CheckSquare size={16} style={{ color: "#667eea" }} />
+                    ) : (
+                      <Square
+                        size={16}
+                        style={{ color: "var(--text-secondary)" }}
+                      />
+                    )}
+                  </button>
                 </th>
                 <th>No</th>
-                <th>Name</th>
-                <th>Age</th>
-                <th>Gender</th>
-                <th>Seat</th>
+                <th
+                  className="users-sortable"
+                  onClick={() => requestSort("fullName")}
+                >
+                  Name <SortIcon col="fullName" />
+                </th>
+                <th
+                  className="users-sortable"
+                  onClick={() => requestSort("age")}
+                >
+                  Age <SortIcon col="age" />
+                </th>
+                <th
+                  className="users-sortable"
+                  onClick={() => requestSort("gender")}
+                >
+                  Gender <SortIcon col="gender" />
+                </th>
+                <th
+                  className="users-sortable"
+                  onClick={() => requestSort("seat")}
+                >
+                  Seat <SortIcon col="seat" />
+                </th>
                 <th>Booking Ref</th>
                 <th>Flight</th>
                 <th>Route</th>
-                <th>Passport</th>
-                <th>Nationality</th>
                 <th>Email</th>
-                <th>Booked On</th>
+                <th
+                  className="users-sortable"
+                  onClick={() => requestSort("createdAt")}
+                >
+                  Booked On <SortIcon col="createdAt" />
+                </th>
                 <th>Actions</th>
               </tr>
             </thead>
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan={14} className="admin-table-loading">
+                  <td colSpan={12} className="admin-table-loading">
                     <Loader2
                       size={32}
                       className="admin-table-empty-icon"
@@ -367,43 +767,52 @@ export default function AdminPassengers({ token }) {
                     <p>Loading passengers...</p>
                   </td>
                 </tr>
-              ) : passengers.length === 0 ? (
+              ) : filteredPassengers.length === 0 ? (
                 <tr>
-                  <td colSpan={14} className="admin-table-empty">
+                  <td colSpan={12} className="admin-table-empty">
                     <Users size={48} className="admin-table-empty-icon" />
                     <p>No passengers found</p>
                   </td>
                 </tr>
               ) : (
-                passengers.map((p, i) => (
+                filteredPassengers.map((p, i) => (
                   <tr key={p._id}>
                     <td>
-                      <input type="checkbox" />
+                      <button
+                        onClick={() => toggleSelect(p._id)}
+                        className="passengers-check-btn"
+                      >
+                        {selectedPassengers.includes(p._id) ? (
+                          <CheckSquare size={16} style={{ color: "#667eea" }} />
+                        ) : (
+                          <Square
+                            size={16}
+                            style={{ color: "var(--text-secondary)" }}
+                          />
+                        )}
+                      </button>
                     </td>
                     <td className="cell-muted">{(page - 1) * 10 + i + 1}</td>
-
-                    {/* Name + Phone */}
                     <td>
                       <div className="admin-avatar-cell">
-                        <div className="admin-avatar">
+                        {/* <div className="admin-avatar">
                           {p.fullName?.charAt(0) || "?"}
-                        </div>
+                        </div> */}
                         <div className="admin-avatar-info">
                           <p className="admin-avatar-name">{p.fullName}</p>
-                          <p className="admin-avatar-sub">{p.phone || "—"}</p>
+                          {/* <p className="admin-avatar-sub">{p.phone || "—"}</p> */}
                         </div>
                       </div>
                     </td>
-
-                    <td className="cell-muted">{p.age || "—"}</td>
-
-                    {/* Gender Badge */}
+                    <td className="cell-muted">
+                      {p.age || calculateAge(p.dob) || "—"}
+                    </td>
                     <td>
                       <span
                         className={
-                          p.gender === "male"
+                          p.gender?.toLowerCase() === "male"
                             ? "badge-male"
-                            : p.gender === "female"
+                            : p.gender?.toLowerCase() === "female"
                               ? "badge-female"
                               : "badge-other"
                         }
@@ -411,41 +820,46 @@ export default function AdminPassengers({ token }) {
                         {p.gender || "—"}
                       </span>
                     </td>
-
-                    <td className="cell-mono">{p.seat}</td>
-                    <td className="cell-accent">{p.bookingRef}</td>
-                    <td>{p.flightNumber}</td>
+                    <td className="cell-mono">{p.seat || "—"}</td>
+                    <td className="cell-accent">{p.bookingRef || "—"}</td>
+                    <td>{p.flightNumber || "—"}</td>
                     <td>
                       {p.from} → {p.to}
                     </td>
-                    <td className="cell-mono cell-muted">
-                      {p.passportNumber || "—"}
-                    </td>
-                    <td className="cell-muted">{p.nationality || "—"}</td>
                     <td className="cell-muted" style={{ fontSize: "0.75rem" }}>
                       {p.email || "—"}
                     </td>
                     <td className="cell-muted" style={{ fontSize: "0.75rem" }}>
                       {formatDate(p.createdAt)}
                     </td>
-
-                    {/* Actions */}
                     <td>
                       <div className="cell-actions">
-                        <button
-                          className="btn-edit"
-                          onClick={() => handleEdit(p)}
-                        >
-                          <Edit2 size={12} /> Edit
-                        </button>
-                        <button
-                          className="btn-danger"
+                        {/* <button
+                          className="users-action-btn users-action-view"
+                          title="View"
                           onClick={() => {
-                            const [bookingId, pIndex] = p._id.split("_");
-                            handleDelete(bookingId, parseInt(pIndex));
+                            setViewPassenger(p);
+                            setShowViewModal(true);
                           }}
                         >
-                          <Trash2 size={12} /> Delete
+                          <Eye size={12} />
+                        </button> */}
+                        <button
+                          className="users-action-btn users-action-edit"
+                          title="Edit"
+                          onClick={() => handleEdit(p)}
+                        >
+                          <Edit2 size={12} />
+                        </button>
+                        <button
+                          className="users-action-btn users-action-delete"
+                          title="Delete"
+                          onClick={() => {
+                            const [b, idx] = p._id.split("_");
+                            handleDelete(b, parseInt(idx));
+                          }}
+                        >
+                          <Trash2 size={12} />
                         </button>
                       </div>
                     </td>
@@ -491,84 +905,6 @@ export default function AdminPassengers({ token }) {
           </button>
         </div>
       </div>
-
-      {/* ── Add/Edit Modal ── */}
-      {showModal && (
-        <div className="admin-modal-overlay">
-          <div className="admin-modal">
-            {/* Modal Header */}
-            <div className="admin-modal-header">
-              <h2 className="admin-modal-title">
-                {modalMode === "add" ? "Add New Passenger" : "Edit Passenger"}
-              </h2>
-              <button
-                className="admin-modal-close"
-                onClick={() => setShowModal(false)}
-              >
-                <X size={20} />
-              </button>
-            </div>
-
-            {/* Modal Body */}
-            <div className="admin-modal-body">
-              <div className="admin-modal-grid">
-                {FORM_FIELDS.map(({ label, field, type, placeholder }) => (
-                  <div className="admin-form-group" key={field}>
-                    <label className="admin-form-label">{label}</label>
-                    <input
-                      type={type}
-                      placeholder={placeholder}
-                      value={formData[field]}
-                      onChange={(e) =>
-                        setFormData((prev) => ({
-                          ...prev,
-                          [field]: e.target.value,
-                        }))
-                      }
-                      className="admin-input"
-                    />
-                  </div>
-                ))}
-
-                {/* Gender Select */}
-                <div className="admin-form-group">
-                  <label className="admin-form-label">Gender</label>
-                  <select
-                    className="admin-select"
-                    style={{ width: "100%" }}
-                    value={formData.gender}
-                    onChange={(e) =>
-                      setFormData((prev) => ({
-                        ...prev,
-                        gender: e.target.value,
-                      }))
-                    }
-                  >
-                    <option value="">Select Gender</option>
-                    <option value="male">Male</option>
-                    <option value="female">Female</option>
-                    <option value="other">Other</option>
-                  </select>
-                </div>
-              </div>
-            </div>
-
-            {/* Modal Footer */}
-            <div className="admin-modal-footer">
-              <button
-                className="btn-secondary"
-                onClick={() => setShowModal(false)}
-              >
-                Cancel
-              </button>
-              <button className="btn-primary" onClick={handleSave}>
-                <Save size={16} />
-                {modalMode === "add" ? "Add Passenger" : "Save Changes"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

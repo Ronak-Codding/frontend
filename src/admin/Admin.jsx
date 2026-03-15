@@ -173,9 +173,9 @@ const Admin = () => {
               <i className="fas fa-map-marker-alt"></i>Airports
             </NavLink>
 
-            <NavLink to="/admin/flights" className="list-group-item">
+            {/* <NavLink to="/admin/flights" className="list-group-item">
               <i className="fas fa-plane"></i> Flights
-            </NavLink>
+            </NavLink> */}
 
             <NavLink to="/admin/bookings" className="list-group-item">
               <i className="fas fa-ticket-alt"></i> Bookings
@@ -205,7 +205,7 @@ const Admin = () => {
             </NavLink> */}
 
             <div className="mt-auto p-3 border-top">
-              <div className="d-flex align-items-center justify-content-between mb-2">
+              {/* <div className="d-flex align-items-center justify-content-between mb-2">
                 <small className="text-muted">Dark Mode</small>
                 <div
                   className="form-check form-switch"
@@ -218,7 +218,7 @@ const Admin = () => {
                     onChange={() => {}}
                   />
                 </div>
-              </div>
+              </div> */}
               <button
                 className="w-full py-2 px-4 border border-red-500 text-red-500 rounded-lg font-semibold hover:bg-red-500 hover:text-white transition-all duration-300 flex items-center justify-center"
                 onClick={logout}

@@ -1,0 +1,43 @@
+/* ══════════════════════════════════════
+   AIRLINES - Specific Styles
+   Uses AdminTables.css + AdminUsers.css
+══════════════════════════════════════ */
+
+/* ── Airline Code Tag ── */
+.airline-code-tag {
+  display: inline-block;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  padding: 0.2rem 0.6rem;
+  border-radius: 0.375rem;
+  font-family: "Courier New", monospace;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #60a5fa;
+  letter-spacing: 0.05em;
+}
+
+/* ── Airline Status Badges ── */
+.airline-status-publish {
+  background: #10b981 !important;
+  color: white !important;
+}
+
+.airline-status-draft {
+  background: #6b7280 !important;
+  color: white !important;
+}
+
+/* ── Airports Filter Grid ── */
+.airports-filter-grid {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+@media (max-width: 768px) {
+  .airports-filter-grid {
+    grid-template-columns: 1fr;
+  }
+}

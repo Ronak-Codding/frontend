@@ -67,14 +67,35 @@ export default function Checkout() {
     return clean.length >= 3 ? clean.slice(0, 2) + "/" + clean.slice(2) : clean;
   };
 
-  const handlePay = () => {
+  const handlePay = async () => {
     setLoading(true);
-    setTimeout(() => {
+    try {
+      // Payment MongoDB mein save karo
+      await fetch("http://localhost:5000/api/booking/save-payment", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          bookingId,
+          amount: price,
+          paymentMethod: method,
+          passengerName: "Guest", // ya form se lo
+          email: searchParams.get("email") || "",
+          flightNumber: flight,
+          from,
+          to,
+        }),
+      });
+
+      setTimeout(() => {
+        setLoading(false);
+        navigate(
+          `/confirmation?bookingId=${bookingId}&price=${price}&from=${from}&to=${to}&flight=${flight}&seats=${searchParams.get("seats")}&date=${searchParams.get("date")}&passengers=${searchParams.get("passengers")}`,
+        );
+      }, 2500);
+    } catch (err) {
+      console.error(err);
       setLoading(false);
-      navigate(
-        `/confirmation?bookingId=${bookingId}&price=${price}&from=${from}&to=${to}&flight=${flight}&seats=${searchParams.get("seats") || ""}&date=${searchParams.get("date") || ""}&passengers=${searchParams.get("passengers") || "1"}`,
-      );
-    }, 2500);
+    }
   };
 
   // Success Screen

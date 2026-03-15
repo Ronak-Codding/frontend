@@ -1,4 +1,7 @@
 import React, { useEffect, useState } from "react";
+import { X, Save } from "lucide-react";
+import "./AdminTables.css";
+import "./AdminUsers.css";
 
 const AddBookingModal = ({ onClose, onSuccess }) => {
   const [users, setUsers] = useState([]);
@@ -13,71 +16,56 @@ const AddBookingModal = ({ onClose, onSuccess }) => {
     total_amount: 0,
   });
 
-  /* ================= FETCH USERS & FLIGHTS ================= */
   useEffect(() => {
     const fetchDropdownData = async () => {
       setLoading(true);
       try {
-        const userRes = await fetch("http://localhost:5000/api/user/allUsers");
-        const flightRes = await fetch(
-          "http://localhost:5000/api/flights/allFlights",
-        );
-
+        const [userRes, flightRes] = await Promise.all([
+          fetch("http://localhost:5000/api/user/allUsers"),
+          fetch("http://localhost:5000/api/flights/allFlights"),
+        ]);
         if (!userRes.ok || !flightRes.ok)
           throw new Error("Failed to load data");
-
-        const usersData = await userRes.json();
-        const flightsData = await flightRes.json();
-
-        setUsers(usersData);
-        setFlights(flightsData);
-      } catch (err) {
+        setUsers(await userRes.json());
+        setFlights(await flightRes.json());
+      } catch {
         setError("Failed to load users or flights");
       } finally {
         setLoading(false);
       }
     };
-
     fetchDropdownData();
   }, []);
 
-  /* ================= HANDLE CHANGE ================= */
   const handleChange = (e) => {
     const { name, value } = e.target;
     let updated = { ...formData, [name]: value };
-
     if (name === "flight_id") {
       const flight = flights.find((f) => f._id === value);
       if (flight)
         updated.total_amount = flight.price * updated.total_passengers;
     }
-
     if (name === "total_passengers") {
       const flight = flights.find((f) => f._id === formData.flight_id);
       if (flight) updated.total_amount = flight.price * value;
     }
-
     setFormData(updated);
   };
 
-  /* ================= SUBMIT ================= */
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError("");
-
     try {
       const res = await fetch("http://localhost:5000/api/bookings", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
       });
-
       if (!res.ok) {
         const msg = await res.json();
         throw new Error(msg.message || "Booking failed");
       }
-
       onSuccess();
       onClose();
     } catch (err) {
@@ -88,136 +76,150 @@ const AddBookingModal = ({ onClose, onSuccess }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
-      {/* Backdrop */}
+    <div className="admin-modal-overlay" onClick={onClose}>
       <div
-        className="absolute inset-0 bg-black/50 backdrop-blur-sm"
-        onClick={onClose}
-      />
-
-      {/* Modal */}
-      <div className="relative w-full max-w-2xl bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700">
-        {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-            Add New Booking
-          </h2>
-          <button
-            onClick={onClose}
-            className="text-2xl text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition"
-          >
-            ×
+        className="admin-modal"
+        style={{ maxWidth: "36rem" }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* ── Header ── */}
+        <div className="admin-modal-header">
+          <h2 className="admin-modal-title">Add New Booking</h2>
+          <button className="admin-modal-close" onClick={onClose}>
+            <X size={20} />
           </button>
         </div>
 
-        {/* Error */}
+        {/* ── Error ── */}
         {error && (
-          <div className="mx-6 mt-4 text-sm text-red-600 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 px-4 py-3 rounded-lg">
+          <div
+            style={{
+              margin: "1rem 1.5rem 0",
+              padding: "0.75rem 1rem",
+              borderRadius: "0.75rem",
+              border: "1px solid rgba(239,68,68,0.3)",
+              background: "rgba(239,68,68,0.1)",
+              color: "#f87171",
+              fontSize: "0.875rem",
+            }}
+          >
             {error}
           </div>
         )}
 
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="p-6">
-          <div className="space-y-4">
-            {/* User */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                User <span className="text-red-500">*</span>
-              </label>
-              <select
-                name="user_id"
-                value={formData.user_id}
-                onChange={handleChange}
-                required
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
-              >
-                <option value="">Select User</option>
-                {users.map((u) => (
-                  <option key={u._id} value={u._id}>
-                    {u.firstName} {u.lastName} ({u.email})
-                  </option>
-                ))}
-              </select>
-            </div>
+        {/* ── Form ── */}
+        <form onSubmit={handleSubmit}>
+          <div className="admin-modal-body">
+            <div
+              style={{ display: "flex", flexDirection: "column", gap: "1rem" }}
+            >
+              {/* User */}
+              <div className="admin-form-group">
+                <label className="admin-form-label">
+                  User <span style={{ color: "#f87171" }}>*</span>
+                </label>
+                <select
+                  name="user_id"
+                  value={formData.user_id}
+                  onChange={handleChange}
+                  required
+                  className="admin-select"
+                  style={{ width: "100%" }}
+                >
+                  <option value="">Select User</option>
+                  {users.map((u) => (
+                    <option key={u._id} value={u._id}>
+                      {u.firstName} {u.lastName} ({u.email})
+                    </option>
+                  ))}
+                </select>
+              </div>
 
-            {/* Flight */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Flight <span className="text-red-500">*</span>
-              </label>
-              <select
-                name="flight_id"
-                value={formData.flight_id}
-                onChange={handleChange}
-                required
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
-              >
-                <option value="">Select Flight</option>
-                {flights.map((f) => (
-                  <option key={f._id} value={f._id}>
-                    {f.flight_number} | {f.from_airport?.airport_code} →{" "}
-                    {f.to_airport?.airport_code} | ₹{f.price}
-                  </option>
-                ))}
-              </select>
-            </div>
+              {/* Flight */}
+              <div className="admin-form-group">
+                <label className="admin-form-label">
+                  Flight <span style={{ color: "#f87171" }}>*</span>
+                </label>
+                <select
+                  name="flight_id"
+                  value={formData.flight_id}
+                  onChange={handleChange}
+                  required
+                  className="admin-select"
+                  style={{ width: "100%" }}
+                >
+                  <option value="">Select Flight</option>
+                  {flights.map((f) => (
+                    <option key={f._id} value={f._id}>
+                      {f.flight_number} | {f.from_airport?.airport_code} →{" "}
+                      {f.to_airport?.airport_code} | ₹{f.price}
+                    </option>
+                  ))}
+                </select>
+              </div>
 
-            {/* Passengers */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Number of Passengers <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="number"
-                min="1"
-                name="total_passengers"
-                value={formData.total_passengers}
-                onChange={handleChange}
-                required
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
-              />
-            </div>
+              {/* Passengers */}
+              <div className="admin-form-group">
+                <label className="admin-form-label">
+                  Number of Passengers{" "}
+                  <span style={{ color: "#f87171" }}>*</span>
+                </label>
+                <input
+                  type="number"
+                  min="1"
+                  name="total_passengers"
+                  value={formData.total_passengers}
+                  onChange={handleChange}
+                  required
+                  className="admin-input"
+                />
+              </div>
 
-            {/* Amount */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Total Amount (₹)
-              </label>
-              <input
-                type="number"
-                readOnly
-                value={formData.total_amount}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-100 dark:bg-gray-600 text-gray-900 dark:text-white cursor-not-allowed"
-              />
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                Auto-calculated based on flight price and passenger count
-              </p>
+              {/* Total Amount */}
+              <div className="admin-form-group">
+                <label className="admin-form-label">Total Amount (₹)</label>
+                <input
+                  type="number"
+                  readOnly
+                  value={formData.total_amount}
+                  className="admin-input"
+                  style={{
+                    background: "var(--bg-secondary)",
+                    cursor: "not-allowed",
+                    opacity: 0.7,
+                  }}
+                />
+                <p
+                  style={{
+                    fontSize: "0.75rem",
+                    color: "var(--text-secondary)",
+                    marginTop: "0.25rem",
+                  }}
+                >
+                  Auto-calculated based on flight price × passengers
+                </p>
+              </div>
             </div>
           </div>
 
-          {/* Footer */}
-          <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-5 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 font-medium transition"
-            >
+          {/* ── Footer ── */}
+          <div className="admin-modal-footer">
+            <button type="button" className="btn-secondary" onClick={onClose}>
               Cancel
             </button>
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="px-5 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium disabled:opacity-50 disabled:cursor-not-allowed transition flex items-center"
-            >
+            <button type="submit" className="btn-primary" disabled={loading}>
               {loading ? (
                 <>
-                  <span className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2"></span>
+                  <div
+                    className="users-spinner"
+                    style={{ width: 16, height: 16, borderWidth: 2 }}
+                  />{" "}
                   Processing...
                 </>
               ) : (
-                "Add Booking"
+                <>
+                  <Save size={16} /> Add Booking
+                </>
               )}
             </button>
           </div>

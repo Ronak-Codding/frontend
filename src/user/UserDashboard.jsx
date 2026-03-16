@@ -108,7 +108,7 @@ const UserDashboard = () => {
       {/* Welcome */}
       <div className="up-header">
         <h1 className="up-title">
-          Welcome back, {user.firstName || "Traveller"} ✈️
+          Welcome back, {user.firstName || "Traveller"} 
         </h1>
         <p className="up-subtitle">Here's your travel summary at a glance</p>
       </div>

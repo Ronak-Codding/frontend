@@ -14,22 +14,19 @@ import AdminBookings from "./admin/AdminBookings";
 import Passengers from "./admin/Passengers";
 import Payment from "./admin/Payment";
 
+import Contact from "./components/ContactUs";
+import FAQs from "./components/FAQs";
+import About from "./components/About";
+import Services from "./components/Services";
+import UserRoute from "./components/UserRoute";
+
 import HomePage from "./pages/Home";
 import Login from "./pages/Login";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import Register from "./pages/Register";
-import Contact from "./components/ContactUs";
-import FAQs from "./components/FAQs";
-import About from "./components/About";
-
-import UserRoute from "./components/UserRoute";
-import Dashboard from "./user/Dashboard";
-import Sidebar from "./user/Sidebar";
-import MyProfile from "./user/MyProfile";
 import PrivacyPolicy from "./pages/Privacy";
 import TermsOfService from "./pages/TermsOfService";
-import Services from "./components/Services";
 import SearchResults from "./pages/SearchResults";
 import SeatSelection from "./pages/SeatSelection";
 import PassengerDetails from "./pages/PassengerDetails";
@@ -49,6 +46,7 @@ export default function App() {
   return (
     <BrowserRouter>
       <Routes>
+        {/* Public */}
         <Route path="/" element={<HomePage />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />

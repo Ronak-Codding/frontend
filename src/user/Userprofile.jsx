@@ -1,11 +1,15 @@
-import React, { useEffect, useState } from "react";
-import { User, Lock, Save, Eye, EyeOff, Camera } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { User, Lock, Save, Eye, EyeOff, Hash, Shield, UserCircle2 } from "lucide-react";
 import "./UserLayout.css";
 import "./UserPages.css";
 
 const UserProfile = () => {
-  const user = JSON.parse(localStorage.getItem("user") || "{}");
+  const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
   const token = localStorage.getItem("usertoken");
+  const userId = storedUser._id || storedUser.id;
+
+  const [userData, setUserData] = useState(null);
+  const [fetching, setFetching] = useState(true);
   const [loading, setLoading] = useState(false);
   const [pwLoading, setPwLoading] = useState(false);
   const [notification, setNotification] = useState({
@@ -20,11 +24,10 @@ const UserProfile = () => {
   });
 
   const [profileForm, setProfileForm] = useState({
-    firstName: user.firstName || "",
-    lastName: user.lastName || "",
-    email: user.email || "",
-    phone: user.phone || "",
-    username: user.username || "",
+    firstName: "",
+    lastName: "",
+    username: "",
+    phone: "",
   });
 
   const [pwForm, setPwForm] = useState({
@@ -41,50 +44,142 @@ const UserProfile = () => {
     );
   };
 
+  // ── Fetch fresh data on mount ──
+  useEffect(() => {
+    const fetchUser = async () => {
+      if (!userId) {
+        setFetching(false);
+        return;
+      }
+      try {
+        const res = await fetch(
+          `http://localhost:5000/api/user/oneUser/${userId}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          },
+        );
+        if (res.ok) {
+          const data = await res.json();
+          setUserData(data);
+          setProfileForm({
+            firstName: data.firstName || "",
+            lastName: data.lastName || "",
+            username: data.username || "",
+            phone: data.phone || "",
+          });
+        } else {
+          // Fallback to localStorage
+          fallbackToStored();
+        }
+      } catch {
+        fallbackToStored();
+      } finally {
+        setFetching(false);
+      }
+    };
+
+    const fallbackToStored = () => {
+      setUserData(storedUser);
+      setProfileForm({
+        firstName:
+          storedUser.firstName || storedUser.fullname?.split(" ")[0] || "",
+        lastName:
+          storedUser.lastName ||
+          storedUser.fullname?.split(" ").slice(1).join(" ") ||
+          "",
+        username: storedUser.username || "",
+        phone: storedUser.phone || "",
+      });
+    };
+
+    fetchUser();
+  }, []);
+
+  // ── Save Profile ──
   const handleProfileSave = async (e) => {
     e.preventDefault();
+    if (!profileForm.firstName.trim()) {
+      showNotification("First name is required", "error");
+      return;
+    }
+    if (profileForm.username && profileForm.username.trim().length < 3) {
+      showNotification("Username must be at least 3 characters", "error");
+      return;
+    }
     setLoading(true);
     try {
+      const body = {
+        firstName: profileForm.firstName.trim(),
+        lastName: profileForm.lastName.trim(),
+      };
+      if (profileForm.username.trim())
+        body.username = profileForm.username.trim();
+      if (profileForm.phone.trim()) body.phone = profileForm.phone.trim();
+
       const res = await fetch(
-        `http://localhost:5000/api/user/updateUser/${user._id}`,
+        `http://localhost:5000/api/user/updateUser/${userId}`,
         {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
-          body: JSON.stringify(profileForm),
+          body: JSON.stringify(body),
         },
       );
-      if (res.ok) {
-        const updated = await res.json();
+      const data = await res.json();
+      if (res.ok && data.success) {
+        const fresh = data.user || data;
+        setUserData(fresh);
+        setProfileForm({
+          firstName: fresh.firstName || "",
+          lastName: fresh.lastName || "",
+          username: fresh.username || "",
+          phone: fresh.phone || "",
+        });
         localStorage.setItem(
           "user",
-          JSON.stringify({ ...user, ...(updated.user || updated) }),
+          JSON.stringify({ ...storedUser, ...fresh }),
         );
+        window.dispatchEvent(new Event("userUpdated"));
         showNotification("Profile updated successfully!");
-      } else showNotification("Failed to update profile", "error");
+      } else {
+        showNotification(data.message || "Failed to update", "error");
+      }
     } catch {
-      showNotification("Failed to update profile", "error");
+      showNotification("Network error. Try again.", "error");
     } finally {
       setLoading(false);
     }
   };
 
+  // ── Change Password ──
+  // Uses /api/user/changePassword/:id which verifies old password first
   const handlePasswordChange = async (e) => {
     e.preventDefault();
+    if (!pwForm.oldPassword) {
+      showNotification("Current password is required", "error");
+      return;
+    }
+    if (pwForm.newPassword.length < 8) {
+      showNotification("New password must be at least 8 characters", "error");
+      return;
+    }
     if (pwForm.newPassword !== pwForm.confirmPassword) {
       showNotification("Passwords do not match", "error");
       return;
     }
-    if (pwForm.newPassword.length < 6) {
-      showNotification("Password must be at least 6 characters", "error");
+    if (pwForm.oldPassword === pwForm.newPassword) {
+      showNotification(
+        "New password must be different from current password",
+        "error",
+      );
       return;
     }
     setPwLoading(true);
     try {
       const res = await fetch(
-        `http://localhost:5000/api/user/changePassword/${user._id}`,
+        `http://localhost:5000/api/user/changePassword/${userId}`,
         {
           method: "PUT",
           headers: {
@@ -97,48 +192,64 @@ const UserProfile = () => {
           }),
         },
       );
-      if (res.ok) {
+      const data = await res.json();
+      if (res.ok && data.success) {
         showNotification("Password changed successfully!");
         setPwForm({ oldPassword: "", newPassword: "", confirmPassword: "" });
       } else {
-        const d = await res.json();
-        showNotification(d.message || "Failed to change password", "error");
+        showNotification(data.message || "Failed to change password", "error");
       }
     } catch {
-      showNotification("Failed to change password", "error");
+      showNotification("Network error. Try again.", "error");
     } finally {
       setPwLoading(false);
     }
   };
 
-  const PwInput = ({ name, placeholder, pwKey }) => (
-    <div style={{ position: "relative" }}>
-      <input
-        type={showPw[pwKey] ? "text" : "password"}
-        placeholder={placeholder}
-        value={pwForm[name]}
-        onChange={(e) => setPwForm({ ...pwForm, [name]: e.target.value })}
-        className="up-form-input"
-        style={{ paddingRight: "2.5rem" }}
-      />
-      <button
-        type="button"
-        onClick={() => setShowPw((p) => ({ ...p, [pwKey]: !p[pwKey] }))}
-        style={{
-          position: "absolute",
-          right: "0.75rem",
-          top: "50%",
-          transform: "translateY(-50%)",
-          background: "none",
-          border: "none",
-          cursor: "pointer",
-          color: "var(--text-secondary)",
-        }}
-      >
-        {showPw[pwKey] ? <EyeOff size={16} /> : <Eye size={16} />}
-      </button>
-    </div>
-  );
+  // Password strength
+  const getStrength = (pw) => {
+    if (!pw) return 0;
+    if (pw.length < 4) return 1;
+    if (pw.length < 6) return 2;
+    if (pw.length < 8) return 3;
+    return 4;
+  };
+  const strengthMeta = [
+    { label: "", color: "var(--border-color)" },
+    { label: "Weak", color: "#ef4444" },
+    { label: "Fair", color: "#f59e0b" },
+    { label: "Good", color: "#3b82f6" },
+    { label: "Strong", color: "#10b981" },
+  ];
+  const strength = getStrength(pwForm.newPassword);
+
+  // Skeleton
+  if (fetching) {
+    return (
+      <div>
+        <div className="up-header">
+          <h1 className="up-title">Profile Settings</h1>
+          <p className="up-subtitle">Loading your profile...</p>
+        </div>
+        <div className="uprof-skeleton-grid">
+          {[1, 2].map((i) => (
+            <div key={i} className="up-card">
+              <div className="up-card-body">
+                {[1, 2, 3, 4].map((j) => (
+                  <div key={j} className="uprof-skeleton-row">
+                    <div className="uprof-skeleton-label" />
+                    <div className="uprof-skeleton-input" />
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  const d = userData || {};
 
   return (
     <div>
@@ -159,7 +270,7 @@ const UserProfile = () => {
       </div>
 
       <div className="up-grid-2">
-        {/* Profile Form */}
+        {/* ── LEFT ── */}
         <div>
           {/* Avatar Card */}
           <div className="up-card" style={{ marginBottom: "1.25rem" }}>
@@ -167,13 +278,10 @@ const UserProfile = () => {
               className="up-card-body"
               style={{ display: "flex", alignItems: "center", gap: "1.25rem" }}
             >
-              <div style={{ position: "relative" }}>
-                <div className="uprof-avatar">
-                  {user.firstName?.charAt(0)?.toUpperCase() || "U"}
-                </div>
-                <button className="uprof-cam-btn">
-                  <Camera size={14} />
-                </button>
+              <div className="uprof-avatar">
+                {(d.firstName || storedUser.fullname)
+                  ?.charAt(0)
+                  ?.toUpperCase() || "U"}
               </div>
               <div>
                 <p
@@ -181,24 +289,28 @@ const UserProfile = () => {
                     fontWeight: 700,
                     color: "var(--text-primary)",
                     fontSize: "1.1rem",
+                    margin: 0,
                   }}
                 >
-                  {user.firstName} {user.lastName}
+                  {d.firstName || ""} {d.lastName || ""}
                 </p>
                 <p
                   style={{
                     color: "var(--text-secondary)",
                     fontSize: "0.85rem",
+                    margin: "0.2rem 0 0.4rem",
                   }}
                 >
-                  {user.email}
+                  {d.email || storedUser.email || ""}
                 </p>
-                <span className="uprof-role-badge">{user.role || "user"}</span>
+                <span className="uprof-role-badge">
+                  {d.role || storedUser.role || "user"}
+                </span>
               </div>
             </div>
           </div>
 
-          {/* Edit Profile */}
+          {/* Edit Form */}
           <div className="up-card">
             <div className="up-card-header">
               <h3 className="up-card-title">
@@ -207,9 +319,10 @@ const UserProfile = () => {
             </div>
             <div className="up-card-body">
               <form onSubmit={handleProfileSave}>
+                {/* First + Last Name */}
                 <div className="up-form-grid-2">
                   <div className="up-form-group">
-                    <label className="up-form-label">First Name</label>
+                    <label className="up-form-label">First Name *</label>
                     <input
                       className="up-form-input"
                       value={profileForm.firstName}
@@ -220,6 +333,7 @@ const UserProfile = () => {
                         })
                       }
                       placeholder="First Name"
+                      required
                     />
                   </div>
                   <div className="up-form-group">
@@ -237,40 +351,36 @@ const UserProfile = () => {
                     />
                   </div>
                 </div>
+
+                {/* Username */}
                 <div className="up-form-group">
                   <label className="up-form-label">Username</label>
-                  <input
-                    className="up-form-input"
-                    value={profileForm.username}
-                    onChange={(e) =>
-                      setProfileForm({
-                        ...profileForm,
-                        username: e.target.value,
-                      })
-                    }
-                    placeholder="username"
-                  />
-                </div>
-                <div className="up-form-group">
-                  <label className="up-form-label">Email</label>
-                  <input
-                    className="up-form-input"
-                    value={profileForm.email}
-                    disabled
-                    style={{ opacity: 0.6, cursor: "not-allowed" }}
-                  />
-                  <p
-                    style={{
-                      fontSize: "0.72rem",
-                      color: "var(--text-secondary)",
-                      marginTop: "0.25rem",
-                    }}
-                  >
-                    Email cannot be changed
+                  <div style={{ position: "relative" }}>
+                    <span className="uprof-at-sign">@</span>
+                    <input
+                      className="up-form-input"
+                      value={profileForm.username}
+                      onChange={(e) =>
+                        setProfileForm({
+                          ...profileForm,
+                          username: e.target.value
+                            .toLowerCase()
+                            .replace(/\s/g, ""),
+                        })
+                      }
+                      placeholder="yourname"
+                      style={{ paddingLeft: "1.75rem" }}
+                    />
+                  </div>
+                  <p className="uprof-field-hint">
+                    Must be unique. Lowercase letters, numbers, underscores
+                    only.
                   </p>
                 </div>
+
+                {/* Phone */}
                 <div className="up-form-group">
-                  <label className="up-form-label">Phone</label>
+                  <label className="up-form-label">Phone Number</label>
                   <input
                     className="up-form-input"
                     value={profileForm.phone}
@@ -278,8 +388,19 @@ const UserProfile = () => {
                       setProfileForm({ ...profileForm, phone: e.target.value })
                     }
                     placeholder="+91 98765 43210"
+                    type="tel"
                   />
                 </div>
+
+                {/* Email — read only */}
+                <div className="up-form-group">
+                  <label className="up-form-label">Email</label>
+                  <div className="uprof-readonly-field">
+                    <span>{d.email || storedUser.email || "—"}</span>
+                    <span className="uprof-readonly-badge">Cannot change</span>
+                  </div>
+                </div>
+
                 <button
                   type="submit"
                   className="up-btn-primary"
@@ -305,8 +426,9 @@ const UserProfile = () => {
           </div>
         </div>
 
-        {/* Password Change */}
+        {/* ── RIGHT ── */}
         <div>
+          {/* Change Password */}
           <div className="up-card">
             <div className="up-card-header">
               <h3 className="up-card-title">
@@ -316,31 +438,120 @@ const UserProfile = () => {
             <div className="up-card-body">
               <form onSubmit={handlePasswordChange}>
                 <div className="up-form-group">
-                  <label className="up-form-label">Current Password</label>
-                  <PwInput
-                    name="oldPassword"
-                    placeholder="Enter current password"
-                    pwKey="old"
-                  />
-                </div>
-                <div className="up-form-group">
-                  <label className="up-form-label">New Password</label>
-                  <PwInput
-                    name="newPassword"
-                    placeholder="Min. 6 characters"
-                    pwKey="new"
-                  />
-                </div>
-                <div className="up-form-group">
-                  <label className="up-form-label">Confirm New Password</label>
-                  <PwInput
-                    name="confirmPassword"
-                    placeholder="Re-enter new password"
-                    pwKey="confirm"
-                  />
+                  <label className="up-form-label">Current Password *</label>
+                  <div style={{ position: "relative" }}>
+                    <input
+                      type={showPw.old ? "text" : "password"}
+                      placeholder="Enter current password"
+                      value={pwForm.oldPassword}
+                      onChange={(e) =>
+                        setPwForm((prev) => ({
+                          ...prev,
+                          oldPassword: e.target.value,
+                        }))
+                      }
+                      className="up-form-input"
+                      style={{ paddingRight: "2.5rem" }}
+                      autoComplete="current-password"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPw((p) => ({ ...p, old: !p.old }))}
+                      style={{
+                        position: "absolute",
+                        right: "0.75rem",
+                        top: "50%",
+                        transform: "translateY(-50%)",
+                        background: "none",
+                        border: "none",
+                        cursor: "pointer",
+                        color: "var(--text-secondary)",
+                      }}
+                    >
+                      {showPw.old ? <EyeOff size={16} /> : <Eye size={16} />}
+                    </button>
+                  </div>
                 </div>
 
-                {/* Password Strength */}
+                <div className="up-form-group">
+                  <label className="up-form-label">New Password *</label>
+                  <div style={{ position: "relative" }}>
+                    <input
+                      type={showPw.new ? "text" : "password"}
+                      placeholder="Min. 8 characters"
+                      value={pwForm.newPassword}
+                      onChange={(e) =>
+                        setPwForm((prev) => ({
+                          ...prev,
+                          newPassword: e.target.value,
+                        }))
+                      }
+                      className="up-form-input"
+                      style={{ paddingRight: "2.5rem" }}
+                      autoComplete="new-password"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPw((p) => ({ ...p, new: !p.new }))}
+                      style={{
+                        position: "absolute",
+                        right: "0.75rem",
+                        top: "50%",
+                        transform: "translateY(-50%)",
+                        background: "none",
+                        border: "none",
+                        cursor: "pointer",
+                        color: "var(--text-secondary)",
+                      }}
+                    >
+                      {showPw.new ? <EyeOff size={16} /> : <Eye size={16} />}
+                    </button>
+                  </div>
+                </div>
+
+                <div className="up-form-group">
+                  <label className="up-form-label">Confirm Password *</label>
+                  <div style={{ position: "relative" }}>
+                    <input
+                      type={showPw.confirm ? "text" : "password"}
+                      placeholder="Re-enter new password"
+                      value={pwForm.confirmPassword}
+                      onChange={(e) =>
+                        setPwForm((prev) => ({
+                          ...prev,
+                          confirmPassword: e.target.value,
+                        }))
+                      }
+                      className="up-form-input"
+                      style={{ paddingRight: "2.5rem" }}
+                      autoComplete="new-password"
+                    />
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setShowPw((p) => ({ ...p, confirm: !p.confirm }))
+                      }
+                      style={{
+                        position: "absolute",
+                        right: "0.75rem",
+                        top: "50%",
+                        transform: "translateY(-50%)",
+                        background: "none",
+                        border: "none",
+                        cursor: "pointer",
+                        color: "var(--text-secondary)",
+                      }}
+                    >
+                      {showPw.confirm ? (
+                        <EyeOff size={16} />
+                      ) : (
+                        <Eye size={16} />
+                      )}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Strength */}
                 {pwForm.newPassword && (
                   <div className="uprof-pw-strength">
                     <div className="uprof-pw-bars">
@@ -350,24 +561,47 @@ const UserProfile = () => {
                           className="uprof-pw-bar"
                           style={{
                             background:
-                              pwForm.newPassword.length >= n * 2
-                                ? pwForm.newPassword.length >= 8
-                                  ? "#10b981"
-                                  : "#f59e0b"
+                              strength >= n
+                                ? strengthMeta[strength].color
                                 : "var(--border-color)",
                           }}
                         />
                       ))}
                     </div>
-                    <span className="uprof-pw-label">
-                      {pwForm.newPassword.length < 4
-                        ? "Weak"
-                        : pwForm.newPassword.length < 8
-                          ? "Fair"
-                          : "Strong"}
+                    <span
+                      className="uprof-pw-label"
+                      style={{ color: strengthMeta[strength].color }}
+                    >
+                      {strengthMeta[strength].label}
                     </span>
                   </div>
                 )}
+
+                {/* Match */}
+                {pwForm.confirmPassword && (
+                  <p
+                    style={{
+                      fontSize: "0.78rem",
+                      marginBottom: "0.75rem",
+                      color:
+                        pwForm.newPassword === pwForm.confirmPassword
+                          ? "#10b981"
+                          : "#ef4444",
+                    }}
+                  >
+                    {pwForm.newPassword === pwForm.confirmPassword
+                      ? "✓ Passwords match"
+                      : "✗ Passwords do not match"}
+                  </p>
+                )}
+
+                <div className="uprof-pw-note">
+                  <Shield size={13} />
+                  <span>
+                    Password is encrypted securely. You'll need the new password
+                    on next login.
+                  </span>
+                </div>
 
                 <button
                   type="submit"
@@ -376,7 +610,7 @@ const UserProfile = () => {
                   style={{
                     width: "100%",
                     justifyContent: "center",
-                    marginTop: "0.5rem",
+                    marginTop: "0.75rem",
                   }}
                 >
                   {pwLoading ? (
@@ -400,17 +634,29 @@ const UserProfile = () => {
           {/* Account Info */}
           <div className="up-card" style={{ marginTop: "1.25rem" }}>
             <div className="up-card-header">
-              <h3 className="up-card-title">Account Info</h3>
+              <h3 className="up-card-title">
+                <UserCircle2 size={16} /> Account Info
+              </h3>
             </div>
             <div className="up-card-body">
               {[
-                ["Account ID", user._id?.slice(-10).toUpperCase()],
-                ["Role", user.role || "User"],
-                ["Status", user.status || "Active"],
+                ["Account ID", (d._id || userId)?.slice(-10).toUpperCase()],
+                [
+                  "Full Name",
+                  `${d.firstName || ""} ${d.lastName || ""}`.trim() ||
+                    storedUser.fullname ||
+                    "—",
+                ],
+                ["Email", d.email || storedUser.email || "—"],
+                ["Username", d.username ? `@${d.username}` : "—"],
+                ["Phone", d.phone || "—"],
+                ["Role", d.role || storedUser.role || "user"],
+                ["Status", d.status || "active"],
                 [
                   "Member Since",
-                  user.createdAt
-                    ? new Date(user.createdAt).toLocaleDateString("en-IN", {
+                  d.createdAt
+                    ? new Date(d.createdAt).toLocaleDateString("en-IN", {
+                        day: "numeric",
                         month: "long",
                         year: "numeric",
                       })

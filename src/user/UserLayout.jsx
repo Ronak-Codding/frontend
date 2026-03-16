@@ -21,10 +21,33 @@ const UserLayout = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [darkMode, setDarkMode] = useState(
     () => localStorage.getItem("userTheme") === "dark",
   );
-  const user = JSON.parse(localStorage.getItem("user") || "{}");
+
+  // ── user as STATE so it re-renders when profile updates ──
+  const [user, setUser] = useState(() =>
+    JSON.parse(localStorage.getItem("user") || "{}"),
+  );
+
+  // ── Listen for localStorage "user" changes from any page ──
+  useEffect(() => {
+    const handleStorageChange = () => {
+      const updated = JSON.parse(localStorage.getItem("user") || "{}");
+      setUser(updated);
+    };
+
+    // Custom event — fired from UserProfile after save
+    window.addEventListener("userUpdated", handleStorageChange);
+    // Native storage event — fires when another tab updates
+    window.addEventListener("storage", handleStorageChange);
+
+    return () => {
+      window.removeEventListener("userUpdated", handleStorageChange);
+      window.removeEventListener("storage", handleStorageChange);
+    };
+  }, []);
 
   useEffect(() => {
     document.body.className = darkMode ? "user-dark" : "user-light";
@@ -43,6 +66,15 @@ const UserLayout = () => {
     navigate("/login");
   };
 
+  // Display name — handle both {firstName} and {fullname} formats
+  const displayName = user.firstName
+    ? `${user.firstName} ${user.lastName || ""}`.trim()
+    : user.fullname || "User";
+
+  const avatarLetter = (user.firstName || user.fullname || "U")
+    .charAt(0)
+    .toUpperCase();
+
   const NAV_ITEMS = [
     { path: "/user/dashboard", label: "Dashboard", icon: LayoutDashboard },
     { path: "/user/bookings", label: "My Bookings", icon: Ticket },
@@ -55,13 +87,15 @@ const UserLayout = () => {
 
   return (
     <div className="ul-root">
-      {/* ── Mobile Overlay ── */}
+      {/* Mobile Overlay */}
       {sidebarOpen && (
         <div className="ul-overlay" onClick={() => setSidebarOpen(false)} />
       )}
 
       {/* ── Sidebar ── */}
-      <aside className={`ul-sidebar ${sidebarOpen ? "ul-sidebar-open" : ""}`}>
+      <aside
+        className={`ul-sidebar ${sidebarOpen ? "ul-sidebar-open" : ""} ${sidebarCollapsed ? "ul-sidebar-collapsed" : ""}`}
+      >
         {/* Logo */}
         <div className="ul-sidebar-logo">
           <div className="ul-logo-icon">
@@ -78,13 +112,9 @@ const UserLayout = () => {
 
         {/* User Card */}
         <div className="ul-user-card">
-          <div className="ul-user-avatar">
-            {user.firstName?.charAt(0)?.toUpperCase() || "U"}
-          </div>
+          <div className="ul-user-avatar">{avatarLetter}</div>
           <div className="ul-user-info">
-            <p className="ul-user-name">
-              {user.firstName} {user.lastName}
-            </p>
+            <p className="ul-user-name">{displayName}</p>
             <p className="ul-user-email">{user.email}</p>
           </div>
         </div>
@@ -124,11 +154,18 @@ const UserLayout = () => {
         </div>
       </aside>
 
-      {/* ── Main Content ── */}
-      <div className="ul-main">
+      {/* ── Main ── */}
+      <div className={`ul-main ${sidebarCollapsed ? "ul-main-expanded" : ""}`}>
         {/* Topbar */}
         <header className="ul-topbar">
           <button className="ul-menu-btn" onClick={() => setSidebarOpen(true)}>
+            <Menu size={20} />
+          </button>
+          <button
+            className="ul-toggle-btn"
+            onClick={() => setSidebarCollapsed((p) => !p)}
+            title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+          >
             <Menu size={20} />
           </button>
           <div className="ul-topbar-title">
@@ -145,8 +182,9 @@ const UserLayout = () => {
             <button className="ul-icon-btn">
               <Bell size={18} />
             </button>
-            <div className="ul-topbar-avatar">
-              {user.firstName?.charAt(0)?.toUpperCase() || "U"}
+            {/* Avatar shows updated letter */}
+            <div className="ul-topbar-avatar" title={displayName}>
+              {avatarLetter}
             </div>
           </div>
         </header>

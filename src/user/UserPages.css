@@ -891,3 +891,223 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* ══════════════════════════════════════════════════════════
+   USERSEARCH — Airport Autocomplete integration
+══════════════════════════════════════════════════════════ */
+
+/* Airport field — wider to fit autocomplete */
+.us-field-airport {
+  flex: 1.5;
+  min-width: 180px;
+}
+
+/* Override AirportAutocomplete label style to match us-field-label */
+.us-field-airport label {
+  font-size: 0.72rem !important;
+  font-weight: 600 !important;
+  color: var(--text-secondary) !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.05em !important;
+  margin-bottom: 0.375rem !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.25rem !important;
+}
+
+/* Override AirportAutocomplete input style to match us-field-input */
+.us-field-airport input {
+  padding: 0.7rem 0.875rem !important;
+  border: 1px solid var(--border-color) !important;
+  border-radius: 0.625rem !important;
+  background: var(--bg-secondary) !important;
+  color: var(--text-primary) !important;
+  font-size: 0.9rem !important;
+  outline: none !important;
+  width: 100% !important;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s !important;
+}
+
+.us-field-airport input:focus {
+  border-color: var(--accent) !important;
+  box-shadow: 0 0 0 3px var(--accent-soft) !important;
+}
+
+/* Autocomplete dropdown z-index fix inside card */
+.us-field-airport .autocomplete-dropdown,
+.us-field-airport [class*="dropdown"],
+.us-field-airport [class*="suggestions"],
+.us-field-airport ul {
+  z-index: 9999 !important;
+  background: var(--card-bg) !important;
+  border: 1px solid var(--border-color) !important;
+  border-radius: 0.75rem !important;
+  box-shadow: var(--shadow-lg) !important;
+}
+
+/* Dropdown item hover */
+.us-field-airport li:hover,
+.us-field-airport [class*="item"]:hover {
+  background: var(--hover-color) !important;
+}
+
+/* Error message */
+.us-error-msg {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1rem;
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  border-radius: 0.625rem;
+  color: #f87171;
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin-bottom: 1rem;
+}
+
+/* Popular card city block */
+.us-popular-city-block {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+.us-popular-code {
+  font-size: 0.9rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  font-family: "Courier New", monospace;
+  letter-spacing: 0.05em;
+}
+
+.us-popular-city {
+  font-size: 0.72rem;
+  color: var(--text-secondary);
+}
+
+/* ══════════════════════════════════════════════════════════
+   PROFILE - Extra classes
+══════════════════════════════════════════════════════════ */
+
+/* Read-only field display */
+.uprof-readonly-field {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.625rem 0.875rem;
+  border: 1.5px solid var(--border-color);
+  border-radius: 0.625rem;
+  background: var(--bg-secondary);
+  opacity: 0.75;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+.uprof-readonly-badge {
+  font-size: 0.68rem;
+  font-weight: 600;
+  padding: 0.15rem 0.5rem;
+  border-radius: 9999px;
+  background: var(--border-color);
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+/* Password note */
+.uprof-pw-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  padding: 0.625rem 0.875rem;
+  background: var(--accent-soft);
+  border: 1px solid rgba(102, 126, 234, 0.2);
+  border-radius: 0.625rem;
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.uprof-pw-note svg {
+  flex-shrink: 0;
+  color: var(--accent);
+  margin-top: 1px;
+}
+
+/* Profile skeleton loader */
+.uprof-skeleton-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+.uprof-skeleton-row {
+  margin-bottom: 1rem;
+}
+
+.uprof-skeleton-label {
+  height: 10px;
+  width: 80px;
+  background: var(--bg-secondary);
+  border-radius: 4px;
+  margin-bottom: 0.5rem;
+  animation: shimmer 1.5s infinite;
+}
+
+.uprof-skeleton-input {
+  height: 42px;
+  background: var(--bg-secondary);
+  border-radius: 0.625rem;
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
+}
+
+@media (max-width: 768px) {
+  .uprof-skeleton-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── Readonly field fix ── */
+.uprof-readonly-field {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  padding: 0.625rem 0.875rem !important;
+  border: 1.5px solid var(--border-color) !important;
+  border-radius: 0.625rem !important;
+  background: var(--bg-secondary) !important;
+  font-size: 0.875rem !important;
+  color: var(--text-secondary) !important;
+  gap: 0.75rem !important;
+  min-height: 42px !important;
+}
+
+.uprof-readonly-field span:first-child {
+  flex: 1 !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+.uprof-readonly-badge {
+  flex-shrink: 0 !important;
+  font-size: 0.68rem !important;
+  font-weight: 600 !important;
+  padding: 0.15rem 0.5rem !important;
+  border-radius: 9999px !important;
+  background: var(--border-color) !important;
+  color: var(--text-secondary) !important;
+  white-space: nowrap !important;
+}

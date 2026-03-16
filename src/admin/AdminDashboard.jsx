@@ -18,6 +18,7 @@ import {
   DollarSign,
   BarChart2,
   Globe,
+  IndianRupee,
 } from "lucide-react";
 import {
   AreaChart,
@@ -765,14 +766,14 @@ const AdminDashboard = () => {
                 className="dash-stat-icon"
                 style={{ background: "rgba(255,255,255,0.2)" }}
               >
-                <DollarSign size={18} style={{ color: "white" }} />
+                <IndianRupee size={18} style={{ color: "white" }} />
               </div>
               <span className="dash-revenue-badge">
                 <TrendingUp size={10} /> +{revenueGrowth}%
               </span>
             </div>
             <h3 className="dash-stat-value" style={{ color: "white" }}>
-              ${totalRevenue}M
+              ₹{totalRevenue}M
             </h3>
             <p
               className="dash-stat-label"
@@ -834,7 +835,7 @@ const AdminDashboard = () => {
                     style={{ background: "#3b82f6" }}
                   />
                   <span className="dash-chip-label">Revenue</span>
-                  <span className="dash-chip-value">${totalRevenue}M</span>
+                  <span className="dash-chip-value">₹{totalRevenue}M</span>
                 </div>
                 <div className="dash-chart-chip">
                   <span
@@ -1221,7 +1222,7 @@ const AdminDashboard = () => {
         <div className="dash-card">
           <div className="dash-card-header dash-bookings-header">
             <h3 className="dash-card-title">
-              <Calendar size={16} style={{ color: "var(--text-secondary)" }} />{" "}
+              <Calendar size={16} style={{ color: "var(--text-secondary)" }} />
               Recent Bookings
             </h3>
             <div className="dash-bookings-controls">
@@ -1280,7 +1281,7 @@ const AdminDashboard = () => {
                       <p className="dash-booking-route-to">→ {b.to}</p>
                     </td>
                     <td className="dash-booking-date">{b.date}</td>
-                    <td className="dash-booking-amount">{b.amount}</td>
+                    <td className="dash-booking-amount">₹{b.amount}</td>
                     <td>
                       <span
                         className={`dash-booking-status ${STATUS_CLASS[b.status] || ""}`}
@@ -1322,7 +1323,7 @@ const AdminDashboard = () => {
                   </div>
                   <div>
                     <span className="dash-mobile-label">Amount</span>
-                    <p className="dash-booking-amount">{b.amount}</p>
+                    <p className="dash-booking-amount">₹{b.amount}</p>
                   </div>
                 </div>
                 <div className="dash-mobile-route">

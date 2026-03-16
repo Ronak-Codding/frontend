@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 import AirlineModal from "./AirlineModal";
 import "./AdminTables.css";
-import "./AdminUsers.css";
+import "./Airlines.css";
 
 const Airlines = () => {
   const [airlines, setAirlines] = useState([]);
@@ -534,13 +534,13 @@ const Airlines = () => {
                         className="cell-actions"
                         style={{ justifyContent: "center" }}
                       >
-                        <button
+                        {/* <button
                           className="users-action-btn users-action-view"
                           title="View"
                           onClick={() => setViewAirline(airline)}
                         >
                           <Eye size={14} />
-                        </button>
+                        </button> */}
                         <button
                           className="users-action-btn users-action-edit"
                           title="Edit"

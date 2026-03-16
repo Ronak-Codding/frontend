@@ -18,7 +18,6 @@ import {
   FileText,
 } from "lucide-react";
 import "./AdminTables.css";
-import "./AdminUsers.css";
 import "./AdminPassengers.css";
 
 export default function AdminPassengers({ token }) {

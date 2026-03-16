@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { X, Save } from "lucide-react";
 import "./AdminTables.css";
-import "./AdminUsers.css";
+// import "./AdminUsers.css";
 import "./AdminPassengers.css";
 
 const PassengerModal = ({ passenger, onClose, refresh }) => {

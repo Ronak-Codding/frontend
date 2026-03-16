@@ -16,7 +16,7 @@ import {
 } from "lucide-react";
 import CountrySelect from "./CountrySelect";
 import "./AdminTables.css";
-import "./AdminUsers.css";
+// import "./AdminUsers.css";
 import "./Airlines.css";
 
 const Airports = () => {
@@ -644,13 +644,13 @@ const Airports = () => {
                     {/* Actions */}
                     <td>
                       <div className="cell-actions">
-                        <button
+                        {/* <button
                           className="users-action-btn users-action-view"
                           title="View"
                           onClick={() => setViewAirport(airport)}
                         >
                           <Eye size={14} />
-                        </button>
+                        </button> */}
                         <button
                           className="users-action-btn users-action-edit"
                           title="Edit"

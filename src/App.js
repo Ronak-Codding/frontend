@@ -38,8 +38,12 @@ import BookingConfirmation from "./pages/BookingConfirmation";
 import CookiePolicy from "./pages/CookiePolicy";
 import HelpCenter from "./pages/Helpcenter";
 
-
-
+import UserLayout from "./user/UserLayout";
+import UserDashboard from "./user/UserDashboard";
+import UserBookings from "./user/UserBookings";
+import UserPayments from "./user/UserPayments";
+import UserProfile from "./user/Userprofile";
+import UserSearch from "./user/UserSearch";
 
 export default function App() {
   return (
@@ -94,14 +98,17 @@ export default function App() {
           element={
             <UserRoute>
               <ThemeProvider storageKey="user-theme">
-                <Sidebar />
+                <UserLayout />
               </ThemeProvider>
             </UserRoute>
           }
         >
-          <Route index element={<Navigate to="dashboard" replace />} />
-          <Route path="dashboard" element={<Dashboard />} />
-          <Route path="myprofile" element={<MyProfile />} />
+          <Route index element={<Navigate to="/user/dashboard" replace />} />
+          <Route path="dashboard" element={<UserDashboard />} />
+          <Route path="bookings" element={<UserBookings />} />
+          <Route path="payments" element={<UserPayments />} />
+          <Route path="profile" element={<UserProfile />} />
+          <Route path="search" element={<UserSearch />} />
         </Route>
 
         {/* Fallback */}

@@ -739,13 +739,13 @@ const AdminUsers = () => {
                         className="cell-actions"
                         style={{ justifyContent: "center" }}
                       >
-                        <button
+                        {/* <button
                           className="users-action-btn users-action-view"
                           title="View"
                           onClick={() => handleView(user._id)}
                         >
                           <Eye size={14} />
-                        </button>
+                        </button> */}
                         <button
                           className="users-action-btn users-action-edit"
                           title="Edit"

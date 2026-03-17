@@ -8,7 +8,6 @@ import {
   Download,
   Home,
   MapPin,
-  Clock,
   Ticket,
 } from "lucide-react";
 
@@ -22,9 +21,10 @@ export default function BookingConfirmation() {
   const from = searchParams.get("from");
   const to = searchParams.get("to");
   const flight = searchParams.get("flight");
-  const seats = searchParams.get("seats");
   const date = searchParams.get("date");
-  const passengers = searchParams.get("passengers") || "1";
+
+  // ✅ URL se seats lo (PayU redirect se aata hai)
+  const seatsParam = searchParams.get("seats") || "";
 
   const [booking, setBooking] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -34,7 +34,9 @@ export default function BookingConfirmation() {
     async function fetchBooking() {
       try {
         if (!bookingId) return;
-        const res = await fetch(`/api/booking/${bookingId}`);
+        const res = await fetch(
+          `http://localhost:5000/api/booking/${bookingId}`,
+        );
         const data = await res.json();
         if (res.ok) setBooking(data);
       } catch (err) {
@@ -45,6 +47,13 @@ export default function BookingConfirmation() {
     }
     fetchBooking();
   }, [bookingId]);
+
+  // ✅ Seats - pehle booking se lo, nahi toh URL param se
+  const displaySeats =
+    booking?.seats?.length > 0 ? booking.seats.join(", ") : seatsParam || "—";
+
+  // ✅ Passengers count - booking se lo
+  const passengersCount = booking?.passengers?.length || 1;
 
   const shortId = bookingId
     ? "BK" + bookingId.slice(-6).toUpperCase()
@@ -122,7 +131,7 @@ export default function BookingConfirmation() {
             </div>
           </div>
 
-          {/* Dashed Divider (ticket tear effect) */}
+          {/* Dashed Divider */}
           <div className="relative flex items-center px-6">
             <div className="absolute -left-4 h-8 w-8 rounded-full bg-background" />
             <div className="w-full border-t-2 border-dashed border-border/50" />
@@ -142,14 +151,15 @@ export default function BookingConfirmation() {
                 <Users className="h-3 w-3" /> Passengers
               </p>
               <p className="font-semibold text-foreground">
-                {passengers} Adult(s)
+                {passengersCount} Adult(s)
               </p>
             </div>
             <div>
               <p className="mb-1 flex items-center gap-1 text-xs font-medium uppercase tracking-wider text-muted-foreground">
                 <Ticket className="h-3 w-3" /> Seat(s)
               </p>
-              <p className="font-semibold text-foreground">{seats || "—"}</p>
+              {/* ✅ Fixed - booking se ya URL se seats dikhao */}
+              <p className="font-semibold text-foreground">{displaySeats}</p>
             </div>
             <div>
               <p className="mb-1 flex items-center gap-1 text-xs font-medium uppercase tracking-wider text-muted-foreground">

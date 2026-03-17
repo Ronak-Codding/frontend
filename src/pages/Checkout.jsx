@@ -70,31 +70,47 @@ export default function Checkout() {
   const handlePay = async () => {
     setLoading(true);
     try {
-      // Payment MongoDB mein save karo
-      await fetch("http://localhost:5000/api/booking/save-payment", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          bookingId,
-          amount: price,
-          paymentMethod: method,
-          passengerName: "Guest", // ya form se lo
-          email: searchParams.get("email") || "",
-          flightNumber: flight,
-          from,
-          to,
-        }),
+      const res = await fetch(
+        "http://localhost:5000/api/booking/payu-initiate",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            amount: price,
+            name: name || "Test User",
+            email: "test@gmail.com", // Valid email ZAROOR
+            phone: "9999999999",
+            bookingId,
+            from,
+            to,
+            flight,
+          }),
+        },
+      );
+
+      const data = await res.json();
+      if (!data.success) throw new Error("Initiate failed");
+
+      // Hidden form submit
+      const form = document.createElement("form");
+      form.method = "POST";
+      form.action = data.payuUrl;
+      form.style.display = "none";
+
+      Object.entries(data.payuData).forEach(([key, value]) => {
+        const input = document.createElement("input");
+        input.type = "hidden";
+        input.name = key;
+        input.value = value ?? ""; // null/undefined → empty string
+        form.appendChild(input);
       });
 
-      setTimeout(() => {
-        setLoading(false);
-        navigate(
-          `/confirmation?bookingId=${bookingId}&price=${price}&from=${from}&to=${to}&flight=${flight}&seats=${searchParams.get("seats")}&date=${searchParams.get("date")}&passengers=${searchParams.get("passengers")}`,
-        );
-      }, 2500);
+      document.body.appendChild(form);
+      form.submit();
     } catch (err) {
       console.error(err);
       setLoading(false);
+      alert("Payment failed: " + err.message);
     }
   };
 

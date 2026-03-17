@@ -239,7 +239,8 @@ export default function PassengerDetails() {
     setError(null);
 
     try {
-      const res = await fetch("http://localhost:5000/api/booking/passengers", {
+      // Step 1: Passenger save karo
+      const res = await fetch("http://localhost:5000/api/booking/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -255,13 +256,48 @@ export default function PassengerDetails() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Save failed");
 
-      // Navigate to payment with bookingId
-      navigate(
-        `/checkout?bookingId=${data.bookingId}&price=${price}&from=${from}&to=${to}&flight=${flight}&seats=${seats.join(",")}&date=${date || ""}&passengers=${passengers}`,
+      // Step 2: PayU initiate karo
+      const payuRes = await fetch(
+        "http://localhost:5000/api/payment/payu-initiate",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            amount: price,
+            name: forms[0].fullName,
+            email: forms[0].email,
+            phone: forms[0].phone,
+            bookingId: data.bookingId,
+            from,
+            to,
+            flight,
+            date: date || "", // ✅ date pass karo
+            seats: seats.join(","), // ✅ seats pass karo
+          }),
+        },
       );
+
+      const payuData = await payuRes.json();
+      if (!payuData.success) throw new Error("PayU initiate failed");
+
+      // Step 3: Hidden form → PayU submit
+      const form = document.createElement("form");
+      form.method = "POST";
+      form.action = payuData.payuUrl;
+      form.style.display = "none";
+
+      Object.entries(payuData.payuData).forEach(([key, value]) => {
+        const input = document.createElement("input");
+        input.type = "hidden";
+        input.name = key;
+        input.value = value ?? "";
+        form.appendChild(input);
+      });
+
+      document.body.appendChild(form);
+      form.submit();
     } catch (err) {
       setError(err.message);
-    } finally {
       setLoading(false);
     }
   };

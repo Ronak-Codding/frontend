@@ -5,6 +5,10 @@ import {
   ChevronLeft,
   ChevronRight,
   Download,
+  Smartphone,
+  Building2,
+  Wallet,
+  IndianRupee,
 } from "lucide-react";
 import "./UserLayout.css";
 import "./UserPages.css";
@@ -22,10 +26,14 @@ const UserPayments = () => {
     const fetchPayments = async () => {
       setLoading(true);
       try {
+        // ✅ Email pass karo URL mein
         const res = await fetch(
-          `http://localhost:5000/api/payments?email=${user.email}`,
+          `http://localhost:5000/api/payment?email=${encodeURIComponent(user.email)}&limit=100`,
         );
-        if (res.ok) setPayments(await res.json());
+        if (res.ok) {
+          const data = await res.json();
+          setPayments(data.payments || []); // ✅ Backend se sirf us user ke payments
+        }
       } catch {
         console.error("Failed to load payments");
       } finally {
@@ -43,9 +51,7 @@ const UserPayments = () => {
     const matchSearch =
       !search ||
       p.transactionId?.toLowerCase().includes(search.toLowerCase()) ||
-      p.bookingId?.bookingReference
-        ?.toLowerCase()
-        .includes(search.toLowerCase()) ||
+      p.flightNumber?.toLowerCase().includes(search.toLowerCase()) ||
       p.paymentMethod?.toLowerCase().includes(search.toLowerCase());
     const matchStatus =
       statusFilter === "All" ||
@@ -58,8 +64,14 @@ const UserPayments = () => {
     (currentPage - 1) * perPage,
     currentPage * perPage,
   );
+
+  // ✅ Stats
   const totalSpent = payments
     .filter((p) => p.status === "success")
+    .reduce((s, p) => s + (p.amount || 0), 0);
+
+  const totalRefunded = payments
+    .filter((p) => p.status === "refunded")
     .reduce((s, p) => s + (p.amount || 0), 0);
 
   const formatDate = (d) =>
@@ -75,14 +87,21 @@ const UserPayments = () => {
     success: "up-badge-confirmed",
     failed: "up-badge-cancelled",
     pending: "up-badge-pending",
-    refunded: "up-badge-pending",
+    refunded: "up-badge-refunded",
   };
-  const METHOD_ICON = { card: "💳", upi: "📱", netbanking: "🏦", wallet: "👛" };
+
+  const METHOD_ICON = {
+    card: <CreditCard size={16} color="#667eea" />,
+    upi: <Smartphone size={16} color="#10b981" />,
+    netbanking: <Building2 size={16} color="#3b82f6" />,
+    wallet: <Wallet size={16} color="#f59e0b" />,
+  };
 
   const exportCSV = () => {
     const headers = [
       "Transaction ID",
-      "Booking Ref",
+      "Flight",
+      "Route",
       "Amount",
       "Method",
       "Status",
@@ -92,7 +111,8 @@ const UserPayments = () => {
       headers,
       ...payments.map((p) => [
         p.transactionId,
-        p.bookingId?.bookingReference || "",
+        p.flightNumber || "",
+        `${p.from || ""} → ${p.to || ""}`,
         p.amount,
         p.paymentMethod,
         p.status,
@@ -129,28 +149,34 @@ const UserPayments = () => {
         </button>
       </div>
 
-      {/* Summary Cards */}
-      <div className="up-grid-3" style={{ marginBottom: "1.5rem" }}>
+      {/* ✅ Summary Cards - 4 cards */}
+      <div className="up-grid-4" style={{ marginBottom: "1.5rem" }}>
         {[
           {
             label: "Total Transactions",
             value: payments.length,
             color: "#667eea",
-            bg: "rgba(102,126,234,0.1)",
           },
           {
             label: "Successful",
             value: payments.filter((p) => p.status === "success").length,
             color: "#10b981",
-            bg: "rgba(16,185,129,0.1)",
+          },
+          {
+            label: "Failed",
+            value: payments.filter((p) => p.status === "failed").length,
+            color: "#ef4444",
           },
           {
             label: "Refunded",
             value: payments.filter((p) => p.status === "refunded").length,
+            subLabel:
+              totalRefunded > 0
+                ? `₹${totalRefunded.toLocaleString("en-IN")}`
+                : null,
             color: "#f59e0b",
-            bg: "rgba(245,158,11,0.1)",
           },
-        ].map(({ label, value, color, bg }) => (
+        ].map(({ label, value, color, subLabel }) => (
           <div
             key={label}
             className="up-card up-card-body"
@@ -163,6 +189,18 @@ const UserPayments = () => {
               {value}
             </div>
             <div className="up-stat-label">{label}</div>
+            {subLabel && (
+              <div
+                style={{
+                  fontSize: "0.75rem",
+                  color,
+                  marginTop: "0.25rem",
+                  fontWeight: 600,
+                }}
+              >
+                {subLabel}
+              </div>
+            )}
           </div>
         ))}
       </div>
@@ -175,7 +213,7 @@ const UserPayments = () => {
               <Search size={15} className="ub-search-icon" />
               <input
                 type="text"
-                placeholder="Search by transaction ID, booking ref..."
+                placeholder="Search by transaction ID, flight, method..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="ub-search-input"
@@ -203,7 +241,8 @@ const UserPayments = () => {
             <thead>
               <tr>
                 <th>Transaction ID</th>
-                <th>Booking Ref</th>
+                <th>Flight</th>
+                <th>Route</th>
                 <th>Method</th>
                 <th>Amount</th>
                 <th>Status</th>
@@ -213,14 +252,14 @@ const UserPayments = () => {
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan={6} className="up-table-empty">
+                  <td colSpan={7} className="up-table-empty">
                     <div className="up-spinner" style={{ margin: "0 auto" }} />
                     <p>Loading payments...</p>
                   </td>
                 </tr>
               ) : current.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="up-table-empty">
+                  <td colSpan={7} className="up-table-empty">
                     <CreditCard
                       size={40}
                       style={{
@@ -235,14 +274,24 @@ const UserPayments = () => {
               ) : (
                 current.map((p, i) => (
                   <tr key={p._id || i}>
-                    <td className="up-table-mono">{p.transactionId || "—"}</td>
-                    <td className="up-table-accent">
-                      {p.bookingId?.bookingReference || p.bookingRef || "—"}
+                    <td
+                      className="up-table-mono"
+                      style={{ fontSize: "0.75rem" }}
+                    >
+                      {p.transactionId || "—"}
+                    </td>
+                    <td className="up-table-accent">{p.flightNumber || "—"}</td>
+                    <td className="up-table-muted">
+                      {p.from && p.to ? `${p.from} → ${p.to}` : "—"}
                     </td>
                     <td>
-                      <span className="up-method-badge">
-                        {METHOD_ICON[p.paymentMethod] || "💰"}{" "}
+                      <span style={{ display: "flex", alignItems: "center" }}>
+                        {METHOD_ICON[p.paymentMethod] || (
+                          <IndianRupee size={16} color="#94a3b8" />
+                        )}
+                        <span style={{ marginLeft: 4, fontSize: "0.875rem", color: "#475569" }}>
                         {p.paymentMethod || "—"}
+                        </span>
                       </span>
                     </td>
                     <td className="up-table-amount">

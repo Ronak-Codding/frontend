@@ -313,9 +313,9 @@ export default function AdminPayments({ token }) {
                       {/* Passenger */}
                       <td>
                         <div className="admin-avatar-cell">
-                          <div className="admin-avatar">
+                          {/* <div className="admin-avatar">
                             {p.passengerName?.charAt(0) || "?"}
-                          </div>
+                          </div> */}
                           <div className="admin-avatar-info">
                             <p className="admin-avatar-name">
                               {p.passengerName || "—"}

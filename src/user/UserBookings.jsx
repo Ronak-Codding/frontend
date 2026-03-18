@@ -8,6 +8,7 @@ import {
   ChevronLeft,
   ChevronRight,
   X,
+  RefreshCw,
 } from "lucide-react";
 import "./UserLayout.css";
 import "./UserPages.css";
@@ -19,6 +20,13 @@ const UserBookings = () => {
   const [statusFilter, setStatusFilter] = useState("All");
   const [currentPage, setCurrentPage] = useState(1);
   const [viewBooking, setViewBooking] = useState(null);
+
+  // ✅ Refund modal state
+  const [refundModal, setRefundModal] = useState(false);
+  const [refundBooking, setRefundBooking] = useState(null);
+  const [refundReason, setRefundReason] = useState("");
+  const [refundLoading, setRefundLoading] = useState(false);
+
   const [notification, setNotification] = useState({
     show: false,
     message: "",
@@ -52,6 +60,7 @@ const UserBookings = () => {
   useEffect(() => {
     if (user.email) fetchBookings();
   }, []);
+
   useEffect(() => {
     setCurrentPage(1);
   }, [search, statusFilter]);
@@ -75,6 +84,7 @@ const UserBookings = () => {
     currentPage * perPage,
   );
 
+  // ── Cancel Booking ──
   const handleCancel = async (bookingId) => {
     if (!window.confirm("Cancel this booking?")) return;
     try {
@@ -83,11 +93,75 @@ const UserBookings = () => {
         { method: "PUT" },
       );
       if (res.ok) {
-        showNotification("Booking cancelled");
+        showNotification("Booking cancelled successfully");
         fetchBookings();
       } else showNotification("Failed to cancel", "error");
     } catch {
       showNotification("Failed to cancel", "error");
+    }
+  };
+
+  // ── Open Refund Modal ──
+  const openRefundModal = (booking) => {
+    setRefundBooking(booking);
+    setRefundReason("");
+    setRefundModal(true);
+    setViewBooking(null);
+  };
+
+  // ── Submit Refund Request ──
+  const handleRefundRequest = async () => {
+    if (!refundReason.trim()) {
+      showNotification("Refund reason required hai", "error");
+      return;
+    }
+    setRefundLoading(true);
+    try {
+      // Payment find karo is booking ke liye
+      const payRes = await fetch(
+        `http://localhost:5000/api/payment?email=${encodeURIComponent(user.email)}&limit=100`,
+      );
+      const payData = await payRes.json();
+      const payments = payData.payments || [];
+
+      // Booking ID se match karo
+      const matchedPayment = payments.find(
+        (p) =>
+          p.bookingId?.toString() === refundBooking._id?.toString() &&
+          p.status === "success",
+      );
+
+      if (!matchedPayment) {
+        showNotification("Is booking ka successful payment nahi mila", "error");
+        setRefundLoading(false);
+        return;
+      }
+
+      // Refund request submit karo
+      const res = await fetch(
+        `http://localhost:5000/api/payment/refund/${matchedPayment._id}`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            reason: refundReason,
+            requestedBy: user.email,
+          }),
+        },
+      );
+
+      if (res.ok) {
+        showNotification("✅ Refund request submitted! Admin review karega.");
+        setRefundModal(false);
+        setRefundBooking(null);
+        fetchBookings();
+      } else {
+        showNotification("Refund request failed", "error");
+      }
+    } catch {
+      showNotification("Refund request failed", "error");
+    } finally {
+      setRefundLoading(false);
     }
   };
 
@@ -99,6 +173,7 @@ const UserBookings = () => {
           year: "numeric",
         })
       : "—";
+
   const STATUS_CLASS = {
     confirmed: "up-badge-confirmed",
     Confirmed: "up-badge-confirmed",
@@ -107,6 +182,15 @@ const UserBookings = () => {
     pending: "up-badge-pending",
     Pending: "up-badge-pending",
   };
+
+  const REFUND_REASONS = [
+    "Flight cancelled by airline",
+    "Medical emergency",
+    "Visa rejected",
+    "Change of travel plans",
+    "Duplicate booking",
+    "Other",
+  ];
 
   return (
     <div>
@@ -119,7 +203,169 @@ const UserBookings = () => {
         </div>
       )}
 
-      {/* View Modal */}
+      {/* ── Refund Request Modal ── */}
+      {refundModal && refundBooking && (
+        <div
+          className="pax-modal-overlay"
+          onClick={() => setRefundModal(false)}
+        >
+          <div
+            className="pax-modal pax-modal-md"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="pax-modal-header">
+              <div>
+                <h2 className="pax-modal-title">Request Refund</h2>
+                <p
+                  style={{
+                    fontSize: "0.8rem",
+                    color: "var(--text-secondary)",
+                    margin: 0,
+                  }}
+                >
+                  {refundBooking.flightNumber} · {refundBooking.from} →{" "}
+                  {refundBooking.to}
+                </p>
+              </div>
+              <button
+                className="pax-modal-close"
+                onClick={() => setRefundModal(false)}
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <div className="pax-modal-body">
+              {/* Booking Info */}
+              <div
+                style={{
+                  background: "rgba(245,158,11,0.08)",
+                  border: "1px solid rgba(245,158,11,0.3)",
+                  borderRadius: "0.75rem",
+                  padding: "1rem",
+                  marginBottom: "1.25rem",
+                }}
+              >
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    marginBottom: "0.5rem",
+                  }}
+                >
+                  <span
+                    style={{
+                      fontSize: "0.8rem",
+                      color: "var(--text-secondary)",
+                    }}
+                  >
+                    Amount
+                  </span>
+                  <span style={{ fontWeight: 700, color: "#f59e0b" }}>
+                    ₹{refundBooking.totalPrice?.toLocaleString("en-IN") || "—"}
+                  </span>
+                </div>
+                <div
+                  style={{ display: "flex", justifyContent: "space-between" }}
+                >
+                  <span
+                    style={{
+                      fontSize: "0.8rem",
+                      color: "var(--text-secondary)",
+                    }}
+                  >
+                    Booked On
+                  </span>
+                  <span style={{ fontSize: "0.85rem" }}>
+                    {formatDate(refundBooking.createdAt)}
+                  </span>
+                </div>
+              </div>
+
+              {/* Reason Select */}
+              <div className="pax-form-group">
+                <label className="pax-form-label">
+                  Refund Reason <span className="pax-required">*</span>
+                </label>
+                <select
+                  value={refundReason}
+                  onChange={(e) => setRefundReason(e.target.value)}
+                  className="pax-form-select"
+                >
+                  <option value="">Select reason...</option>
+                  {REFUND_REASONS.map((r) => (
+                    <option key={r} value={r}>
+                      {r}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Custom reason if Other */}
+              {refundReason === "Other" && (
+                <div
+                  className="pax-form-group"
+                  style={{ marginTop: "0.75rem" }}
+                >
+                  <label className="pax-form-label">Describe your reason</label>
+                  <textarea
+                    rows={3}
+                    placeholder="Apna reason likho..."
+                    onChange={(e) => setRefundReason(e.target.value)}
+                    className="pax-form-input"
+                    style={{ resize: "vertical" }}
+                  />
+                </div>
+              )}
+
+              <p
+                style={{
+                  fontSize: "0.75rem",
+                  color: "var(--text-secondary)",
+                  marginTop: "0.75rem",
+                  padding: "0.6rem",
+                  background: "rgba(102,126,234,0.08)",
+                  borderRadius: "0.5rem",
+                }}
+              >
+                ℹ️ Refund request admin ko jayega. 3-5 business days mein
+                process hoga.
+              </p>
+            </div>
+
+            <div className="pax-modal-footer">
+              <button
+                className="btn-secondary"
+                onClick={() => setRefundModal(false)}
+              >
+                Cancel
+              </button>
+              <button
+                className="btn-primary"
+                onClick={handleRefundRequest}
+                disabled={refundLoading || !refundReason}
+                style={{ background: "#f59e0b", borderColor: "#f59e0b" }}
+              >
+                {refundLoading ? (
+                  <>
+                    <div
+                      className="users-spinner"
+                      style={{ width: 16, height: 16, borderWidth: 2 }}
+                    />
+                    Submitting...
+                  </>
+                ) : (
+                  <>
+                    <RefreshCw size={15} /> Submit Refund Request
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── View Booking Modal ── */}
       {viewBooking && (
         <div className="pax-modal-overlay" onClick={() => setViewBooking(null)}>
           <div
@@ -157,7 +403,7 @@ const UserBookings = () => {
                   ],
                   ["Status", viewBooking.status],
                   ["Flight Number", viewBooking.flightNumber],
-                  ["From", viewBooking.from || viewBooking.seats?.[0]],
+                  ["From", viewBooking.from],
                   ["To", viewBooking.to],
                   ["Passengers", viewBooking.passengers?.length || 1],
                   [
@@ -173,7 +419,6 @@ const UserBookings = () => {
                 ))}
               </div>
 
-              {/* Passengers List */}
               {viewBooking.passengers?.length > 0 && (
                 <div style={{ marginTop: "1.25rem" }}>
                   <p
@@ -206,6 +451,7 @@ const UserBookings = () => {
               )}
             </div>
             <div className="pax-modal-footer">
+              {/* ✅ Cancel button */}
               {(viewBooking.status === "confirmed" ||
                 viewBooking.status === "Confirmed") && (
                 <button
@@ -216,6 +462,28 @@ const UserBookings = () => {
                   }}
                 >
                   <XCircle size={15} /> Cancel Booking
+                </button>
+              )}
+              {/* ✅ Refund button - cancelled booking pe */}
+              {(viewBooking.status === "cancelled" ||
+                viewBooking.status === "Cancelled") && (
+                <button
+                  onClick={() => openRefundModal(viewBooking)}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "0.4rem",
+                    background: "rgba(245,158,11,0.15)",
+                    color: "#f59e0b",
+                    border: "1px solid rgba(245,158,11,0.4)",
+                    borderRadius: "0.6rem",
+                    padding: "0.5rem 1rem",
+                    cursor: "pointer",
+                    fontWeight: 600,
+                    fontSize: "0.85rem",
+                  }}
+                >
+                  <RefreshCw size={15} /> Request Refund
                 </button>
               )}
               <button
@@ -317,6 +585,7 @@ const UserBookings = () => {
                   {b.status}
                 </span>
                 <div className="ub-actions">
+                  {/* View */}
                   <button
                     className="ub-action-btn ub-view-btn"
                     onClick={() => setViewBooking(b)}
@@ -324,13 +593,29 @@ const UserBookings = () => {
                   >
                     <Eye size={15} />
                   </button>
+                  {/* Cancel - confirmed booking pe */}
                   {(b.status === "confirmed" || b.status === "Confirmed") && (
                     <button
                       className="ub-action-btn ub-cancel-btn"
                       onClick={() => handleCancel(b._id)}
-                      title="Cancel"
+                      title="Cancel Booking"
                     >
                       <XCircle size={15} />
+                    </button>
+                  )}
+                  {/* ✅ Refund - cancelled booking pe */}
+                  {(b.status === "cancelled" || b.status === "Cancelled") && (
+                    <button
+                      className="ub-action-btn"
+                      onClick={() => openRefundModal(b)}
+                      title="Request Refund"
+                      style={{
+                        background: "rgba(245,158,11,0.1)",
+                        color: "#f59e0b",
+                        border: "1px solid rgba(245,158,11,0.3)",
+                      }}
+                    >
+                      <RefreshCw size={15} />
                     </button>
                   )}
                 </div>

@@ -1111,3 +1111,38 @@
   color: var(--text-secondary) !important;
   white-space: nowrap !important;
 }
+
+
+
+/* UserPages.css mein yeh add karo */
+
+/* 4 column grid */
+.up-grid-4 {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+}
+
+@media (max-width: 768px) {
+  .up-grid-4 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .up-grid-4 {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Refunded badge */
+.up-badge-refunded {
+  background: rgba(245, 158, 11, 0.1);
+  color: #f59e0b;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: capitalize;
+}

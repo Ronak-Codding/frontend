@@ -30,7 +30,6 @@ import TermsOfService from "./pages/TermsOfService";
 import SearchResults from "./pages/SearchResults";
 import SeatSelection from "./pages/SeatSelection";
 import PassengerDetails from "./pages/PassengerDetails";
-import Checkout from "./pages/Checkout";
 import BookingConfirmation from "./pages/BookingConfirmation";
 import CookiePolicy from "./pages/CookiePolicy";
 import HelpCenter from "./pages/Helpcenter";
@@ -63,7 +62,6 @@ export default function App() {
         <Route path="/results" element={<SearchResults />} />
         <Route path="/seats" element={<SeatSelection />} />
         <Route path="/passengers" element={<PassengerDetails />} />
-        <Route path="/checkout" element={<Checkout />} />
         <Route path="/confirmation" element={<BookingConfirmation />} />
         <Route path="/admin-login" element={<AdminLogin />} />
 

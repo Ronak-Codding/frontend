@@ -30,8 +30,8 @@ import {
 import "./AdminTables.css";
 import "./AdminDashboard.css";
 
-// ─── Data ───────────────────────────────────────────────────────────
-const revenueMonthly = [
+// ─── Fallback Static Data ────────────────────────────────────────────
+const FALLBACK_MONTHLY = [
   { month: "Jul", revenue: 4.2, bookings: 320 },
   { month: "Aug", revenue: 5.8, bookings: 415 },
   { month: "Sep", revenue: 5.1, bookings: 390 },
@@ -42,7 +42,7 @@ const revenueMonthly = [
   { month: "Feb", revenue: 8.4, bookings: 580 },
   { month: "Mar", revenue: 10.2, bookings: 710 },
 ];
-const revenueWeekly = [
+const FALLBACK_WEEKLY = [
   { month: "Mon", revenue: 1.1, bookings: 82 },
   { month: "Tue", revenue: 1.4, bookings: 105 },
   { month: "Wed", revenue: 0.9, bookings: 74 },
@@ -150,7 +150,7 @@ const ROUTES = [
   { from: { x: 47, y: 28 }, to: { x: 81, y: 36 }, active: true },
 ];
 
-// ─── Custom Tooltip ───────────────────────────────────────────────────
+// ─── Custom Tooltip ──────────────────────────────────────────────────
 const CustomTooltip = ({ active, payload, label }) => {
   if (active && payload && payload.length) {
     return (
@@ -158,7 +158,11 @@ const CustomTooltip = ({ active, payload, label }) => {
         <p className="dash-tooltip-label">{label}</p>
         {payload.map((p, i) => (
           <p key={i} style={{ color: p.color }} className="dash-tooltip-value">
-            {p.name === "revenue" ? `$${p.value}M` : `${p.value} bookings`}
+            {p.name === "revenue"
+              ? p.value >= 1
+                ? `₹${p.value}L`
+                : `₹${(p.value * 100000).toLocaleString("en-IN")}`
+              : `${p.value} bookings`}
           </p>
         ))}
       </div>
@@ -167,11 +171,10 @@ const CustomTooltip = ({ active, payload, label }) => {
   return null;
 };
 
-// ─── World Route Map ────────────────────────────────────────────────
+// ─── World Route Map ─────────────────────────────────────────────────
 const WorldRouteMap = ({ destinations }) => {
   const [hoveredCity, setHoveredCity] = useState(null);
   const [animOffset, setAnimOffset] = useState(0);
-
   useEffect(() => {
     const interval = setInterval(
       () => setAnimOffset((prev) => (prev + 1) % 100),
@@ -179,7 +182,6 @@ const WorldRouteMap = ({ destinations }) => {
     );
     return () => clearInterval(interval);
   }, []);
-
   return (
     <div className="dash-map">
       <svg
@@ -221,7 +223,6 @@ const WorldRouteMap = ({ destinations }) => {
             <stop offset="100%" stopColor="#3b82f6" stopOpacity="0" />
           </radialGradient>
         </defs>
-        {/* Continents */}
         <ellipse
           cx="22"
           cy="33"
@@ -292,7 +293,6 @@ const WorldRouteMap = ({ destinations }) => {
           strokeWidth="0.3"
           opacity="0.8"
         />
-        {/* Routes */}
         {ROUTES.map((route, i) => (
           <line
             key={i}
@@ -306,7 +306,6 @@ const WorldRouteMap = ({ destinations }) => {
             opacity={route.active ? 0.7 : 0.3}
           />
         ))}
-        {/* Animated planes */}
         {ROUTES.filter((r) => r.active).map((route, i) => {
           const t = ((animOffset + i * 20) % 100) / 100;
           const cx = route.from.x + (route.to.x - route.from.x) * t;
@@ -329,7 +328,6 @@ const WorldRouteMap = ({ destinations }) => {
             </circle>
           );
         })}
-        {/* Airport dots */}
         {destinations.map((dest, i) => (
           <g
             key={i}
@@ -410,7 +408,7 @@ const WorldRouteMap = ({ destinations }) => {
   );
 };
 
-// ─── Skeleton ─────────────────────────────────────────────────────────
+// ─── Skeleton ────────────────────────────────────────────────────────
 const AirlineSkeleton = () => (
   <div className="dash-airline-skeleton">
     <div className="dash-skeleton-header">
@@ -429,19 +427,25 @@ const AirlineSkeleton = () => (
   </div>
 );
 
-// ─── Main Component ────────────────────────────────────────────────────
+// ─── Main Component ──────────────────────────────────────────────────
 const AdminDashboard = () => {
   const [users, setUsers] = useState([]);
   const [airlines, setAirlines] = useState([]);
   const [airports, setAirports] = useState([]);
-  const [flights, setFlights] = useState([]);
   const [popularAirlines, setPopularAirlines] = useState([]);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [chartPeriod, setChartPeriod] = useState("monthly");
   const [chartType, setChartType] = useState("area");
-  const itemsPerPage = 5;
+
+  // ✅ Real DB states
+  const [realRevenue, setRealRevenue] = useState(0);
+  const [realBookings, setRealBookings] = useState(0);
+  const [realFlights, setRealFlights] = useState(0);
+  const [refundedCount, setRefundedCount] = useState(0);
+
+  // ✅ Real chart data states
+  const [realMonthlyData, setRealMonthlyData] = useState(FALLBACK_MONTHLY);
+  const [realWeeklyData, setRealWeeklyData] = useState(FALLBACK_WEEKLY);
 
   useEffect(() => {
     const fetchAllData = async () => {
@@ -451,7 +455,7 @@ const AdminDashboard = () => {
           fetchUsers(),
           fetchAirlines(),
           fetchAirports(),
-          fetchFlights(),
+          fetchRevenueAndBookings(),
           fetchPopularAirlines(),
         ]);
       } catch (e) {
@@ -471,6 +475,7 @@ const AdminDashboard = () => {
       setUsers([]);
     }
   };
+
   const fetchAirlines = async () => {
     try {
       const res = await axios.get(
@@ -481,6 +486,7 @@ const AdminDashboard = () => {
       setAirlines([]);
     }
   };
+
   const fetchAirports = async () => {
     try {
       const res = await fetch("http://localhost:5000/api/airports/allAirports");
@@ -489,12 +495,122 @@ const AdminDashboard = () => {
       setAirports([]);
     }
   };
-  const fetchFlights = async () => {
+
+  // ✅ Real Revenue + Chart Data from DB
+  const fetchRevenueAndBookings = async () => {
     try {
-      const res = await fetch("http://localhost:5000/api/flights/allFlights");
-      if (res.ok) setFlights(await res.json());
-    } catch {
-      setFlights([]);
+      const payRes = await fetch(
+        "http://localhost:5000/api/payment?limit=1000",
+      );
+      if (payRes.ok) {
+        const payData = await payRes.json();
+        const payments = payData.payments || [];
+
+        // ── Total Revenue ──
+        const revenue = payments
+          .filter((p) => p.status === "success")
+          .reduce((sum, p) => sum + (p.amount || 0), 0);
+        const refunded = payments.filter((p) => p.status === "refunded").length;
+        setRealRevenue(revenue);
+        setRefundedCount(refunded);
+
+        // ── Monthly Chart Data ──
+        const monthNames = [
+          "Jan",
+          "Feb",
+          "Mar",
+          "Apr",
+          "May",
+          "Jun",
+          "Jul",
+          "Aug",
+          "Sep",
+          "Oct",
+          "Nov",
+          "Dec",
+        ];
+        const monthlyMap = {};
+
+        payments.forEach((p) => {
+          if (p.status !== "success") return;
+          const d = new Date(p.createdAt);
+          const key = monthNames[d.getMonth()];
+          if (!monthlyMap[key])
+            monthlyMap[key] = {
+              month: key,
+              revenue: 0,
+              bookings: 0,
+              order: d.getMonth(),
+            };
+          monthlyMap[key].revenue += p.amount || 0;
+          monthlyMap[key].bookings += 1;
+        });
+
+        const monthlyArr = Object.values(monthlyMap)
+          .sort((a, b) => a.order - b.order)
+          .map((m) => ({
+            month: m.month,
+            revenue: parseFloat((m.revenue / 100000).toFixed(2)), // Lakhs mein
+            bookings: m.bookings,
+          }));
+
+        if (monthlyArr.length > 0) setRealMonthlyData(monthlyArr);
+
+        // ── Weekly Chart Data (last 7 days) ──
+        const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+        const now = new Date();
+        const weeklyMap = {};
+
+        // Last 7 days initialize
+        for (let i = 6; i >= 0; i--) {
+          const d = new Date(now);
+          d.setDate(now.getDate() - i);
+          const key = dayNames[d.getDay()];
+          if (!weeklyMap[key])
+            weeklyMap[key] = {
+              month: key,
+              revenue: 0,
+              bookings: 0,
+              order: 6 - i,
+            };
+        }
+
+        payments.forEach((p) => {
+          if (p.status !== "success") return;
+          const d = new Date(p.createdAt);
+          const diffMs = now - d;
+          const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+          if (diffDays <= 6) {
+            const key = dayNames[d.getDay()];
+            if (weeklyMap[key]) {
+              weeklyMap[key].revenue += p.amount || 0;
+              weeklyMap[key].bookings += 1;
+            }
+          }
+        });
+
+        const weeklyArr = Object.values(weeklyMap)
+          .sort((a, b) => a.order - b.order)
+          .map((w) => ({
+            month: w.month,
+            revenue: parseFloat((w.revenue / 100000).toFixed(2)),
+            bookings: w.bookings,
+          }));
+
+        if (weeklyArr.length > 0) setRealWeeklyData(weeklyArr);
+      }
+
+      // ── Bookings Count ──
+      const bookRes = await fetch(
+        "http://localhost:5000/api/booking?limit=1&page=1",
+      );
+      if (bookRes.ok) {
+        const bookData = await bookRes.json();
+        setRealBookings(bookData.total || 0);
+        setRealFlights(bookData.total || 0);
+      }
+    } catch (e) {
+      console.error("Revenue fetch error:", e);
     }
   };
 
@@ -528,7 +644,7 @@ const AdminDashboard = () => {
           color: colors[i % colors.length],
           flights: Math.floor(Math.random() * 500) + 500,
           rating: (Math.random() * 1.5 + 3.5).toFixed(1),
-          revenue: `$${(Math.random() * 10 + 5).toFixed(1)}M`,
+          revenue: `₹${(Math.random() * 10 + 5).toFixed(1)}M`,
           trend: `+${(Math.random() * 10 + 2).toFixed(1)}%`,
         }))
         .sort((a, b) => b.percentage - a.percentage)
@@ -543,7 +659,7 @@ const AdminDashboard = () => {
           code: "SHA",
           flights: 1245,
           rating: 4.8,
-          revenue: "$12.4M",
+          revenue: "₹12.4M",
           trend: "+12%",
         },
         {
@@ -553,7 +669,7 @@ const AdminDashboard = () => {
           code: "FFA",
           flights: 1080,
           rating: 4.6,
-          revenue: "$10.2M",
+          revenue: "₹10.2M",
           trend: "+8%",
         },
         {
@@ -563,7 +679,7 @@ const AdminDashboard = () => {
           code: "AEJ",
           flights: 950,
           rating: 4.5,
-          revenue: "$9.1M",
+          revenue: "₹9.1M",
           trend: "+5%",
         },
         {
@@ -573,33 +689,44 @@ const AdminDashboard = () => {
           code: "NMB",
           flights: 820,
           rating: 4.3,
-          revenue: "$7.8M",
+          revenue: "₹7.8M",
           trend: "+3%",
         },
       ]);
     }
   };
 
-  const chartData = chartPeriod === "monthly" ? revenueMonthly : revenueWeekly;
-  const totalRevenue = chartData.reduce((s, d) => s + d.revenue, 0).toFixed(1);
-  const totalBookingsChart = chartData.reduce((s, d) => s + d.bookings, 0);
-  const revenueGrowth = (
-    ((chartData[chartData.length - 1].revenue - chartData[0].revenue) /
-      chartData[0].revenue) *
-    100
-  ).toFixed(1);
+  // ✅ Real chart data use karo
+  const chartData =
+    chartPeriod === "monthly" ? realMonthlyData : realWeeklyData;
 
-  const STATUS_CLASS = {
-    confirmed: "dash-status-confirmed",
-    pending: "dash-status-pending",
-    completed: "dash-status-completed",
-    cancelled: "dash-status-cancelled",
+  const chartRevenueLakhs = chartData.reduce((s, d) => s + d.revenue, 0);
+  const chartRevenueDisplay =
+    chartRevenueLakhs >= 10
+      ? `₹${(chartRevenueLakhs / 10).toFixed(1)}Cr`
+      : chartRevenueLakhs >= 1
+        ? `₹${chartRevenueLakhs.toFixed(1)}L`
+        : `₹${(chartRevenueLakhs * 100000).toLocaleString("en-IN")}`;
+
+  const chartBookingsTotal = chartData.reduce((s, d) => s + d.bookings, 0);
+
+  const firstRev = chartData[0]?.revenue || 0;
+  const lastRev = chartData[chartData.length - 1]?.revenue || 0;
+  const revenueGrowth =
+    firstRev > 0 ? (((lastRev - firstRev) / firstRev) * 100).toFixed(1) : "0.0";
+
+  // ✅ Format revenue
+  const formatRevenue = (amount) => {
+    if (amount >= 10000000) return `₹${(amount / 10000000).toFixed(1)}Cr`;
+    if (amount >= 100000) return `₹${(amount / 100000).toFixed(1)}L`;
+    if (amount >= 1000) return `₹${(amount / 1000).toFixed(1)}K`;
+    return `₹${amount.toLocaleString("en-IN")}`;
   };
 
   const STAT_CARDS = [
     {
       label: "Total Users",
-      value: users.length || 2481,
+      value: users.length || 0,
       badge: "+12%",
       color: "#3b82f6",
       bg: "rgba(59,130,246,0.08)",
@@ -607,7 +734,7 @@ const AdminDashboard = () => {
     },
     {
       label: "Total Airlines",
-      value: airlines.length || 48,
+      value: airlines.length || 0,
       badge: "+5%",
       color: "#22c55e",
       bg: "rgba(34,197,94,0.08)",
@@ -615,15 +742,15 @@ const AdminDashboard = () => {
     },
     {
       label: "Total Airports",
-      value: airports.length || 186,
+      value: airports.length || 0,
       badge: "+8%",
       color: "#8b5cf6",
       bg: "rgba(139,92,246,0.08)",
       icon: MapPin,
     },
     {
-      label: "Total Flights",
-      value: flights.length || 3740,
+      label: "Total Bookings",
+      value: realFlights || 0,
       badge: "+15%",
       color: "#f97316",
       bg: "rgba(249,115,22,0.08)",
@@ -634,13 +761,13 @@ const AdminDashboard = () => {
   return (
     <div className="dash-container">
       <div className="dash-inner">
-        {/* ── Welcome ── */}
+        {/* Welcome */}
         <div className="dash-welcome">
           <h2 className="dash-welcome-title">Dashboard Overview</h2>
           <p className="dash-welcome-sub">Welcome back, Admin</p>
         </div>
 
-        {/* ── Stats Grid ── */}
+        {/* Stats Grid */}
         <div className="dash-stats-grid">
           {STAT_CARDS.map(({ label, value, badge, color, bg, icon: Icon }) => (
             <div key={label} className="dash-stat-card">
@@ -655,12 +782,14 @@ const AdminDashboard = () => {
                   {badge}
                 </span>
               </div>
-              <h3 className="dash-stat-value">{value.toLocaleString()}</h3>
+              <h3 className="dash-stat-value">
+                {loading ? "—" : value.toLocaleString()}
+              </h3>
               <p className="dash-stat-label">{label}</p>
             </div>
           ))}
 
-          {/* Revenue Card */}
+          {/*  Real Revenue Card */}
           <div className="dash-stat-card dash-stat-revenue">
             <div className="dash-stat-top">
               <div
@@ -670,11 +799,11 @@ const AdminDashboard = () => {
                 <IndianRupee size={18} style={{ color: "white" }} />
               </div>
               <span className="dash-revenue-badge">
-                <TrendingUp size={10} /> +{revenueGrowth}%
+                <TrendingUp size={10} /> Live
               </span>
             </div>
             <h3 className="dash-stat-value" style={{ color: "white" }}>
-              ₹{totalRevenue}M
+              {loading ? "—" : formatRevenue(realRevenue)}
             </h3>
             <p
               className="dash-stat-label"
@@ -683,15 +812,17 @@ const AdminDashboard = () => {
               Total Revenue
             </p>
             <div className="dash-revenue-footer">
-              <span>{totalBookingsChart.toLocaleString()} bookings</span>
-              <span>this {chartPeriod === "monthly" ? "year" : "week"}</span>
+              <span>{realBookings.toLocaleString()} bookings</span>
+              <span>
+                {refundedCount > 0 ? `${refundedCount} refunded` : "all time"}
+              </span>
             </div>
           </div>
         </div>
 
-        {/* ── Charts Section ── */}
+        {/* Charts Section */}
         <div className="dash-charts-grid">
-          {/* Area / Bar Chart */}
+          {/* ✅ Real Chart */}
           <div className="dash-card dash-chart-main">
             <div className="dash-card-header">
               <div>
@@ -736,7 +867,7 @@ const AdminDashboard = () => {
                     style={{ background: "#3b82f6" }}
                   />
                   <span className="dash-chip-label">Revenue</span>
-                  <span className="dash-chip-value">₹{totalRevenue}M</span>
+                  <span className="dash-chip-value">{chartRevenueDisplay}</span>
                 </div>
                 <div className="dash-chart-chip">
                   <span
@@ -745,16 +876,26 @@ const AdminDashboard = () => {
                   />
                   <span className="dash-chip-label">Bookings</span>
                   <span className="dash-chip-value">
-                    {totalBookingsChart.toLocaleString()}
+                    {chartBookingsTotal.toLocaleString()}
                   </span>
                 </div>
                 <div className="dash-chart-chip">
-                  <TrendingUp size={12} style={{ color: "#22c55e" }} />
+                  <TrendingUp
+                    size={12}
+                    style={{
+                      color:
+                        parseFloat(revenueGrowth) >= 0 ? "#22c55e" : "#ef4444",
+                    }}
+                  />
                   <span
                     className="dash-chip-value"
-                    style={{ color: "#22c55e" }}
+                    style={{
+                      color:
+                        parseFloat(revenueGrowth) >= 0 ? "#22c55e" : "#ef4444",
+                    }}
                   >
-                    +{revenueGrowth}% growth
+                    {parseFloat(revenueGrowth) >= 0 ? "+" : ""}
+                    {revenueGrowth}% growth
                   </span>
                 </div>
               </div>
@@ -925,7 +1066,7 @@ const AdminDashboard = () => {
           </div>
         </div>
 
-        {/* ── World Map + Top Destinations ── */}
+        {/* World Map + Top Destinations */}
         <div className="dash-charts-grid">
           <div className="dash-card dash-chart-main">
             <div className="dash-card-header">
@@ -946,7 +1087,6 @@ const AdminDashboard = () => {
               <WorldRouteMap destinations={TOP_DESTINATIONS} />
             </div>
           </div>
-
           <div className="dash-card">
             <div className="dash-card-header">
               <h3 className="dash-card-title">
@@ -1003,7 +1143,7 @@ const AdminDashboard = () => {
           </div>
         </div>
 
-        {/* ── Popular Airlines ── */}
+        {/* Popular Airlines */}
         <div className="dash-card" style={{ marginBottom: "1.5rem" }}>
           <div className="dash-airlines-header">
             <div>
@@ -1110,7 +1250,7 @@ const AdminDashboard = () => {
                 </div>
                 <div className="dash-airlines-footer">
                   <button className="dash-link-btn">
-                    View All Airlines ({airlines.length || 48} total){" "}
+                    View All Airlines ({airlines.length} total){" "}
                     <ArrowUpRight size={14} />
                   </button>
                 </div>

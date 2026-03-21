@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import {
-  Eye,
   Edit2,
   Trash2,
   Download,
@@ -10,6 +9,8 @@ import {
   Plane,
   ChevronLeft,
   ChevronRight,
+  CheckSquare,
+  Square,
 } from "lucide-react";
 import AirlineModal from "./AirlineModal";
 import "./AdminTables.css";
@@ -31,6 +32,7 @@ const Airlines = () => {
     type: "",
   });
   const [selectedAirlines, setSelectedAirlines] = useState([]);
+  const [selectAll, setSelectAll] = useState(false);
   const [sortConfig, setSortConfig] = useState({
     key: "airline_name",
     direction: "asc",
@@ -71,6 +73,12 @@ const Airlines = () => {
   useEffect(() => {
     setCurrentPage(1);
   }, [search, statusFilter]);
+
+  // Reset selection on page/filter change
+  useEffect(() => {
+    setSelectedAirlines([]);
+    setSelectAll(false);
+  }, [currentPage, search, statusFilter]);
 
   const filteredAirlines = () =>
     airlines.filter((a) => {
@@ -165,6 +173,24 @@ const Airlines = () => {
     }
   };
 
+  // ── Checkbox handlers ──
+  const handleSelectAll = () => {
+    if (selectAll) {
+      setSelectedAirlines([]);
+      setSelectAll(false);
+    } else {
+      setSelectedAirlines(currentAirlines.map((a) => a._id));
+      setSelectAll(true);
+    }
+  };
+
+  const toggleAirlineSelection = (id) => {
+    setSelectedAirlines((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
+    );
+  };
+
+  // ── Bulk Delete ──
   const handleBulkDelete = async () => {
     if (!window.confirm(`Delete ${selectedAirlines.length} airlines?`)) return;
     setLoading(true);
@@ -178,6 +204,7 @@ const Airlines = () => {
       );
       setAirlines(airlines.filter((a) => !selectedAirlines.includes(a._id)));
       setSelectedAirlines([]);
+      setSelectAll(false);
       showNotification(`${selectedAirlines.length} airlines deleted`);
     } catch {
       showNotification("Failed to delete", "error");
@@ -186,6 +213,7 @@ const Airlines = () => {
     }
   };
 
+  // ── Bulk Status Update ──
   const handleBulkStatusUpdate = async (newStatus) => {
     setLoading(true);
     try {
@@ -198,6 +226,7 @@ const Airlines = () => {
       );
       await fetchAirlines();
       setSelectedAirlines([]);
+      setSelectAll(false);
       showNotification(
         `${selectedAirlines.length} airlines updated to ${newStatus}`,
       );
@@ -240,20 +269,6 @@ const Airlines = () => {
     showNotification(`Exported ${dataToExport.length} airlines`);
   };
 
-  const handleSelectAll = () => {
-    setSelectedAirlines(
-      selectedAirlines.length === currentAirlines.length
-        ? []
-        : currentAirlines.map((a) => a._id),
-    );
-  };
-
-  const toggleAirlineSelection = (id) => {
-    setSelectedAirlines((prev) =>
-      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
-    );
-  };
-
   const SortIcon = ({ col }) =>
     sortConfig.key === col
       ? sortConfig.direction === "asc"
@@ -263,7 +278,7 @@ const Airlines = () => {
 
   return (
     <div>
-      {/* ── Loading Overlay ── */}
+      {/* Loading Overlay */}
       {loading && (
         <div className="users-loading-overlay">
           <div className="users-loading-box">
@@ -273,7 +288,7 @@ const Airlines = () => {
         </div>
       )}
 
-      {/* ── Notification ── */}
+      {/* Notification */}
       {notification.show && (
         <div
           className={`users-notification ${notification.type === "error" ? "users-notification-error" : "users-notification-success"}`}
@@ -282,7 +297,7 @@ const Airlines = () => {
         </div>
       )}
 
-      {/* ── View Airline Modal ── */}
+      {/* View Airline Modal */}
       {viewAirline && (
         <div className="admin-modal-overlay">
           <div className="admin-modal admin-modal-sm">
@@ -329,7 +344,7 @@ const Airlines = () => {
         </div>
       )}
 
-      {/* ── Page Header ── */}
+      {/* Page Header */}
       <div className="admin-page-header">
         <div>
           <h1 className="admin-page-title">Airlines Management</h1>
@@ -340,18 +355,18 @@ const Airlines = () => {
         </div>
         <div className="admin-header-actions">
           <select
-            className="admin-select"
+            className="btn-export-select"
             value={exportFormat}
             onChange={(e) => setExportFormat(e.target.value)}
           >
             <option value="csv">CSV</option>
             <option value="json">JSON</option>
           </select>
-          <button className="btn-secondary" onClick={exportAirlines}>
+          <button className="btn-export" onClick={exportAirlines}>
             <Download size={16} /> Export
           </button>
           <button
-            className="btn-primary"
+            className="btn-add-user"
             onClick={() => {
               setShowModal(true);
               setEditId(null);
@@ -367,7 +382,7 @@ const Airlines = () => {
         </div>
       </div>
 
-      {/* ── Filters ── */}
+      {/* Filters */}
       <div className="users-filter-card">
         <div className="users-filter-grid">
           <div className="admin-search-wrapper">
@@ -398,7 +413,7 @@ const Airlines = () => {
         </div>
       </div>
 
-      {/* ── Bulk Actions Bar ── */}
+      {/* Bulk Actions Bar */}
       {selectedAirlines.length > 0 && (
         <div className="users-bulk-bar">
           <span className="users-bulk-count">
@@ -425,7 +440,10 @@ const Airlines = () => {
             </button>
             <button
               className="users-bulk-btn users-bulk-clear"
-              onClick={() => setSelectedAirlines([])}
+              onClick={() => {
+                setSelectedAirlines([]);
+                setSelectAll(false);
+              }}
             >
               Clear
             </button>
@@ -433,42 +451,45 @@ const Airlines = () => {
         </div>
       )}
 
-      {/* ── Table ── */}
+      {/* Table */}
       <div className="admin-table-container">
         <div className="admin-table-scroll">
           <table className="admin-table">
             <thead>
               <tr>
+                {/* Select All Checkbox */}
                 <th>
-                  <input
-                    type="checkbox"
-                    checked={
-                      selectedAirlines.length === currentAirlines.length &&
-                      currentAirlines.length > 0
-                    }
-                    onChange={handleSelectAll}
-                  />
+                  <button
+                    onClick={handleSelectAll}
+                    className="passengers-check-btn"
+                  >
+                    {selectAll ? (
+                      <CheckSquare size={16} style={{ color: "#667eea" }} />
+                    ) : (
+                      <Square
+                        size={16}
+                        style={{ color: "var(--text-secondary)" }}
+                      />
+                    )}
+                  </button>
                 </th>
                 <th
                   className="users-sortable"
                   onClick={() => requestSort("airline_name")}
                 >
-                  Name
-                  <SortIcon col="airline_name" />
+                  Name <SortIcon col="airline_name" />
                 </th>
                 <th
                   className="users-sortable"
                   onClick={() => requestSort("airline_code")}
                 >
-                  Code
-                  <SortIcon col="airline_code" />
+                  Code <SortIcon col="airline_code" />
                 </th>
                 <th
                   className="users-sortable"
                   onClick={() => requestSort("status")}
                 >
-                  Status
-                  <SortIcon col="status" />
+                  Status <SortIcon col="status" />
                 </th>
                 <th style={{ textAlign: "center" }}>Actions</th>
               </tr>
@@ -482,90 +503,96 @@ const Airlines = () => {
                   </td>
                 </tr>
               ) : (
-                currentAirlines.map((airline) => (
-                  <tr key={airline._id}>
-                    <td>
-                      <input
-                        type="checkbox"
-                        checked={selectedAirlines.includes(airline._id)}
-                        onChange={() => toggleAirlineSelection(airline._id)}
-                      />
-                    </td>
-
-                    {/* Name */}
-                    <td>
-                      <div className="admin-avatar-cell">
-                        {/* <div
-                          className="admin-avatar"
-                          style={{
-                            background:
-                              "linear-gradient(135deg, #3b82f6, #2563eb)",
-                          }}
+                currentAirlines.map((airline) => {
+                  const isSelected = selectedAirlines.includes(airline._id);
+                  return (
+                    <tr
+                      key={airline._id}
+                      style={
+                        isSelected
+                          ? { background: "rgba(102,126,234,0.08)" }
+                          : {}
+                      }
+                    >
+                      {/* Row Checkbox */}
+                      <td>
+                        <button
+                          onClick={() => toggleAirlineSelection(airline._id)}
+                          className="passengers-check-btn"
                         >
-                          {airline.airline_name?.charAt(0) || "A"}
-                        </div> */}
-                        <div className="admin-avatar-info">
-                          <p className="admin-avatar-name">
-                            {airline.airline_name}
-                          </p>
+                          {isSelected ? (
+                            <CheckSquare
+                              size={16}
+                              style={{ color: "#667eea" }}
+                            />
+                          ) : (
+                            <Square
+                              size={16}
+                              style={{ color: "var(--text-secondary)" }}
+                            />
+                          )}
+                        </button>
+                      </td>
+
+                      {/* Name */}
+                      <td>
+                        <div className="admin-avatar-cell">
+                          <div className="admin-avatar-info">
+                            <p className="admin-avatar-name">
+                              {airline.airline_name}
+                            </p>
+                          </div>
                         </div>
-                      </div>
-                    </td>
+                      </td>
 
-                    {/* Code */}
-                    <td>
-                      <span className="airline-code-tag">
-                        {airline.airline_code}
-                      </span>
-                    </td>
+                      {/* Code */}
+                      <td>
+                        <span className="airline-code-tag">
+                          {airline.airline_code}
+                        </span>
+                      </td>
 
-                    {/* Status */}
-                    <td>
-                      <span
-                        className={`users-status-badge ${airline.status === "Publish" ? "airline-status-publish" : "airline-status-draft"}`}
-                      >
-                        {airline.status}
-                      </span>
-                    </td>
+                      {/* Status */}
+                      <td>
+                        <span
+                          className={`users-status-badge ${airline.status === "Publish" ? "airline-status-publish" : "airline-status-draft"}`}
+                        >
+                          {airline.status}
+                        </span>
+                      </td>
 
-                    {/* Actions */}
-                    <td>
-                      <div
-                        className="cell-actions"
-                        style={{ justifyContent: "center" }}
-                      >
-                        {/* <button
-                          className="users-action-btn users-action-view"
-                          title="View"
-                          onClick={() => setViewAirline(airline)}
+                      {/* Actions */}
+                      <td>
+                        <div
+                          className="cell-actions"
+                          style={{ justifyContent: "center" }}
                         >
-                          <Eye size={14} />
-                        </button> */}
-                        <button
-                          className="users-action-btn users-action-edit"
-                          title="Edit"
-                          onClick={() => handleEdit(airline)}
-                        >
-                          <Edit2 size={14} />
-                        </button>
-                        <button
-                          className="users-action-btn users-action-delete"
-                          title="Delete"
-                          onClick={() => handleDelete(airline._id)}
-                        >
-                          <Trash2 size={14} />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
+                          <button
+                            className="users-action-btn users-action-edit"
+                            title="Edit"
+                            onClick={() => handleEdit(airline)}
+                          >
+                            <Edit2 size={14} />
+                          </button>
+                          <button
+                            className="users-action-btn users-action-delete"
+                            title="Delete"
+                            onClick={() => handleDelete(airline._id)}
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
               )}
             </tbody>
           </table>
         </div>
       </div>
 
-      {/* ── Pagination ── */}
+      {/* Pagination */}
       {totalPages > 1 && (
         <div className="admin-pagination">
           <p className="admin-pagination-info">
@@ -601,7 +628,7 @@ const Airlines = () => {
         </div>
       )}
 
-      {/* ── Airline Modal ── */}
+      {/* Airline Modal */}
       <AirlineModal
         show={showModal}
         onClose={() => {

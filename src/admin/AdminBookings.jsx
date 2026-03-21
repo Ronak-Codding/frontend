@@ -9,12 +9,23 @@ import {
   ChevronLeft,
   ChevronRight,
   X,
+  CheckSquare,
+  Square,
 } from "lucide-react";
 import AddBookingModal from "./AddBookingModal";
 import "./AdminTables.css";
 import "./AdminUsers.css";
 import "./AdminContacts.css";
 import "./Bookings.css";
+
+const BOOKING_STATUS_CLASS = {
+  confirmed: "badge-confirmed",
+  Confirmed: "badge-confirmed",
+  cancelled: "badge-cancelled",
+  Cancelled: "badge-cancelled",
+  pending: "badge-pending",
+  Pending: "badge-pending",
+};
 
 const AdminBookings = () => {
   const [bookings, setBookings] = useState([]);
@@ -33,8 +44,13 @@ const AdminBookings = () => {
     type: "",
   });
   const [statusFilter, setStatusFilter] = useState("all");
-  const [exportFormat, setExportFormat] = useState("csv");
   const [dateRange, setDateRange] = useState({ start: "", end: "" });
+
+  const [selectedBookings, setSelectedBookings] = useState([]);
+  const [selectAll, setSelectAll] = useState(false);
+
+  // ── Export format state ──
+  const [exportFormat, setExportFormat] = useState("csv");
 
   const showNotification = (message, type = "success") => {
     setNotification({ show: true, message, type });
@@ -44,7 +60,6 @@ const AdminBookings = () => {
     );
   };
 
-  //  API fetch data 
   const fetchBookings = async (page = 1) => {
     setLoading(true);
     try {
@@ -56,15 +71,15 @@ const AdminBookings = () => {
         startDate: dateRange.start,
         endDate: dateRange.end,
       });
-
       const res = await fetch(
         `http://localhost:5000/api/booking?${params.toString()}`,
       );
       const data = await res.json();
-
       setBookings(data.bookings || []);
       setTotalCount(data.total || 0);
       setTotalPages(data.pages || 1);
+      setSelectedBookings([]);
+      setSelectAll(false);
     } catch {
       showNotification("Failed to fetch bookings", "error");
     } finally {
@@ -76,7 +91,6 @@ const AdminBookings = () => {
     fetchBookings(currentPage);
   }, [currentPage, query, statusFilter, dateRange]);
 
-  // Delete booking
   const deleteBooking = async (id) => {
     if (!window.confirm("Delete this booking?")) return;
     setLoading(true);
@@ -93,19 +107,98 @@ const AdminBookings = () => {
     }
   };
 
-  //  Export CSV
-  const exportBookings = async () => {
+  // ── Checkbox handlers ──
+  const handleSelectAll = () => {
+    if (selectAll) {
+      setSelectedBookings([]);
+      setSelectAll(false);
+    } else {
+      setSelectedBookings(bookings.map((b) => b._id));
+      setSelectAll(true);
+    }
+  };
+
+  const toggleBookingSelection = (id) => {
+    setSelectedBookings((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
+    );
+  };
+
+  // ── Bulk Delete ──
+  const handleBulkDelete = async () => {
+    if (!window.confirm(`${selectedBookings.length} bookings delete karo?`))
+      return;
+    setLoading(true);
     try {
-      const res = await fetch("http://localhost:5000/api/booking/export/csv");
-      if (!res.ok) throw new Error("Export failed");
-      const blob = await res.blob();
+      await Promise.all(
+        selectedBookings.map((id) =>
+          fetch(`http://localhost:5000/api/booking/${id}`, {
+            method: "DELETE",
+          }),
+        ),
+      );
+      setSelectedBookings([]);
+      setSelectAll(false);
+      showNotification(`${selectedBookings.length} bookings deleted`);
+      fetchBookings(currentPage);
+    } catch {
+      showNotification("Bulk delete failed", "error");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // ── Bulk Status Update ──
+  const handleBulkStatus = async (status) => {
+    setLoading(true);
+    try {
+      await Promise.all(
+        selectedBookings.map((id) =>
+          fetch(`http://localhost:5000/api/booking/${id}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ status }),
+          }),
+        ),
+      );
+      setSelectedBookings([]);
+      setSelectAll(false);
+      showNotification(
+        `${selectedBookings.length} bookings updated to ${status}`,
+      );
+      fetchBookings(currentPage);
+    } catch {
+      showNotification("Bulk update failed", "error");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // ── Export (CSV + JSON) ──
+  const exportBookings = async () => {
+    if (exportFormat === "csv") {
+      try {
+        const res = await fetch("http://localhost:5000/api/booking/export/csv");
+        if (!res.ok) throw new Error("Export failed");
+        const blob = await res.blob();
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = `bookings_${new Date().toISOString().split("T")[0]}.csv`;
+        a.click();
+        showNotification("CSV exported successfully");
+      } catch {
+        showNotification("Export failed", "error");
+      }
+    } else {
+      // JSON export — current fetched bookings data
+      const blob = new Blob([JSON.stringify(bookings, null, 2)], {
+        type: "application/json",
+      });
       const a = document.createElement("a");
       a.href = URL.createObjectURL(blob);
-      a.download = `bookings_${new Date().toISOString().split("T")[0]}.csv`;
+      a.download = `bookings_${new Date().toISOString().split("T")[0]}.json`;
       a.click();
-      showNotification("Exported successfully");
-    } catch {
-      showNotification("Export failed", "error");
+      showNotification(`${bookings.length} bookings exported as JSON`);
     }
   };
 
@@ -133,7 +226,7 @@ const AdminBookings = () => {
         </div>
       )}
 
-      {/* ── View Booking Modal ── */}
+      {/* View Modal */}
       {showViewModal && viewBooking && (
         <div
           className="pax-modal-overlay"
@@ -203,7 +296,7 @@ const AdminBookings = () => {
         </div>
       )}
 
-      {/* ── Page Header ── */}
+      {/* Page Header */}
       <div className="admin-page-header">
         <div>
           <h1 className="admin-page-title">Bookings Management</h1>
@@ -213,16 +306,29 @@ const AdminBookings = () => {
           </p>
         </div>
         <div className="admin-header-actions">
-          <button className="btn-secondary" onClick={exportBookings}>
+          {/* Export Format Select */}
+          <select
+            className="btn-export-select"
+            value={exportFormat}
+            onChange={(e) => setExportFormat(e.target.value)}
+          >
+            <option value="csv">CSV</option>
+            <option value="json">JSON</option>
+          </select>
+
+          {/* Export Button */}
+          <button className="btn-export" onClick={exportBookings}>
             <Download size={16} /> Export
           </button>
-          {/* <button className="btn-primary" onClick={() => setShowAdd(true)}>
-            <Plus size={16} /> Add New Booking
-          </button> */}
+
+          {/* Add Booking Button */}
+          <button className="btn-add-user" onClick={() => setShowAdd(true)}>
+            <Plus size={16} /> Add Booking
+          </button>
         </div>
       </div>
 
-      {/* ── Filters ── */}
+      {/* Filters */}
       <div className="users-filter-card">
         <div className="contacts-filter-grid">
           <div
@@ -252,6 +358,7 @@ const AdminBookings = () => {
             <option value="all">All Status</option>
             <option value="confirmed">Confirmed</option>
             <option value="cancelled">Cancelled</option>
+            <option value="pending">Pending</option>
           </select>
           <div className="contacts-date-range">
             <input
@@ -274,12 +381,73 @@ const AdminBookings = () => {
         </div>
       </div>
 
-      {/* ── Table ── */}
+      {/* Bulk Actions Bar */}
+      {selectedBookings.length > 0 && (
+        <div className="users-bulk-bar">
+          <span className="users-bulk-count">
+            {selectedBookings.length} booking(s) selected
+          </span>
+          <div className="users-bulk-actions">
+            <select
+              onChange={(e) => handleBulkStatus(e.target.value)}
+              className="users-bulk-select"
+              defaultValue=""
+              style={{
+                padding: "0.4rem 0.8rem",
+                borderRadius: "0.5rem",
+                border: "1px solid var(--border)",
+                background: "white",
+                fontSize: "0.8rem",
+              }}
+            >
+              <option value="" disabled>
+                Change Status
+              </option>
+              <option value="confirmed">Set Confirmed</option>
+              <option value="cancelled">Set Cancelled</option>
+              <option value="pending">Set Pending</option>
+            </select>
+            <button
+              className="users-bulk-btn users-bulk-blocked"
+              onClick={handleBulkDelete}
+            >
+              Delete Selected
+            </button>
+            <button
+              className="users-bulk-btn users-bulk-clear"
+              onClick={() => {
+                setSelectedBookings([]);
+                setSelectAll(false);
+              }}
+            >
+              Clear
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Table */}
       <div className="admin-table-container">
         <div className="admin-table-scroll">
           <table className="admin-table">
             <thead>
               <tr>
+                {/* Select All Checkbox */}
+                <th>
+                  <button
+                    onClick={handleSelectAll}
+                    className="passengers-check-btn"
+                  >
+                    {selectAll ? (
+                      <CheckSquare size={16} style={{ color: "#667eea" }} />
+                    ) : (
+                      <Square
+                        size={16}
+                        style={{ color: "var(--text-secondary)" }}
+                      />
+                    )}
+                  </button>
+                </th>
                 <th>Booking Ref</th>
                 <th>User</th>
                 <th>Email</th>
@@ -295,105 +463,120 @@ const AdminBookings = () => {
             <tbody>
               {bookings.length === 0 ? (
                 <tr>
-                  <td colSpan={10} className="admin-table-empty">
+                  <td colSpan={11} className="admin-table-empty">
                     <BookOpen size={48} className="admin-table-empty-icon" />
                     <p>No bookings found</p>
                   </td>
                 </tr>
               ) : (
-                bookings.map((b) => (
-                  <tr key={b._id}>
-                    {/*  bookingRef */}
-                    <td className="cell-accent">{b.bookingRef}</td>
-
-                    {/* User name */}
-                    <td>
-                      <div className="admin-avatar-cell">
-                        {/* <div className="admin-avatar">
-                          {b.userName?.charAt(0)?.toUpperCase() || "?"}
-                        </div> */}
+                bookings.map((b) => {
+                  const isSelected = selectedBookings.includes(b._id);
+                  return (
+                    <tr
+                      key={b._id}
+                      style={
+                        isSelected
+                          ? { background: "rgba(102,126,234,0.08)" }
+                          : {}
+                      }
+                    >
+                      {/* Row Checkbox */}
+                      <td>
+                        <button
+                          onClick={() => toggleBookingSelection(b._id)}
+                          className="passengers-check-btn"
+                        >
+                          {isSelected ? (
+                            <CheckSquare
+                              size={16}
+                              style={{ color: "#667eea" }}
+                            />
+                          ) : (
+                            <Square
+                              size={16}
+                              style={{ color: "var(--text-secondary)" }}
+                            />
+                          )}
+                        </button>
+                      </td>
+                      <td className="cell-accent">{b.bookingRef}</td>
+                      <td>
                         <div className="admin-avatar-info">
                           <p className="admin-avatar-name">{b.userName}</p>
                         </div>
-                      </div>
-                    </td>
-
-                    {/*  Email */}
-                    <td className="cell-muted" style={{ fontSize: "0.75rem" }}>
-                      {b.email}
-                    </td>
-
-                    {/*  Flight */}
-                    <td>
-                      <span className="airline-code-tag">
-                        {b.flightNumber || "—"}
-                      </span>
-                    </td>
-
-                    {/* Route */}
-                    <td className="cell-muted">
-                      {b.from} → {b.to}
-                    </td>
-
-                    {/*  Passengers */}
-                    <td>
-                      <span className="booking-passengers-badge">
-                        {b.passengersCount}
-                      </span>
-                    </td>
-
-                    {/* Amount */}
-                    <td className="cell-success">
-                      ₹{b.totalPrice?.toLocaleString("en-IN")}
-                    </td>
-
-                    {/* Status */}
-                    <td>
-                      <span className="badge-confirmed">
-                        {b.status || "Confirmed"}
-                      </span>
-                    </td>
-
-                    {/* Date */}
-                    <td className="cell-muted" style={{ fontSize: "0.75rem" }}>
-                      {new Date(b.createdAt).toLocaleDateString("en-IN", {
-                        day: "numeric",
-                        month: "short",
-                        year: "numeric",
-                      })}
-                    </td>
-
-                    {/*  Actions */}
-                    <td>
-                      <div className="cell-actions">
-                        <button
-                          className="users-action-btn users-action-view"
-                          title="View"
-                          onClick={() => {
-                            setViewBooking(b);
-                            setShowViewModal(true);
-                          }}
+                      </td>
+                      <td
+                        className="cell-muted"
+                        style={{ fontSize: "0.75rem" }}
+                      >
+                        {b.email}
+                      </td>
+                      <td>
+                        <span className="airline-code-tag">
+                          {b.flightNumber || "—"}
+                        </span>
+                      </td>
+                      <td className="cell-muted">
+                        {b.from} → {b.to}
+                      </td>
+                      <td>
+                        <span className="booking-passengers-badge">
+                          {b.passengersCount}
+                        </span>
+                      </td>
+                      <td className="cell-success">
+                        ₹{b.totalPrice?.toLocaleString("en-IN")}
+                      </td>
+                      <td>
+                        <span
+                          className={
+                            BOOKING_STATUS_CLASS[b.status] || "badge-pending"
+                          }
                         >
-                          <Eye size={14} />
-                        </button>
-                        <button
-                          className="users-action-btn users-action-delete"
-                          title="Delete"
-                          onClick={() => deleteBooking(b._id)}
-                        >
-                          <Trash2 size={14} />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
+                          {b.status || "confirmed"}
+                        </span>
+                      </td>
+                      <td
+                        className="cell-muted"
+                        style={{ fontSize: "0.75rem" }}
+                      >
+                        {new Date(b.createdAt).toLocaleDateString("en-IN", {
+                          day: "numeric",
+                          month: "short",
+                          year: "numeric",
+                        })}
+                      </td>
+                      <td>
+                        <div className="cell-actions">
+                          <button
+                            className="users-action-btn users-action-view"
+                            title="View"
+                            onClick={() => {
+                              setViewBooking(b);
+                              setShowViewModal(true);
+                            }}
+                          >
+                            <Eye size={14} />
+                          </button>
+                          <button
+                            className="users-action-btn users-action-delete"
+                            title="Delete"
+                            onClick={() => deleteBooking(b._id)}
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
               )}
             </tbody>
           </table>
         </div>
       </div>
 
-      {/* ── Pagination ── */}
+      {/* Pagination */}
       {totalPages > 1 && (
         <div className="admin-pagination">
           <p className="admin-pagination-info">
@@ -427,7 +610,7 @@ const AdminBookings = () => {
         </div>
       )}
 
-      {/* ── Add Booking Modal ── */}
+      {/* Add Booking Modal */}
       {showAdd && (
         <AddBookingModal
           onClose={() => setShowAdd(false)}

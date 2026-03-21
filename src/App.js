@@ -9,7 +9,7 @@ import Users from "./admin/AdminUsers";
 import AdminContacts from "./admin/AdminContacts";
 import Airlines from "./admin/Airlines";
 import Airports from "./admin/Airports";
-import Flights from "./admin/Flights";
+import AdminFlights from "./admin/Flight";
 import AdminBookings from "./admin/AdminBookings";
 import Passengers from "./admin/Passengers";
 import Payment from "./admin/Payment";
@@ -82,7 +82,7 @@ export default function App() {
           <Route path="contacts" element={<AdminContacts />} />
           <Route path="airlines" element={<Airlines />} />
           <Route path="airports" element={<Airports />} />
-          <Route path="flights" element={<Flights />} />
+          <Route path="flights" element={<AdminFlights />} />
           <Route path="bookings" element={<AdminBookings />} />
           <Route path="passengers" element={<Passengers />} />
           <Route path="payments" element={<Payment />} />

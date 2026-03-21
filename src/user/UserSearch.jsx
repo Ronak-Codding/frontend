@@ -18,7 +18,7 @@ const UserSearch = () => {
   const navigate = useNavigate();
   const [tripType, setTripType] = useState("oneway");
   const [fromAirport, setFromAirport] = useState(null);
-  const [toAirport, setToAirport] = useState(null);
+  const [toAirport, setToAirport] = useState(null); 
   const [date, setDate] = useState("");
   const [returnDate, setReturnDate] = useState("");
   const [passengers, setPassengers] = useState("1");

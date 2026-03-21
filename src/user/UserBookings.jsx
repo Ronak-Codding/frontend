@@ -328,8 +328,7 @@ const UserBookings = () => {
                   borderRadius: "0.5rem",
                 }}
               >
-                ℹ️ Refund request admin ko jayega. 3-5 business days mein
-                process hoga.
+                ℹ️ Refund request admin. It will take 3-5 business days to process. After approval, the amount will be automatically returned to the original payment method.
               </p>
             </div>
 
@@ -451,7 +450,7 @@ const UserBookings = () => {
               )}
             </div>
             <div className="pax-modal-footer">
-              {/* ✅ Cancel button */}
+              {/* Cancel button */}
               {(viewBooking.status === "confirmed" ||
                 viewBooking.status === "Confirmed") && (
                 <button
@@ -464,7 +463,7 @@ const UserBookings = () => {
                   <XCircle size={15} /> Cancel Booking
                 </button>
               )}
-              {/* ✅ Refund button - cancelled booking pe */}
+              {/* Refund button - cancelled booking pe */}
               {(viewBooking.status === "cancelled" ||
                 viewBooking.status === "Cancelled") && (
                 <button
@@ -603,7 +602,7 @@ const UserBookings = () => {
                       <XCircle size={15} />
                     </button>
                   )}
-                  {/* ✅ Refund - cancelled booking pe */}
+                  {/*  Refund - cancelled booking pe */}
                   {(b.status === "cancelled" || b.status === "Cancelled") && (
                     <button
                       className="ub-action-btn"

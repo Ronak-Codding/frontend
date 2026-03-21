@@ -577,13 +577,13 @@ export default function AdminPassengers({ token }) {
             </div>
             <div className="pax-modal-footer">
               <button
-                className="btn-secondary"
+                className="btn-export"
                 onClick={() => setShowModal(false)}
               >
                 Cancel
               </button>
               <button
-                className="btn-primary"
+                className="btn-add-user"
                 onClick={handleSave}
                 disabled={loading}
               >
@@ -616,14 +616,14 @@ export default function AdminPassengers({ token }) {
         </div>
         <div className="admin-header-actions">
           <select
-            className="admin-select"
+             className="btn-export-select"
             value={exportFormat}
             onChange={(e) => setExportFormat(e.target.value)}
           >
             <option value="csv">CSV</option>
             <option value="json">JSON</option>
           </select>
-          <button className="btn-secondary" onClick={exportPassengers}>
+          <button className="btn-export" onClick={exportPassengers}>
             <Download size={16} /> Export
           </button>
         </div>

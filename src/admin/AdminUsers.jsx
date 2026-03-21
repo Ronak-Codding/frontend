@@ -11,6 +11,8 @@ import {
   ChevronRight,
   X,
   Save,
+  CheckSquare,
+  Square,
 } from "lucide-react";
 import "./AdminTables.css";
 import "./AdminUsers.css";
@@ -30,6 +32,7 @@ const AdminUsers = () => {
     type: "",
   });
   const [selectedUsers, setSelectedUsers] = useState([]);
+  const [selectAll, setSelectAll] = useState(false);
   const [sortConfig, setSortConfig] = useState({
     key: "firstName",
     direction: "asc",
@@ -76,6 +79,16 @@ const AdminUsers = () => {
     loadUsers();
   }, []);
 
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, statusFilter, advancedFilters]);
+
+  // Reset selection on page/filter change
+  useEffect(() => {
+    setSelectedUsers([]);
+    setSelectAll(false);
+  }, [currentPage, searchTerm, statusFilter, advancedFilters]);
+
   const filteredUsers = () => {
     return users.filter((user) => {
       const matchesSearch =
@@ -118,10 +131,6 @@ const AdminUsers = () => {
     indexOfFirstUser,
     indexOfLastUser,
   );
-
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [searchTerm, statusFilter, advancedFilters]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -208,6 +217,39 @@ const AdminUsers = () => {
     }
   };
 
+  const handleView = async (id) => {
+    setLoading(true);
+    try {
+      const res = await fetch(`http://localhost:5000/api/user/oneUser/${id}`);
+      const data = await res.json();
+      setViewUser(data);
+    } catch {
+      showNotification("Failed to load user details", "error");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // ── Checkbox handlers ──
+  const handleSelectAll = () => {
+    if (selectAll) {
+      setSelectedUsers([]);
+      setSelectAll(false);
+    } else {
+      setSelectedUsers(currentUsers.map((u) => u._id));
+      setSelectAll(true);
+    }
+  };
+
+  const toggleUserSelection = (userId) => {
+    setSelectedUsers((prev) =>
+      prev.includes(userId)
+        ? prev.filter((id) => id !== userId)
+        : [...prev, userId],
+    );
+  };
+
+  // ── Bulk Delete ──
   const handleBulkDelete = async () => {
     if (!window.confirm(`Delete ${selectedUsers.length} selected users?`))
       return;
@@ -222,6 +264,7 @@ const AdminUsers = () => {
       );
       setUsers(users.filter((u) => !selectedUsers.includes(u._id)));
       setSelectedUsers([]);
+      setSelectAll(false);
       showNotification(`${selectedUsers.length} users deleted`);
     } catch {
       showNotification("Failed to delete users", "error");
@@ -230,6 +273,7 @@ const AdminUsers = () => {
     }
   };
 
+  // ── Bulk Status Update ──
   const handleBulkStatusUpdate = async (newStatus) => {
     setLoading(true);
     try {
@@ -244,22 +288,10 @@ const AdminUsers = () => {
       );
       await loadUsers();
       setSelectedUsers([]);
+      setSelectAll(false);
       showNotification(`${selectedUsers.length} users updated to ${newStatus}`);
     } catch {
       showNotification("Failed to update users", "error");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleView = async (id) => {
-    setLoading(true);
-    try {
-      const res = await fetch(`http://localhost:5000/api/user/oneUser/${id}`);
-      const data = await res.json();
-      setViewUser(data);
-    } catch {
-      showNotification("Failed to load user details", "error");
     } finally {
       setLoading(false);
     }
@@ -307,22 +339,6 @@ const AdminUsers = () => {
     showNotification(`Exported ${dataToExport.length} users`);
   };
 
-  const handleSelectAll = () => {
-    setSelectedUsers(
-      selectedUsers.length === currentUsers.length
-        ? []
-        : currentUsers.map((u) => u._id),
-    );
-  };
-
-  const toggleUserSelection = (userId) => {
-    setSelectedUsers((prev) =>
-      prev.includes(userId)
-        ? prev.filter((id) => id !== userId)
-        : [...prev, userId],
-    );
-  };
-
   const closeForm = () => {
     setShowForm(false);
     setEditId(null);
@@ -348,7 +364,7 @@ const AdminUsers = () => {
 
   return (
     <div>
-      {/* ── Loading Overlay ── */}
+      {/* Loading Overlay */}
       {loading && (
         <div className="users-loading-overlay">
           <div className="users-loading-box">
@@ -358,7 +374,7 @@ const AdminUsers = () => {
         </div>
       )}
 
-      {/* ── Notification ── */}
+      {/* Notification */}
       {notification.show && (
         <div
           className={`users-notification ${notification.type === "error" ? "users-notification-error" : "users-notification-success"}`}
@@ -367,7 +383,7 @@ const AdminUsers = () => {
         </div>
       )}
 
-      {/* ── Add/Edit Modal ── */}
+      {/* Add/Edit Modal */}
       {showForm && (
         <div className="admin-modal-overlay">
           <div className="admin-modal" style={{ maxWidth: "48rem" }}>
@@ -491,7 +507,7 @@ const AdminUsers = () => {
         </div>
       )}
 
-      {/* ── View User Modal ── */}
+      {/* View User Modal */}
       {viewUser && (
         <div className="admin-modal-overlay">
           <div className="admin-modal admin-modal-sm">
@@ -540,7 +556,7 @@ const AdminUsers = () => {
         </div>
       )}
 
-      {/* ── Page Header ── */}
+      {/* Page Header */}
       <div className="admin-page-header">
         <div>
           <h1 className="admin-page-title">Users Management</h1>
@@ -550,24 +566,29 @@ const AdminUsers = () => {
           </p>
         </div>
         <div className="admin-header-actions">
+          {/* Export Format Select */}
           <select
-            className="admin-select"
+            className="btn-export-select"
             value={exportFormat}
             onChange={(e) => setExportFormat(e.target.value)}
           >
             <option value="csv">CSV</option>
             <option value="json">JSON</option>
           </select>
-          <button className="btn-secondary" onClick={exportUsers}>
+
+          {/* Export Button */}
+          <button className="btn-export" onClick={exportUsers}>
             <Download size={16} /> Export
           </button>
-          <button className="btn-primary" onClick={() => setShowForm(true)}>
+
+          {/* Add New User Button */}
+          <button className="btn-add-user" onClick={() => setShowForm(true)}>
             <Plus size={16} /> Add New User
           </button>
         </div>
       </div>
 
-      {/* ── Filters ── */}
+      {/* Filters */}
       <div className="users-filter-card">
         <div className="users-filter-grid">
           <div className="admin-search-wrapper">
@@ -603,7 +624,7 @@ const AdminUsers = () => {
         </div>
       </div>
 
-      {/* ── Bulk Actions Bar ── */}
+      {/* Bulk Actions Bar */}
       {selectedUsers.length > 0 && (
         <div className="users-bulk-bar">
           <span className="users-bulk-count">
@@ -630,7 +651,10 @@ const AdminUsers = () => {
             </button>
             <button
               className="users-bulk-btn users-bulk-clear"
-              onClick={() => setSelectedUsers([])}
+              onClick={() => {
+                setSelectedUsers([]);
+                setSelectAll(false);
+              }}
             >
               Clear
             </button>
@@ -638,132 +662,144 @@ const AdminUsers = () => {
         </div>
       )}
 
-      {/* ── Table ── */}
+      {/* Table */}
       <div className="admin-table-container">
         <div className="admin-table-scroll">
           <table className="admin-table">
             <thead>
               <tr>
+                {/* Select All Checkbox */}
                 <th>
-                  <input
-                    type="checkbox"
-                    checked={
-                      selectedUsers.length === currentUsers.length &&
-                      currentUsers.length > 0
-                    }
-                    onChange={handleSelectAll}
-                  />
+                  <button
+                    onClick={handleSelectAll}
+                    className="passengers-check-btn"
+                  >
+                    {selectAll ? (
+                      <CheckSquare size={16} style={{ color: "#667eea" }} />
+                    ) : (
+                      <Square
+                        size={16}
+                        style={{ color: "var(--text-secondary)" }}
+                      />
+                    )}
+                  </button>
                 </th>
                 <th
                   className="users-sortable"
                   onClick={() => requestSort("firstName")}
                 >
-                  No
-                  <SortIcon col="firstName" />
+                  No <SortIcon col="firstName" />
                 </th>
                 <th
                   className="users-sortable"
                   onClick={() => requestSort("lastName")}
                 >
-                  Full Name
-                  <SortIcon col="lastName" />
+                  Full Name <SortIcon col="lastName" />
                 </th>
                 <th
                   className="users-sortable"
                   onClick={() => requestSort("email")}
                 >
-                  Email
-                  <SortIcon col="email" />
+                  Email <SortIcon col="email" />
                 </th>
                 <th>Phone</th>
                 <th
                   className="users-sortable"
                   onClick={() => requestSort("role")}
                 >
-                  Role
-                  <SortIcon col="role" />
+                  Role <SortIcon col="role" />
                 </th>
                 <th
                   className="users-sortable"
                   onClick={() => requestSort("status")}
                 >
-                  Status
-                  <SortIcon col="status" />
+                  Status <SortIcon col="status" />
                 </th>
                 <th style={{ textAlign: "center" }}>Actions</th>
               </tr>
             </thead>
             <tbody>
               {currentUsers.length > 0 ? (
-                currentUsers.map((user, i) => (
-                  <tr key={user._id}>
-                    <td>
-                      <input
-                        type="checkbox"
-                        checked={selectedUsers.includes(user._id)}
-                        onChange={() => toggleUserSelection(user._id)}
-                      />
-                    </td>
-                    <td className="cell-muted">{indexOfFirstUser + i + 1}</td>
-                    <td>
-                      <div className="admin-avatar-cell">
-                        {/* <div className="admin-avatar">
-                          {user.firstName?.charAt(0) || "?"}
-                        </div> */}
-                        <div className="admin-avatar-info">
-                          <p className="admin-avatar-name">
-                            {user.firstName} {user.middleName} {user.lastName}
-                          </p>
-                          {/* <p className="admin-avatar-sub">@{user.username}</p> */}
+                currentUsers.map((user, i) => {
+                  const isSelected = selectedUsers.includes(user._id);
+                  return (
+                    <tr
+                      key={user._id}
+                      style={
+                        isSelected
+                          ? { background: "rgba(102,126,234,0.08)" }
+                          : {}
+                      }
+                    >
+                      {/* Row Checkbox */}
+                      <td>
+                        <button
+                          onClick={() => toggleUserSelection(user._id)}
+                          className="passengers-check-btn"
+                        >
+                          {isSelected ? (
+                            <CheckSquare
+                              size={16}
+                              style={{ color: "#667eea" }}
+                            />
+                          ) : (
+                            <Square
+                              size={16}
+                              style={{ color: "var(--text-secondary)" }}
+                            />
+                          )}
+                        </button>
+                      </td>
+                      <td className="cell-muted">{indexOfFirstUser + i + 1}</td>
+                      <td>
+                        <div className="admin-avatar-cell">
+                          <div className="admin-avatar-info">
+                            <p className="admin-avatar-name">
+                              {user.firstName} {user.middleName} {user.lastName}
+                            </p>
+                          </div>
                         </div>
-                      </div>
-                    </td>
-                    <td className="cell-muted">{user.email}</td>
-                    <td className="cell-muted">{user.phone || "—"}</td>
-                    <td>
-                      <span
-                        className={`users-role-badge ${user.role === "admin" ? "users-role-admin" : "users-role-user"}`}
-                      >
-                        {user.role}
-                      </span>
-                    </td>
-                    <td>
-                      <span
-                        className={`users-status-badge ${user.status === "active" ? "users-status-active" : "users-status-blocked"}`}
-                      >
-                        {user.status}
-                      </span>
-                    </td>
-                    <td>
-                      <div
-                        className="cell-actions"
-                        style={{ justifyContent: "center" }}
-                      >
-                        {/* <button
-                          className="users-action-btn users-action-view"
-                          title="View"
-                          onClick={() => handleView(user._id)}
+                      </td>
+                      <td className="cell-muted">{user.email}</td>
+                      <td className="cell-muted">{user.phone || "—"}</td>
+                      <td>
+                        <span
+                          className={`users-role-badge ${user.role === "admin" ? "users-role-admin" : "users-role-user"}`}
                         >
-                          <Eye size={14} />
-                        </button> */}
-                        <button
-                          className="users-action-btn users-action-edit"
-                          title="Edit"
-                          onClick={() => handleEdit(user)}
+                          {user.role}
+                        </span>
+                      </td>
+                      <td>
+                        <span
+                          className={`users-status-badge ${user.status === "active" ? "users-status-active" : "users-status-blocked"}`}
                         >
-                          <Edit2 size={14} />
-                        </button>
-                        <button
-                          className="users-action-btn users-action-delete"
-                          title="Delete"
-                          onClick={() => handleDelete(user._id)}
+                          {user.status}
+                        </span>
+                      </td>
+                      <td>
+                        <div
+                          className="cell-actions"
+                          style={{ justifyContent: "center" }}
                         >
-                          <Trash2 size={14} />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
+                          <button
+                            className="users-action-btn users-action-edit"
+                            title="Edit"
+                            onClick={() => handleEdit(user)}
+                          >
+                            <Edit2 size={14} />
+                          </button>
+                          <button
+                            className="users-action-btn users-action-delete"
+                            title="Delete"
+                            onClick={() => handleDelete(user._id)}
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
               ) : (
                 <tr>
                   <td colSpan={8} className="admin-table-empty">
@@ -777,7 +813,7 @@ const AdminUsers = () => {
         </div>
       </div>
 
-      {/* ── Pagination ── */}
+      {/* Pagination */}
       {totalPages > 1 && (
         <div className="admin-pagination">
           <p className="admin-pagination-info">

@@ -13,10 +13,11 @@ import {
   X,
   Save,
   EyeOff,
+  CheckSquare,
+  Square,
 } from "lucide-react";
 import CountrySelect from "./CountrySelect";
 import "./AdminTables.css";
-// import "./AdminUsers.css";
 import "./Airlines.css";
 
 const Airports = () => {
@@ -35,6 +36,7 @@ const Airports = () => {
     type: "",
   });
   const [selectedAirports, setSelectedAirports] = useState([]);
+  const [selectAll, setSelectAll] = useState(false);
   const [sortConfig, setSortConfig] = useState({
     key: "airport_name",
     direction: "asc",
@@ -65,9 +67,7 @@ const Airports = () => {
     try {
       const res = await axios.get(
         "http://localhost:5000/api/airports/allAirports",
-        {
-          headers: { Authorization: `Bearer ${getToken()}` },
-        },
+        { headers: { Authorization: `Bearer ${getToken()}` } },
       );
       setAirports(res.data);
     } catch {
@@ -83,6 +83,12 @@ const Airports = () => {
   useEffect(() => {
     setCurrentPage(1);
   }, [searchTerm, filter, advancedFilters]);
+
+  // Reset selection on page/filter change
+  useEffect(() => {
+    setSelectedAirports([]);
+    setSelectAll(false);
+  }, [currentPage, searchTerm, filter, advancedFilters]);
 
   const filteredAirports = () =>
     airports.filter((a) => {
@@ -224,6 +230,24 @@ const Airports = () => {
     }
   };
 
+  // ── Checkbox handlers ──
+  const handleSelectAll = () => {
+    if (selectAll) {
+      setSelectedAirports([]);
+      setSelectAll(false);
+    } else {
+      setSelectedAirports(currentAirports.map((a) => a._id));
+      setSelectAll(true);
+    }
+  };
+
+  const toggleAirportSelection = (id) => {
+    setSelectedAirports((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
+    );
+  };
+
+  // ── Bulk Delete ──
   const handleBulkDelete = async () => {
     if (!window.confirm(`Delete ${selectedAirports.length} airports?`)) return;
     setLoading(true);
@@ -238,6 +262,7 @@ const Airports = () => {
       );
       setAirports(airports.filter((a) => !selectedAirports.includes(a._id)));
       setSelectedAirports([]);
+      setSelectAll(false);
       showNotification(`${selectedAirports.length} airports deleted`);
     } catch {
       showNotification("Failed to delete", "error");
@@ -246,6 +271,7 @@ const Airports = () => {
     }
   };
 
+  // ── Bulk Status Update ──
   const handleBulkStatusUpdate = async (newStatus) => {
     setLoading(true);
     try {
@@ -260,6 +286,7 @@ const Airports = () => {
       );
       await fetchAirports();
       setSelectedAirports([]);
+      setSelectAll(false);
       showNotification(
         `${selectedAirports.length} airports updated to ${newStatus}`,
       );
@@ -312,20 +339,6 @@ const Airports = () => {
     showNotification(`Exported ${dataToExport.length} airports`);
   };
 
-  const handleSelectAll = () => {
-    setSelectedAirports(
-      selectedAirports.length === currentAirports.length
-        ? []
-        : currentAirports.map((a) => a._id),
-    );
-  };
-
-  const toggleAirportSelection = (id) => {
-    setSelectedAirports((prev) =>
-      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
-    );
-  };
-
   const SortIcon = ({ col }) =>
     sortConfig.key === col
       ? sortConfig.direction === "asc"
@@ -335,7 +348,7 @@ const Airports = () => {
 
   return (
     <div>
-      {/* ── Loading Overlay ── */}
+      {/* Loading Overlay */}
       {loading && (
         <div className="users-loading-overlay">
           <div className="users-loading-box">
@@ -345,7 +358,7 @@ const Airports = () => {
         </div>
       )}
 
-      {/* ── Notification ── */}
+      {/* Notification */}
       {notification.show && (
         <div
           className={`users-notification ${notification.type === "error" ? "users-notification-error" : "users-notification-success"}`}
@@ -354,7 +367,7 @@ const Airports = () => {
         </div>
       )}
 
-      {/* ── View Airport Modal ── */}
+      {/* View Airport Modal */}
       {viewAirport && (
         <div className="admin-modal-overlay">
           <div className="admin-modal admin-modal-sm">
@@ -403,7 +416,7 @@ const Airports = () => {
         </div>
       )}
 
-      {/* ── Page Header ── */}
+      {/* Page Header */}
       <div className="admin-page-header">
         <div>
           <h1 className="admin-page-title">Airports Management</h1>
@@ -414,23 +427,23 @@ const Airports = () => {
         </div>
         <div className="admin-header-actions">
           <select
-            className="admin-select"
+              className="btn-export-select"
             value={exportFormat}
             onChange={(e) => setExportFormat(e.target.value)}
           >
             <option value="csv">CSV</option>
             <option value="json">JSON</option>
           </select>
-          <button className="btn-secondary" onClick={exportAirports}>
+          <button className="btn-export" onClick={exportAirports}>
             <Download size={16} /> Export
           </button>
-          <button className="btn-primary" onClick={openAddModal}>
+          <button className="btn-add-user" onClick={openAddModal}>
             <Plus size={16} /> Add Airport
           </button>
         </div>
       </div>
 
-      {/* ── Filters ── */}
+      {/* Filters */}
       <div className="users-filter-card">
         <div className="airports-filter-grid">
           <div className="admin-search-wrapper">
@@ -467,7 +480,7 @@ const Airports = () => {
         </div>
       </div>
 
-      {/* ── Bulk Actions Bar ── */}
+      {/* Bulk Actions Bar */}
       {selectedAirports.length > 0 && (
         <div className="users-bulk-bar">
           <span className="users-bulk-count">
@@ -494,7 +507,10 @@ const Airports = () => {
             </button>
             <button
               className="users-bulk-btn users-bulk-clear"
-              onClick={() => setSelectedAirports([])}
+              onClick={() => {
+                setSelectedAirports([]);
+                setSelectAll(false);
+              }}
             >
               Clear
             </button>
@@ -502,63 +518,63 @@ const Airports = () => {
         </div>
       )}
 
-      {/* ── Table ── */}
+      {/* Table */}
       <div className="admin-table-container">
         <div className="admin-table-scroll">
           <table className="admin-table">
             <thead>
               <tr>
+                {/* Select All Checkbox */}
                 <th>
-                  <input
-                    type="checkbox"
-                    checked={
-                      selectedAirports.length === currentAirports.length &&
-                      currentAirports.length > 0
-                    }
-                    onChange={handleSelectAll}
-                  />
+                  <button
+                    onClick={handleSelectAll}
+                    className="passengers-check-btn"
+                  >
+                    {selectAll ? (
+                      <CheckSquare size={16} style={{ color: "#667eea" }} />
+                    ) : (
+                      <Square
+                        size={16}
+                        style={{ color: "var(--text-secondary)" }}
+                      />
+                    )}
+                  </button>
                 </th>
                 <th
                   className="users-sortable"
                   onClick={() => requestSort("airport_code")}
                 >
-                  Code
-                  <SortIcon col="airport_code" />
+                  Code <SortIcon col="airport_code" />
                 </th>
                 <th
                   className="users-sortable"
                   onClick={() => requestSort("airport_name")}
                 >
-                  Airport Name
-                  <SortIcon col="airport_name" />
+                  Airport Name <SortIcon col="airport_name" />
                 </th>
                 <th
                   className="users-sortable"
                   onClick={() => requestSort("city")}
                 >
-                  City
-                  <SortIcon col="city" />
+                  City <SortIcon col="city" />
                 </th>
                 <th
                   className="users-sortable"
                   onClick={() => requestSort("country")}
                 >
-                  Country
-                  <SortIcon col="country" />
+                  Country <SortIcon col="country" />
                 </th>
                 <th
                   className="users-sortable"
                   onClick={() => requestSort("status")}
                 >
-                  Status
-                  <SortIcon col="status" />
+                  Status <SortIcon col="status" />
                 </th>
                 <th
                   className="users-sortable"
                   onClick={() => requestSort("createdAt")}
                 >
-                  Created
-                  <SortIcon col="createdAt" />
+                  Created <SortIcon col="createdAt" />
                 </th>
                 <th>Actions</th>
               </tr>
@@ -579,138 +595,145 @@ const Airports = () => {
                   </td>
                 </tr>
               ) : (
-                currentAirports.map((airport) => (
-                  <tr key={airport._id}>
-                    <td>
-                      <input
-                        type="checkbox"
-                        checked={selectedAirports.includes(airport._id)}
-                        onChange={() => toggleAirportSelection(airport._id)}
-                      />
-                    </td>
-
-                    {/* Code */}
-                    <td>
-                      <span className="airline-code-tag">
-                        {airport.airport_code}
-                      </span>
-                    </td>
-
-                    {/* Name */}
-                    <td>
-                      <div className="admin-avatar-cell">
-                        {/* <div
-                          className="admin-avatar"
-                          style={{
-                            background:
-                              "linear-gradient(135deg, #10b981, #059669)",
-                            fontSize: "0.65rem",
-                          }}
-                        >
-                          {airport.airport_code?.slice(0, 2) || "AP"}
-                        </div> */}
-                        <div className="admin-avatar-info">
-                          <p className="admin-avatar-name">
-                            {airport.airport_name}
-                          </p>
-                        </div>
-                      </div>
-                    </td>
-
-                    {/* City */}
-                    <td className="cell-muted">{airport.city}</td>
-
-                    {/* Country */}
-                    <td className="cell-muted">{airport.country}</td>
-
-                    {/* Status */}
-                    <td>
-                      <span
-                        className={`users-status-badge ${airport.status === "Publish" ? "airline-status-publish" : "airline-status-draft"}`}
-                      >
-                        {airport.status}
-                      </span>
-                    </td>
-
-                    {/* Created */}
-                    <td className="cell-muted" style={{ fontSize: "0.75rem" }}>
-                      {new Date(airport.createdAt).toLocaleDateString("en-IN", {
-                        day: "numeric",
-                        month: "short",
-                        year: "numeric",
-                      })}
-                    </td>
-
-                    {/* Actions */}
-                    <td>
-                      <div className="cell-actions">
-                        {/* <button
-                          className="users-action-btn users-action-view"
-                          title="View"
-                          onClick={() => setViewAirport(airport)}
-                        >
-                          <Eye size={14} />
-                        </button> */}
+                currentAirports.map((airport) => {
+                  const isSelected = selectedAirports.includes(airport._id);
+                  return (
+                    <tr
+                      key={airport._id}
+                      style={
+                        isSelected
+                          ? { background: "rgba(102,126,234,0.08)" }
+                          : {}
+                      }
+                    >
+                      {/* Row Checkbox */}
+                      <td>
                         <button
-                          className="users-action-btn users-action-edit"
-                          title="Edit"
-                          onClick={() => openEditModal(airport)}
+                          onClick={() => toggleAirportSelection(airport._id)}
+                          className="passengers-check-btn"
                         >
-                          <Edit2 size={14} />
-                        </button>
-                        <button
-                          title={
-                            airport.status === "Publish"
-                              ? "Set Draft"
-                              : "Set Publish"
-                          }
-                          onClick={() =>
-                            toggleStatus(airport._id, airport.status)
-                          }
-                          style={{
-                            width: 30,
-                            height: 30,
-                            borderRadius: "0.5rem",
-                            border: "none",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            cursor: "pointer",
-                            transition: "background 0.2s",
-                            background:
-                              airport.status === "Publish"
-                                ? "rgba(167,139,250,0.1)"
-                                : "rgba(16,185,129,0.1)",
-                            color:
-                              airport.status === "Publish"
-                                ? "#a78bfa"
-                                : "#10b981",
-                          }}
-                        >
-                          {airport.status === "Publish" ? (
-                            <EyeOff size={14} />
+                          {isSelected ? (
+                            <CheckSquare
+                              size={16}
+                              style={{ color: "#667eea" }}
+                            />
                           ) : (
-                            <Eye size={14} />
+                            <Square
+                              size={16}
+                              style={{ color: "var(--text-secondary)" }}
+                            />
                           )}
                         </button>
-                        <button
-                          className="users-action-btn users-action-delete"
-                          title="Delete"
-                          onClick={() => handleDelete(airport._id)}
+                      </td>
+
+                      {/* Code */}
+                      <td>
+                        <span className="airline-code-tag">
+                          {airport.airport_code}
+                        </span>
+                      </td>
+
+                      {/* Name */}
+                      <td>
+                        <div className="admin-avatar-cell">
+                          <div className="admin-avatar-info">
+                            <p className="admin-avatar-name">
+                              {airport.airport_name}
+                            </p>
+                          </div>
+                        </div>
+                      </td>
+
+                      {/* City */}
+                      <td className="cell-muted">{airport.city}</td>
+
+                      {/* Country */}
+                      <td className="cell-muted">{airport.country}</td>
+
+                      {/* Status */}
+                      <td>
+                        <span
+                          className={`users-status-badge ${airport.status === "Publish" ? "airline-status-publish" : "airline-status-draft"}`}
                         >
-                          <Trash2 size={14} />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
+                          {airport.status}
+                        </span>
+                      </td>
+
+                      {/* Created */}
+                      <td
+                        className="cell-muted"
+                        style={{ fontSize: "0.75rem" }}
+                      >
+                        {new Date(airport.createdAt).toLocaleDateString(
+                          "en-IN",
+                          { day: "numeric", month: "short", year: "numeric" },
+                        )}
+                      </td>
+
+                      {/* Actions */}
+                      <td>
+                        <div className="cell-actions">
+                          <button
+                            className="users-action-btn users-action-edit"
+                            title="Edit"
+                            onClick={() => openEditModal(airport)}
+                          >
+                            <Edit2 size={14} />
+                          </button>
+                          <button
+                            title={
+                              airport.status === "Publish"
+                                ? "Set Draft"
+                                : "Set Publish"
+                            }
+                            onClick={() =>
+                              toggleStatus(airport._id, airport.status)
+                            }
+                            style={{
+                              width: 30,
+                              height: 30,
+                              borderRadius: "0.5rem",
+                              border: "none",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              cursor: "pointer",
+                              transition: "background 0.2s",
+                              background:
+                                airport.status === "Publish"
+                                  ? "rgba(167,139,250,0.1)"
+                                  : "rgba(16,185,129,0.1)",
+                              color:
+                                airport.status === "Publish"
+                                  ? "#a78bfa"
+                                  : "#10b981",
+                            }}
+                          >
+                            {airport.status === "Publish" ? (
+                              <EyeOff size={14} />
+                            ) : (
+                              <Eye size={14} />
+                            )}
+                          </button>
+                          <button
+                            className="users-action-btn users-action-delete"
+                            title="Delete"
+                            onClick={() => handleDelete(airport._id)}
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
               )}
             </tbody>
           </table>
         </div>
       </div>
 
-      {/* ── Pagination ── */}
+      {/* Pagination */}
       {totalPages > 1 && (
         <div className="admin-pagination">
           <p className="admin-pagination-info">
@@ -746,7 +769,7 @@ const Airports = () => {
         </div>
       )}
 
-      {/* ── Add/Edit Modal ── */}
+      {/* Add/Edit Modal */}
       {showModal && (
         <div
           className="admin-modal-overlay"
@@ -812,7 +835,7 @@ const Airports = () => {
                     </select>
                   </div>
 
-                  {/* Airport Name - full width */}
+                  {/* Airport Name */}
                   <div
                     className="admin-form-group"
                     style={{ gridColumn: "span 2" }}
@@ -870,14 +893,14 @@ const Airports = () => {
               <div className="admin-modal-footer">
                 <button
                   type="button"
-                  className="btn-secondary"
+                  className="btn-export"
                   onClick={() => setShowModal(false)}
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="btn-primary"
+                  className="btn-add-user"
                   disabled={loading}
                 >
                   {loading ? (
@@ -890,7 +913,7 @@ const Airports = () => {
                     </>
                   ) : (
                     <>
-                      <Save size={16} />{" "}
+                      <Save size={16} />
                       {editingId ? "Update Airport" : "Add Airport"}
                     </>
                   )}

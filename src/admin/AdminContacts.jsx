@@ -9,6 +9,8 @@ import {
   ChevronLeft,
   ChevronRight,
   X,
+  CheckSquare,
+  Square,
 } from "lucide-react";
 import "./AdminTables.css";
 import "./AdminUsers.css";
@@ -31,6 +33,7 @@ const AdminContacts = () => {
     direction: "desc",
   });
   const [selectedContacts, setSelectedContacts] = useState([]);
+  const [selectAll, setSelectAll] = useState(false);
   const [exportFormat, setExportFormat] = useState("csv");
   const [dateRange, setDateRange] = useState({ start: "", end: "" });
 
@@ -63,6 +66,12 @@ const AdminContacts = () => {
   useEffect(() => {
     setCurrentPage(1);
   }, [search, statusFilter, dateRange]);
+
+  // Reset selection when page/filter changes
+  useEffect(() => {
+    setSelectedContacts([]);
+    setSelectAll(false);
+  }, [currentPage, search, statusFilter, dateRange]);
 
   const filteredContactsData = () =>
     contacts.filter((c) => {
@@ -160,6 +169,24 @@ const AdminContacts = () => {
     }
   };
 
+  // ── Checkbox handlers ──
+  const handleSelectAll = () => {
+    if (selectAll) {
+      setSelectedContacts([]);
+      setSelectAll(false);
+    } else {
+      setSelectedContacts(currentContacts.map((c) => c._id));
+      setSelectAll(true);
+    }
+  };
+
+  const toggleContactSelection = (id) => {
+    setSelectedContacts((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
+    );
+  };
+
+  // ── Bulk Delete ──
   const handleBulkDelete = async () => {
     if (!window.confirm(`Delete ${selectedContacts.length} messages?`)) return;
     setLoading(true);
@@ -173,6 +200,7 @@ const AdminContacts = () => {
       );
       setContacts(contacts.filter((c) => !selectedContacts.includes(c._id)));
       setSelectedContacts([]);
+      setSelectAll(false);
       showNotification(`${selectedContacts.length} messages deleted`);
     } catch {
       showNotification("Failed to delete messages", "error");
@@ -181,6 +209,7 @@ const AdminContacts = () => {
     }
   };
 
+  // ── Bulk Status Update ──
   const handleBulkStatusUpdate = async (newStatus) => {
     if (!newStatus) return;
     setLoading(true);
@@ -196,6 +225,7 @@ const AdminContacts = () => {
       );
       await loadContacts();
       setSelectedContacts([]);
+      setSelectAll(false);
       showNotification(
         `${selectedContacts.length} messages updated to ${newStatus}`,
       );
@@ -247,20 +277,6 @@ const AdminContacts = () => {
     showNotification(`Exported ${dataToExport.length} messages`);
   };
 
-  const handleSelectAll = () => {
-    setSelectedContacts(
-      selectedContacts.length === currentContacts.length
-        ? []
-        : currentContacts.map((c) => c._id),
-    );
-  };
-
-  const toggleContactSelection = (id) => {
-    setSelectedContacts((prev) =>
-      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
-    );
-  };
-
   const SortIcon = ({ col }) =>
     sortConfig.key === col
       ? sortConfig.direction === "asc"
@@ -270,7 +286,7 @@ const AdminContacts = () => {
 
   return (
     <div>
-      {/* ── Loading Overlay ── */}
+      {/* Loading Overlay */}
       {loading && (
         <div className="users-loading-overlay">
           <div className="users-loading-box">
@@ -280,7 +296,7 @@ const AdminContacts = () => {
         </div>
       )}
 
-      {/* ── Notification ── */}
+      {/* Notification */}
       {notification.show && (
         <div
           className={`users-notification ${notification.type === "error" ? "users-notification-error" : "users-notification-success"}`}
@@ -289,7 +305,7 @@ const AdminContacts = () => {
         </div>
       )}
 
-      {/* ── Page Header ── */}
+      {/* Page Header */}
       <div className="admin-page-header">
         <div>
           <h1 className="admin-page-title">Contact Messages</h1>
@@ -303,20 +319,20 @@ const AdminContacts = () => {
         </div>
         <div className="admin-header-actions">
           <select
-            className="admin-select"
+            className="btn-export-select"
             value={exportFormat}
             onChange={(e) => setExportFormat(e.target.value)}
           >
             <option value="csv">CSV</option>
             <option value="json">JSON</option>
           </select>
-          <button className="btn-secondary" onClick={exportContacts}>
+          <button className="btn-export" onClick={exportContacts}>
             <Download size={16} /> Export
           </button>
         </div>
       </div>
 
-      {/* ── Filters ── */}
+      {/* Filters */}
       <div className="users-filter-card">
         <div className="contacts-filter-grid">
           <div
@@ -368,7 +384,7 @@ const AdminContacts = () => {
         </div>
       </div>
 
-      {/* ── Bulk Actions Bar ── */}
+      {/* Bulk Actions Bar */}
       {selectedContacts.length > 0 && (
         <div className="users-bulk-bar">
           <span className="users-bulk-count">
@@ -394,7 +410,10 @@ const AdminContacts = () => {
             </button>
             <button
               className="users-bulk-btn users-bulk-clear"
-              onClick={() => setSelectedContacts([])}
+              onClick={() => {
+                setSelectedContacts([]);
+                setSelectAll(false);
+              }}
             >
               Clear
             </button>
@@ -402,21 +421,27 @@ const AdminContacts = () => {
         </div>
       )}
 
-      {/* ── Table ── */}
+      {/* Table */}
       <div className="admin-table-container">
         <div className="admin-table-scroll">
           <table className="admin-table">
             <thead>
               <tr>
+                {/* Select All Checkbox */}
                 <th>
-                  <input
-                    type="checkbox"
-                    checked={
-                      selectedContacts.length === currentContacts.length &&
-                      currentContacts.length > 0
-                    }
-                    onChange={handleSelectAll}
-                  />
+                  <button
+                    onClick={handleSelectAll}
+                    className="passengers-check-btn"
+                  >
+                    {selectAll ? (
+                      <CheckSquare size={16} style={{ color: "#667eea" }} />
+                    ) : (
+                      <Square
+                        size={16}
+                        style={{ color: "var(--text-secondary)" }}
+                      />
+                    )}
+                  </button>
                 </th>
                 <th
                   className="users-sortable"
@@ -460,114 +485,136 @@ const AdminContacts = () => {
                   </td>
                 </tr>
               ) : (
-                currentContacts.map((c) => (
-                  <tr key={c._id}>
-                    <td>
-                      <input
-                        type="checkbox"
-                        checked={selectedContacts.includes(c._id)}
-                        onChange={() => toggleContactSelection(c._id)}
-                      />
-                    </td>
+                currentContacts.map((c) => {
+                  const isSelected = selectedContacts.includes(c._id);
+                  return (
+                    <tr
+                      key={c._id}
+                      style={
+                        isSelected
+                          ? { background: "rgba(102,126,234,0.08)" }
+                          : {}
+                      }
+                    >
+                      {/* Row Checkbox */}
+                      <td>
+                        <button
+                          onClick={() => toggleContactSelection(c._id)}
+                          className="passengers-check-btn"
+                        >
+                          {isSelected ? (
+                            <CheckSquare
+                              size={16}
+                              style={{ color: "#667eea" }}
+                            />
+                          ) : (
+                            <Square
+                              size={16}
+                              style={{ color: "var(--text-secondary)" }}
+                            />
+                          )}
+                        </button>
+                      </td>
 
-                    {/* Name */}
-                    <td>
-                      <div className="admin-avatar-cell">
-                        {/* <div className="admin-avatar">
-                          {c.fullName?.charAt(0)?.toUpperCase() || "?"}
-                        </div> */}
-                        <div className="admin-avatar-info">
-                          <p className="admin-avatar-name">{c.fullName}</p>
+                      {/* Name */}
+                      <td>
+                        <div className="admin-avatar-cell">
+                          <div className="admin-avatar-info">
+                            <p className="admin-avatar-name">{c.fullName}</p>
+                          </div>
                         </div>
-                      </div>
-                    </td>
+                      </td>
 
-                    {/* Email */}
-                    <td>
-                      <a
-                        href={`mailto:${c.email}`}
-                        className="contacts-email-link"
-                      >
-                        {c.email}
-                      </a>
-                    </td>
-
-                    {/* Phone */}
-                    <td className="cell-muted">
-                      {c.phone ? (
+                      {/* Email */}
+                      <td>
                         <a
-                          href={`tel:${c.phone}`}
-                          className="contacts-phone-link"
+                          href={`mailto:${c.email}`}
+                          className="contacts-email-link"
                         >
-                          {c.phone}
+                          {c.email}
                         </a>
-                      ) : (
-                        "—"
-                      )}
-                    </td>
+                      </td>
 
-                    {/* Subject */}
-                    <td>
-                      <span className="contacts-subject-tag">
-                        {c.subject || "No subject"}
-                      </span>
-                    </td>
+                      {/* Phone */}
+                      <td className="cell-muted">
+                        {c.phone ? (
+                          <a
+                            href={`tel:${c.phone}`}
+                            className="contacts-phone-link"
+                          >
+                            {c.phone}
+                          </a>
+                        ) : (
+                          "—"
+                        )}
+                      </td>
 
-                    {/* Status */}
-                    <td>
-                      <span
-                        className={`contacts-status-badge ${c.status === "new" ? "contacts-status-new" : "contacts-status-read"}`}
-                        onClick={() => toggleStatus(c._id, c.status)}
-                        title="Click to toggle status"
-                      >
-                        {c.status}
-                      </span>
-                    </td>
+                      {/* Subject */}
+                      <td>
+                        <span className="contacts-subject-tag">
+                          {c.subject || "No subject"}
+                        </span>
+                      </td>
 
-                    {/* Date */}
-                    <td className="cell-muted" style={{ fontSize: "0.75rem" }}>
-                      {new Date(c.createdAt).toLocaleDateString("en-IN", {
-                        day: "numeric",
-                        month: "short",
-                        year: "numeric",
-                      })}
-                    </td>
-
-                    {/* Actions */}
-                    <td>
-                      <div className="cell-actions">
-                        <button
-                          className="users-action-btn users-action-view"
-                          title="View"
-                          onClick={() => handleView(c)}
-                        >
-                          <Eye size={14} />
-                        </button>
-                        <button
-                          className="users-action-btn users-action-edit"
-                          title="Toggle Status"
+                      {/* Status */}
+                      <td>
+                        <span
+                          className={`contacts-status-badge ${c.status === "new" ? "contacts-status-new" : "contacts-status-read"}`}
                           onClick={() => toggleStatus(c._id, c.status)}
+                          title="Click to toggle status"
                         >
-                          <RefreshCw size={14} />
-                        </button>
-                        <button
-                          className="users-action-btn users-action-delete"
-                          title="Delete"
-                          onClick={() => deleteContact(c._id)}
-                        >
-                          <Trash2 size={14} />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
+                          {c.status}
+                        </span>
+                      </td>
+
+                      {/* Date */}
+                      <td
+                        className="cell-muted"
+                        style={{ fontSize: "0.75rem" }}
+                      >
+                        {new Date(c.createdAt).toLocaleDateString("en-IN", {
+                          day: "numeric",
+                          month: "short",
+                          year: "numeric",
+                        })}
+                      </td>
+
+                      {/* Actions */}
+                      <td>
+                        <div className="cell-actions">
+                          <button
+                            className="users-action-btn users-action-view"
+                            title="View"
+                            onClick={() => handleView(c)}
+                          >
+                            <Eye size={14} />
+                          </button>
+                          <button
+                            className="users-action-btn users-action-edit"
+                            title="Toggle Status"
+                            onClick={() => toggleStatus(c._id, c.status)}
+                          >
+                            <RefreshCw size={14} />
+                          </button>
+                          <button
+                            className="users-action-btn users-action-delete"
+                            title="Delete"
+                            onClick={() => deleteContact(c._id)}
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
               )}
             </tbody>
           </table>
         </div>
       </div>
 
-      {/* ── Pagination ── */}
+      {/* Pagination */}
       {totalPages > 1 && (
         <div className="admin-pagination">
           <p className="admin-pagination-info">
@@ -603,7 +650,7 @@ const AdminContacts = () => {
         </div>
       )}
 
-      {/* ── View Contact Modal ── */}
+      {/* View Contact Modal */}
       {viewContact && (
         <div
           className="admin-modal-overlay"
@@ -625,7 +672,6 @@ const AdminContacts = () => {
             </div>
 
             <div className="admin-modal-body">
-              {/* Details Grid */}
               <div className="contacts-view-grid">
                 {[
                   ["Full Name", viewContact.fullName],
@@ -645,7 +691,6 @@ const AdminContacts = () => {
                 ))}
               </div>
 
-              {/* Message */}
               <div style={{ marginTop: "1rem" }}>
                 <label className="admin-form-label">Message</label>
                 <div className="contacts-message-box">

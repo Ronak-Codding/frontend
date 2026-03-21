@@ -12,7 +12,7 @@ import {
   Smartphone,
   Building2,
   Wallet,
-  IndianRupee, // ✅ Yeh add karo
+  IndianRupee, //Yeh add karo
 } from "lucide-react";
 import "./UserLayout.css";
 import "./UserPages.css";
@@ -32,11 +32,11 @@ const UserDashboard = () => {
       setLoading(true);
       try {
         const [bRes, pRes] = await Promise.all([
-          // ✅ Bookings - email se
+          //  Bookings - email se
           fetch(
             `http://localhost:5000/api/booking/my-bookings/${encodeURIComponent(user.email)}`,
           ),
-          // ✅ Payments - sahi URL + email filter
+          //  Payments - sahi URL + email filter
           fetch(
             `http://localhost:5000/api/payment?email=${encodeURIComponent(user.email)}&limit=100`,
           ),
@@ -65,7 +65,7 @@ const UserDashboard = () => {
     (b) => b.status === "cancelled" || b.status === "Cancelled",
   ).length;
 
-  // ✅ Sirf successful payments ka total
+  //  Sirf successful payments ka total
   const totalSpent = payments
     .filter((p) => p.status === "success")
     .reduce((s, p) => s + (p.amount || 0), 0);
@@ -74,7 +74,7 @@ const UserDashboard = () => {
     .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
     .slice(0, 5);
 
-  // ✅ Recent payments - latest 3
+  //  Recent payments - latest 3
   const recentPayments = [...payments]
     .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
     .slice(0, 3);
@@ -277,7 +277,7 @@ const UserDashboard = () => {
             </div>
           </div>
 
-          {/* ✅ Recent Payments - fixed */}
+          {/* Recent Payments - fixed */}
           <div className="up-card">
             <div className="up-card-header">
               <h3 className="up-card-title">

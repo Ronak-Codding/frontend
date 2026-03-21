@@ -16,6 +16,8 @@ import {
   Trash2,
   IndianRupee,
   AlertCircle,
+  CheckSquare,
+  Square,
 } from "lucide-react";
 import "./AdminTables.css";
 
@@ -77,6 +79,13 @@ export default function AdminPayments({ token }) {
   const [refundModal, setRefundModal] = useState(null);
   const [refundReason, setRefundReason] = useState("");
 
+  // ── Bulk selection state ──
+  const [selectedPayments, setSelectedPayments] = useState([]);
+  const [selectAll, setSelectAll] = useState(false);
+
+  // ── Export format state ──
+  const [exportFormat, setExportFormat] = useState("csv");
+
   const authHeaders = {
     "Content-Type": "application/json",
     Authorization: `Bearer ${token}`,
@@ -84,7 +93,13 @@ export default function AdminPayments({ token }) {
 
   useEffect(() => {
     fetchPayments();
-  }, [page, status, method]);
+  }, [page, status, method, search]);
+
+  // Reset selection whenever payments list changes
+  useEffect(() => {
+    setSelectedPayments([]);
+    setSelectAll(false);
+  }, [payments]);
 
   const fetchPayments = async () => {
     setLoading(true);
@@ -105,6 +120,47 @@ export default function AdminPayments({ token }) {
       setTotal(data.total || 0);
       setPages(data.pages || 1);
       setTotalRevenue(data.totalRevenue || 0);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // ── Checkbox handlers ──
+  const handleSelectAll = () => {
+    if (selectAll) {
+      setSelectedPayments([]);
+      setSelectAll(false);
+    } else {
+      setSelectedPayments(payments.map((p) => p._id));
+      setSelectAll(true);
+    }
+  };
+
+  const toggleSelect = (id) => {
+    setSelectedPayments((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
+    );
+  };
+
+  // ── Bulk delete ──
+  const handleBulkDelete = async () => {
+    if (!window.confirm(`Delete ${selectedPayments.length} payment record(s)?`))
+      return;
+    setLoading(true);
+    try {
+      await Promise.all(
+        selectedPayments.map((id) =>
+          fetch(`http://localhost:5000/api/admin/payments/${id}`, {
+            method: "DELETE",
+            headers: authHeaders,
+          }),
+        ),
+      );
+      setSelectedPayments([]);
+      setSelectAll(false);
+      fetchPayments();
     } catch (err) {
       console.error(err);
     } finally {
@@ -143,6 +199,24 @@ export default function AdminPayments({ token }) {
     }
   };
 
+  // ── Export (CSV + JSON) ──
+  const exportPayments = async () => {
+    if (exportFormat === "csv") {
+      window.open(
+        "http://localhost:5000/api/admin/payments/export/csv",
+        "_blank",
+      );
+    } else {
+      const blob = new Blob([JSON.stringify(payments, null, 2)], {
+        type: "application/json",
+      });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = `payments_${new Date().toISOString().split("T")[0]}.json`;
+      a.click();
+    }
+  };
+
   const formatDate = (d) =>
     d
       ? new Date(d).toLocaleDateString("en-IN", {
@@ -162,17 +236,22 @@ export default function AdminPayments({ token }) {
           <h1 className="admin-page-title">Payments</h1>
           <p className="admin-page-subtitle">Total: {total} transactions</p>
         </div>
-        <button
-          className="btn-secondary"
-          onClick={() =>
-            window.open(
-              "http://localhost:5000/api/admin/payments/export/csv",
-              "_blank",
-            )
-          }
-        >
-          <Download size={16} /> Export CSV
-        </button>
+        <div className="admin-header-actions">
+          {/* Export Format Select */}
+          <select
+            className="btn-export-select"
+            value={exportFormat}
+            onChange={(e) => setExportFormat(e.target.value)}
+          >
+            <option value="csv">CSV</option>
+            <option value="json">JSON</option>
+          </select>
+
+          {/* Export Button */}
+          <button className="btn-export" onClick={exportPayments}>
+            <Download size={16} /> Export
+          </button>
+        </div>
       </div>
 
       {/* ── Stats Cards ── */}
@@ -194,28 +273,19 @@ export default function AdminPayments({ token }) {
 
       {/* ── Filters ── */}
       <div className="admin-filters">
-        <form
-          className="admin-search-form"
-          onSubmit={(e) => {
-            e.preventDefault();
-            setPage(1);
-            fetchPayments();
-          }}
-        >
-          <div className="admin-search-wrapper">
+        <div className="admin-search-wrapper">
             <Search size={16} className="admin-search-icon" />
             <input
               type="text"
               placeholder="Search by TXN ID, Name, Email, Flight..."
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                setPage(1);
+              }}
               className="admin-input admin-input-search"
             />
           </div>
-          <button type="submit" className="btn-search">
-            Search
-          </button>
-        </form>
 
         <select
           className="admin-select"
@@ -248,12 +318,54 @@ export default function AdminPayments({ token }) {
         </select>
       </div>
 
+      {/* ── Bulk Action Bar ── */}
+      {selectedPayments.length > 0 && (
+        <div className="users-bulk-bar">
+          <span className="users-bulk-count">
+            {selectedPayments.length} payment(s) selected
+          </span>
+          <div className="users-bulk-actions">
+            <button
+              className="users-bulk-btn users-bulk-blocked"
+              onClick={handleBulkDelete}
+            >
+              Delete Selected
+            </button>
+            <button
+              className="users-bulk-btn users-bulk-clear"
+              onClick={() => {
+                setSelectedPayments([]);
+                setSelectAll(false);
+              }}
+            >
+              Clear
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* ── Table ── */}
       <div className="admin-table-container">
         <div className="admin-table-scroll">
           <table className="admin-table">
             <thead>
               <tr>
+                {/* ── Select All checkbox ── */}
+                <th>
+                  <button
+                    onClick={handleSelectAll}
+                    className="passengers-check-btn"
+                  >
+                    {selectAll ? (
+                      <CheckSquare size={16} style={{ color: "#667eea" }} />
+                    ) : (
+                      <Square
+                        size={16}
+                        style={{ color: "var(--text-secondary)" }}
+                      />
+                    )}
+                  </button>
+                </th>
                 {[
                   "Transaction ID",
                   "Passenger",
@@ -272,7 +384,7 @@ export default function AdminPayments({ token }) {
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan={9} className="admin-table-loading">
+                  <td colSpan={10} className="admin-table-loading">
                     <Loader2
                       size={32}
                       className="admin-table-empty-icon"
@@ -283,7 +395,7 @@ export default function AdminPayments({ token }) {
                 </tr>
               ) : payments.length === 0 ? (
                 <tr>
-                  <td colSpan={9} className="admin-table-empty">
+                  <td colSpan={10} className="admin-table-empty">
                     <CreditCard size={48} className="admin-table-empty-icon" />
                     <p>No payments found</p>
                   </td>
@@ -296,9 +408,37 @@ export default function AdminPayments({ token }) {
                     METHOD_CONFIG[p.paymentMethod] || METHOD_CONFIG.card;
                   const StatusIcon = statusConfig.icon;
                   const MethodIcon = methodConfig.icon;
+                  const isSelected = selectedPayments.includes(p._id);
 
                   return (
-                    <tr key={p._id}>
+                    <tr
+                      key={p._id}
+                      style={
+                        isSelected
+                          ? { background: "rgba(102,126,234,0.08)" }
+                          : {}
+                      }
+                    >
+                      {/* ── Row checkbox ── */}
+                      <td>
+                        <button
+                          onClick={() => toggleSelect(p._id)}
+                          className="passengers-check-btn"
+                        >
+                          {isSelected ? (
+                            <CheckSquare
+                              size={16}
+                              style={{ color: "#667eea" }}
+                            />
+                          ) : (
+                            <Square
+                              size={16}
+                              style={{ color: "var(--text-secondary)" }}
+                            />
+                          )}
+                        </button>
+                      </td>
+
                       {/* Transaction ID */}
                       <td>
                         <p className="cell-accent">{p.transactionId}</p>
@@ -313,9 +453,6 @@ export default function AdminPayments({ token }) {
                       {/* Passenger */}
                       <td>
                         <div className="admin-avatar-cell">
-                          {/* <div className="admin-avatar">
-                            {p.passengerName?.charAt(0) || "?"}
-                          </div> */}
                           <div className="admin-avatar-info">
                             <p className="admin-avatar-name">
                               {p.passengerName || "—"}

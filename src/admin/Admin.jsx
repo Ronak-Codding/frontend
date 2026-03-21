@@ -173,9 +173,9 @@ const Admin = () => {
               <i className="fas fa-map-marker-alt"></i>Airports
             </NavLink>
 
-            {/* <NavLink to="/admin/flights" className="list-group-item">
+            <NavLink to="/admin/flights" className="list-group-item">
               <i className="fas fa-plane"></i> Flights
-            </NavLink> */}
+            </NavLink>
 
             <NavLink to="/admin/bookings" className="list-group-item">
               <i className="fas fa-ticket-alt"></i> Bookings

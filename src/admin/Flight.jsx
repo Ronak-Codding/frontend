@@ -1,996 +1,1058 @@
-import React, { useState, useEffect } from "react";
-// import DataTable from "react-data-table-component";
+import React, { useEffect, useState } from "react";
+import {
+  Plus,
+  Search,
+  Eye,
+  Edit2,
+  Trash2,
+  Download,
+  ChevronLeft,
+  ChevronRight,
+  X,
+  Save,
+  Plane,
+  ToggleLeft,
+  ToggleRight,
+  RefreshCw,
+  CheckSquare,
+  Square,
+} from "lucide-react";
+import "./AdminTables.css";
+import "./AdminUsers.css";
 
-const Flights = () => {
+const API = "http://localhost:5000/api";
+
+const EMPTY_FORM = {
+  flight_number: "",
+  airline: "",
+  from_airport: "",
+  to_airport: "",
+  departure_time: "",
+  arrival_time: "",
+  duration: "",
+  price: "",
+  seats_available: "",
+  total_seats: "",
+  aircraft_type: "Boeing 737",
+  status: "Scheduled",
+  admin_status: "Publish",
+};
+
+const generateFlightNumber = (airlineCode) => {
+  const num = Math.floor(100 + Math.random() * 900);
+  return `${airlineCode}${num}`;
+};
+
+// ── FlightForm - Component ke BAHAR ──
+const FlightForm = ({
+  title,
+  onSubmit,
+  onClose,
+  formData,
+  handleFormChange,
+  handleRegenerate,
+  airlines,
+  airports,
+  formLoading,
+}) => (
+  <div className="pax-modal-overlay" onClick={onClose}>
+    <div
+      className="pax-modal pax-modal-lg"
+      style={{ maxHeight: "90vh", overflowY: "auto" }}
+      onClick={(e) => e.stopPropagation()}
+    >
+      <div className="pax-modal-header">
+        <h2 className="pax-modal-title">{title}</h2>
+        <button className="pax-modal-close" onClick={onClose}>
+          <X size={20} />
+        </button>
+      </div>
+      <form onSubmit={onSubmit}>
+        <div className="pax-modal-body">
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "1fr 1fr",
+              gap: "1rem",
+            }}
+          >
+            {/* Flight Number */}
+            <div className="pax-form-group">
+              <label className="pax-form-label">Flight Number *</label>
+              <div style={{ display: "flex", gap: "0.5rem" }}>
+                <input
+                  type="text"
+                  name="flight_number"
+                  value={formData.flight_number}
+                  onChange={handleFormChange}
+                  placeholder="Select airline to auto-generate"
+                  required
+                  className="pax-form-input"
+                  style={{ flex: 1 }}
+                />
+                <button
+                  type="button"
+                  onClick={handleRegenerate}
+                  title="Regenerate"
+                  style={{
+                    padding: "0 0.75rem",
+                    borderRadius: "0.6rem",
+                    border: "1px solid var(--border)",
+                    background: "var(--secondary, rgba(255,255,255,0.05))",
+                    cursor: "pointer",
+                    color: "var(--text-secondary)",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "0.3rem",
+                    fontSize: "0.75rem",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  <RefreshCw size={13} /> Generate
+                </button>
+              </div>
+              {formData.flight_number && (
+                <p
+                  style={{
+                    fontSize: "0.72rem",
+                    color: "var(--text-secondary)",
+                    marginTop: "0.3rem",
+                  }}
+                >
+                  Flight: <strong>{formData.flight_number}</strong>
+                </p>
+              )}
+            </div>
+
+            {/* Aircraft Type */}
+            <div className="pax-form-group">
+              <label className="pax-form-label">Aircraft Type</label>
+              <input
+                type="text"
+                name="aircraft_type"
+                value={formData.aircraft_type}
+                onChange={handleFormChange}
+                placeholder="Boeing 737"
+                className="pax-form-input"
+              />
+            </div>
+
+            {/* Airline */}
+            <div className="pax-form-group">
+              <label className="pax-form-label">Airline *</label>
+              <select
+                name="airline"
+                value={formData.airline}
+                onChange={handleFormChange}
+                required
+                className="pax-form-select"
+              >
+                <option value="">Select Airline</option>
+                {airlines.map((a) => (
+                  <option key={a._id} value={a._id}>
+                    {a.airline_name} ({a.airline_code})
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Price */}
+            <div className="pax-form-group">
+              <label className="pax-form-label">Price (₹) *</label>
+              <input
+                type="number"
+                name="price"
+                value={formData.price}
+                onChange={handleFormChange}
+                placeholder="5000"
+                required
+                className="pax-form-input"
+              />
+            </div>
+
+            {/* From Airport */}
+            <div className="pax-form-group">
+              <label className="pax-form-label">From Airport *</label>
+              <select
+                name="from_airport"
+                value={formData.from_airport}
+                onChange={handleFormChange}
+                required
+                className="pax-form-select"
+              >
+                <option value="">Select Airport</option>
+                {airports.map((a) => (
+                  <option key={a._id} value={a._id}>
+                    {a.airport_code} - {a.city}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* To Airport */}
+            <div className="pax-form-group">
+              <label className="pax-form-label">To Airport *</label>
+              <select
+                name="to_airport"
+                value={formData.to_airport}
+                onChange={handleFormChange}
+                required
+                className="pax-form-select"
+              >
+                <option value="">Select Airport</option>
+                {airports.map((a) => (
+                  <option key={a._id} value={a._id}>
+                    {a.airport_code} - {a.city}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Departure */}
+            <div className="pax-form-group">
+              <label className="pax-form-label">Departure Time *</label>
+              <input
+                type="datetime-local"
+                name="departure_time"
+                value={formData.departure_time}
+                onChange={handleFormChange}
+                required
+                className="pax-form-input"
+              />
+            </div>
+
+            {/* Arrival */}
+            <div className="pax-form-group">
+              <label className="pax-form-label">Arrival Time *</label>
+              <input
+                type="datetime-local"
+                name="arrival_time"
+                value={formData.arrival_time}
+                onChange={handleFormChange}
+                required
+                className="pax-form-input"
+              />
+            </div>
+
+            {/* Duration */}
+            <div className="pax-form-group">
+              <label className="pax-form-label">
+                Duration (minutes) - Auto
+              </label>
+              <input
+                type="number"
+                name="duration"
+                value={formData.duration}
+                onChange={handleFormChange}
+                placeholder="Auto calculated"
+                className="pax-form-input"
+              />
+            </div>
+
+            {/* Total Seats */}
+            <div className="pax-form-group">
+              <label className="pax-form-label">Total Seats *</label>
+              <input
+                type="number"
+                name="total_seats"
+                value={formData.total_seats}
+                onChange={handleFormChange}
+                placeholder="180"
+                required
+                className="pax-form-input"
+              />
+            </div>
+
+            {/* Available Seats */}
+            <div className="pax-form-group">
+              <label className="pax-form-label">Seats Available *</label>
+              <input
+                type="number"
+                name="seats_available"
+                value={formData.seats_available}
+                onChange={handleFormChange}
+                placeholder="150"
+                required
+                className="pax-form-input"
+              />
+            </div>
+
+            {/* Status */}
+            <div className="pax-form-group">
+              <label className="pax-form-label">Flight Status</label>
+              <select
+                name="status"
+                value={formData.status}
+                onChange={handleFormChange}
+                className="pax-form-select"
+              >
+                <option value="Scheduled">Scheduled</option>
+                <option value="Delayed">Delayed</option>
+                <option value="Cancelled">Cancelled</option>
+                <option value="Completed">Completed</option>
+              </select>
+            </div>
+
+            {/* Admin Status */}
+            <div className="pax-form-group">
+              <label className="pax-form-label">Publish Status</label>
+              <select
+                name="admin_status"
+                value={formData.admin_status}
+                onChange={handleFormChange}
+                className="pax-form-select"
+              >
+                <option value="Publish">Publish</option>
+                <option value="Draft">Draft</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div className="pax-modal-footer">
+          <button type="button" className="btn-export" onClick={onClose}>
+            Cancel
+          </button>
+          <button type="submit" className="btn-add-user" disabled={formLoading}>
+            {formLoading ? (
+              <>
+                <div
+                  className="users-spinner"
+                  style={{ width: 16, height: 16, borderWidth: 2 }}
+                />{" "}
+                Saving...
+              </>
+            ) : (
+              <>
+                <Save size={16} /> Save Flight
+              </>
+            )}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+);
+
+// ── Main Component ──
+const AdminFlights = () => {
   const [flights, setFlights] = useState([]);
-  const [filteredFlights, setFilteredFlights] = useState([]);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [loading, setLoading] = useState(true);
-  const [showAddModal, setShowAddModal] = useState(false);
-  const [showEditModal, setShowEditModal] = useState(false);
-  const [currentFlight, setCurrentFlight] = useState(null);
-
   const [airlines, setAirlines] = useState([]);
   const [airports, setAirports] = useState([]);
-
+  const [loading, setLoading] = useState(false);
+  const [totalCount, setTotalCount] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
   const [currentPage, setCurrentPage] = useState(1);
-  const flightsPerPage = 5;
-
-  const [newFlight, setNewFlight] = useState({
-    flight_number: "",
-    airline: "",
-    from_airport: "",
-    to_airport: "",
-    departure_time: "",
-    arrival_time: "",
-    price: "",
-    seats_available: "",
-    total_seats: "",
-    aircraft_type: "Boeing 737",
-    status: "Scheduled",
-    admin_status: "Publish",
+  const [query, setQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [notification, setNotification] = useState({
+    show: false,
+    message: "",
+    type: "",
   });
+  const [showAdd, setShowAdd] = useState(false);
+  const [showEdit, setShowEdit] = useState(false);
+  const [showView, setShowView] = useState(false);
+  const [selectedFlight, setSelectedFlight] = useState(null);
+  const [formData, setFormData] = useState(EMPTY_FORM);
+  const [formLoading, setFormLoading] = useState(false);
 
-  const [editFlight, setEditFlight] = useState({
-    flight_number: "",
-    status: "Scheduled",
-    admin_status: "Publish",
-    price: "",
-    seats_available: "",
-  });
+  const [selectedFlights, setSelectedFlights] = useState([]);
+  const [selectAll, setSelectAll] = useState(false);
+
+  // ── Export format state ──
+  const [exportFormat, setExportFormat] = useState("csv");
+
+  const perPage = 10;
+
+  const showNotification = (message, type = "success") => {
+    setNotification({ show: true, message, type });
+    setTimeout(
+      () => setNotification({ show: false, message: "", type: "" }),
+      3000,
+    );
+  };
+
+  const fetchFlights = async (page = 1) => {
+    setLoading(true);
+    try {
+      const params = new URLSearchParams({
+        page,
+        limit: perPage,
+        search: query,
+        status: statusFilter,
+      });
+      const res = await fetch(`${API}/flights?${params}`);
+      const data = await res.json();
+      setFlights(data.flights || []);
+      setTotalCount(data.total || 0);
+      setTotalPages(data.pages || 1);
+    } catch {
+      showNotification("Failed to fetch flights", "error");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchDropdowns = async () => {
+    try {
+      const [aRes, apRes] = await Promise.all([
+        fetch(`${API}/airlines/allAirlines`),
+        fetch(`${API}/airports/allAirports`),
+      ]);
+      const aData = await aRes.json();
+      const apData = await apRes.json();
+      setAirlines(aData.airlines || []);
+      setAirports(Array.isArray(apData) ? apData : apData.airports || []);
+    } catch {
+      console.error("Dropdown fetch failed");
+    }
+  };
 
   useEffect(() => {
-    fetchAllData();
+    fetchFlights(currentPage);
+  }, [currentPage, query, statusFilter]);
+
+  useEffect(() => {
+    fetchDropdowns();
   }, []);
 
-  const fetchAllData = async () => {
-    try {
-      const flightsRes = await fetch(
-        "http://localhost:5000/api/flights/allFlights",
-      );
-      const flightsData = await flightsRes.json();
-      setFlights(flightsData);
-      setFilteredFlights(flightsData);
+  // Reset selection on flights change
+  useEffect(() => {
+    setSelectedFlights([]);
+    setSelectAll(false);
+  }, [flights]);
 
-      const airlinesRes = await fetch(
-        "http://localhost:5000/api/airlines/allAirlines",
-      );
-      const airlinesData = await airlinesRes.json();
-      setAirlines(
-        Array.isArray(airlinesData)
-          ? airlinesData
-          : airlinesData.airlines || [],
-      );
+  const handleFormChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => {
+      const updated = { ...prev, [name]: value };
+      if (name === "airline" && value) {
+        const sel = airlines.find((a) => a._id === value);
+        if (sel) updated.flight_number = generateFlightNumber(sel.airline_code);
+      }
+      if (name === "departure_time" || name === "arrival_time") {
+        const dep = new Date(updated.departure_time);
+        const arr = new Date(updated.arrival_time);
+        if (dep && arr && arr > dep)
+          updated.duration = Math.round((arr - dep) / 60000);
+      }
+      return updated;
+    });
+  };
 
-      const airportsRes = await fetch(
-        "http://localhost:5000/api/airports/allAirports",
-      );
-      const airportsData = await airportsRes.json();
-      setAirports(airportsData);
-
-      setLoading(false);
-    } catch (err) {
-      console.error(err);
-      setLoading(false);
+  const handleRegenerate = () => {
+    const sel = airlines.find((a) => a._id === formData.airline);
+    if (sel) {
+      setFormData((prev) => ({
+        ...prev,
+        flight_number: generateFlightNumber(sel.airline_code),
+      }));
+    } else {
+      showNotification("Pehle airline select karo", "error");
     }
   };
 
-  const handleSearch = (e) => {
-    const value = e.target.value.toLowerCase();
-    setSearchTerm(value);
-
-    if (!value) {
-      setFilteredFlights(flights);
-      setCurrentPage(1);
-
-      return;
-    }
-
-    setFilteredFlights(
-      flights.filter(
-        (f) =>
-          f.flight_number?.toLowerCase().includes(value) ||
-          f.airline?.airline_name?.toLowerCase().includes(value) ||
-          f.from_airport?.iata_code?.toLowerCase().includes(value) ||
-          f.to_airport?.iata_code?.toLowerCase().includes(value),
-      ),
-    );
-  };
-
-  const calculateDuration = (dep, arr) => {
-    const diff = new Date(arr) - new Date(dep);
-    return diff > 0 ? Math.round(diff / 60000) : 0;
-  };
-
-  const handleAddFlight = async (e) => {
+  const handleCreate = async (e) => {
     e.preventDefault();
-
-    if (newFlight.from_airport === newFlight.to_airport) {
-      alert("From and To airport cannot be same");
-      return;
-    }
-
-    const flightData = {
-      ...newFlight,
-      duration: calculateDuration(
-        newFlight.departure_time,
-        newFlight.arrival_time,
-      ),
-      price: Number(newFlight.price),
-      total_seats: Number(newFlight.total_seats),
-      seats_available: Number(
-        newFlight.seats_available || newFlight.total_seats,
-      ),
-    };
-
+    setFormLoading(true);
     try {
-      const res = await fetch("http://localhost:5000/api/flights", {
+      const res = await fetch(`${API}/flights`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(flightData),
+        body: JSON.stringify(formData),
       });
-
-      if (!res.ok) {
-        const err = await res.json();
-        alert(err.message || "Failed to add flight");
-        return;
-      }
-
-      setShowAddModal(false);
-      fetchAllData();
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Create failed");
+      showNotification("Flight added successfully!");
+      setShowAdd(false);
+      setFormData(EMPTY_FORM);
+      fetchFlights(1);
     } catch (err) {
-      console.error(err);
+      showNotification(err.message, "error");
+    } finally {
+      setFormLoading(false);
     }
   };
 
-  const toggleFlightStatus = async (id, status) => {
-    await fetch(`http://localhost:5000/api/flights/${id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        admin_status: status === "Publish" ? "Draft" : "Publish",
-      }),
-    });
-    fetchAllData();
-  };
-
-  const handleEditClick = (f) => {
-    setCurrentFlight(f);
-    setEditFlight({
-      flight_number: f.flight_number,
-      status: f.status,
-      admin_status: f.admin_status,
-      price: f.price,
-      seats_available: f.seats_available,
-    });
-    setShowEditModal(true);
-  };
-
-  const handleEditSubmit = async (e) => {
+  const handleUpdate = async (e) => {
     e.preventDefault();
-    await fetch(
-      `http://localhost:5000/api/flights/updateFlight/${currentFlight._id}`,
-      {
+    setFormLoading(true);
+    try {
+      const res = await fetch(`${API}/flights/${selectedFlight._id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(editFlight),
-      },
-    );
-    setShowEditModal(false);
-    fetchAllData();
+        body: JSON.stringify(formData),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Update failed");
+      showNotification("Flight updated successfully!");
+      setShowEdit(false);
+      fetchFlights(currentPage);
+    } catch (err) {
+      showNotification(err.message, "error");
+    } finally {
+      setFormLoading(false);
+    }
   };
-
-  const indexOfLast = currentPage * flightsPerPage;
-  const indexOfFirst = indexOfLast - flightsPerPage;
-  const currentFlights = filteredFlights.slice(indexOfFirst, indexOfLast);
-  const totalPages = Math.ceil(filteredFlights.length / flightsPerPage);
 
   const handleDelete = async (id) => {
     if (!window.confirm("Delete this flight?")) return;
-    await fetch(`http://localhost:5000/api/flights/deleteFlight/${id}`, {
-      method: "DELETE",
-    });
-    fetchAllData();
+    try {
+      await fetch(`${API}/flights/${id}`, { method: "DELETE" });
+      showNotification("Flight deleted");
+      fetchFlights(currentPage);
+    } catch {
+      showNotification("Delete failed", "error");
+    }
   };
 
-  const handleNewFlightInputChange = (e) => {
-    const { name, value } = e.target;
-    setNewFlight((p) => ({ ...p, [name]: value }));
+  const handleToggle = async (id) => {
+    try {
+      await fetch(`${API}/flights/${id}/toggle-status`, { method: "PATCH" });
+      fetchFlights(currentPage);
+    } catch {
+      showNotification("Toggle failed", "error");
+    }
   };
 
-  const handleEditInputChange = (e) => {
-    const { name, value } = e.target;
-    setEditFlight((p) => ({ ...p, [name]: value }));
+  // ── Checkbox handlers ──
+  const handleSelectAll = () => {
+    if (selectAll) {
+      setSelectedFlights([]);
+      setSelectAll(false);
+    } else {
+      setSelectedFlights(flights.map((f) => f._id));
+      setSelectAll(true);
+    }
   };
 
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center h-[80vh]">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-      </div>
+  const toggleFlightSelection = (id) => {
+    setSelectedFlights((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
     );
-  }
+  };
+
+  // ── Bulk Delete ──
+  const handleBulkDelete = async () => {
+    if (!window.confirm(`${selectedFlights.length} flights delete karo?`))
+      return;
+    setLoading(true);
+    try {
+      await Promise.all(
+        selectedFlights.map((id) =>
+          fetch(`${API}/flights/${id}`, { method: "DELETE" }),
+        ),
+      );
+      setSelectedFlights([]);
+      setSelectAll(false);
+      showNotification(`${selectedFlights.length} flights deleted`);
+      fetchFlights(currentPage);
+    } catch {
+      showNotification("Bulk delete failed", "error");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // ── Bulk Status Update ──
+  const handleBulkStatus = async (admin_status) => {
+    setLoading(true);
+    try {
+      await Promise.all(
+        selectedFlights.map((id) =>
+          fetch(`${API}/flights/${id}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ admin_status }),
+          }),
+        ),
+      );
+      setSelectedFlights([]);
+      setSelectAll(false);
+      showNotification(
+        `${selectedFlights.length} flights updated to ${admin_status}`,
+      );
+      fetchFlights(currentPage);
+    } catch {
+      showNotification("Bulk update failed", "error");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const openEdit = (flight) => {
+    setSelectedFlight(flight);
+    setFormData({
+      flight_number: flight.flight_number || "",
+      airline: flight.airline?._id || "",
+      from_airport: flight.from_airport?._id || "",
+      to_airport: flight.to_airport?._id || "",
+      departure_time: flight.departure_time
+        ? new Date(flight.departure_time).toISOString().slice(0, 16)
+        : "",
+      arrival_time: flight.arrival_time
+        ? new Date(flight.arrival_time).toISOString().slice(0, 16)
+        : "",
+      duration: flight.duration || "",
+      price: flight.price || "",
+      seats_available: flight.seats_available || "",
+      total_seats: flight.total_seats || "",
+      aircraft_type: flight.aircraft_type || "Boeing 737",
+      status: flight.status || "Scheduled",
+      admin_status: flight.admin_status || "Publish",
+    });
+    setShowEdit(true);
+  };
+
+  // ── Export (CSV + JSON) ──
+  const exportFlights = async () => {
+    if (exportFormat === "csv") {
+      try {
+        const res = await fetch(`${API}/flights/export/csv`);
+        const blob = await res.blob();
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = `flights_${new Date().toISOString().split("T")[0]}.csv`;
+        a.click();
+        showNotification("CSV exported successfully");
+      } catch {
+        showNotification("Export failed", "error");
+      }
+    } else {
+      // JSON export — current fetched flights data
+      const blob = new Blob([JSON.stringify(flights, null, 2)], {
+        type: "application/json",
+      });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = `flights_${new Date().toISOString().split("T")[0]}.json`;
+      a.click();
+      showNotification(`${flights.length} flights exported as JSON`);
+    }
+  };
+
+  const formatTime = (d) =>
+    d
+      ? new Date(d).toLocaleString("en-IN", {
+          day: "numeric",
+          month: "short",
+          hour: "2-digit",
+          minute: "2-digit",
+        })
+      : "—";
+  const formatDuration = (mins) =>
+    mins ? `${Math.floor(mins / 60)}h ${mins % 60}m` : "—";
+
+  const STATUS_CLASS = {
+    Scheduled: "badge-confirmed",
+    Delayed: "badge-pending",
+    Cancelled: "badge-cancelled",
+    Completed: "badge-confirmed",
+  };
+
+  const closeForm = () => {
+    setShowAdd(false);
+    setShowEdit(false);
+  };
+
+  const commonFormProps = {
+    formData,
+    handleFormChange,
+    handleRegenerate,
+    airlines,
+    airports,
+    formLoading,
+    onClose: closeForm,
+  };
 
   return (
-    //  bg-gray-50
-    <div className="flights-container p-6  min-h-screen">
-      {/* Header */}
-      <div className="flex justify-between items-center mb-6">
-        <div>
-          <h2 className="text-2xl font-bold text-gray-800 mb-1">
-            Flights Data
-          </h2>
-          {/* <p className="text-gray-600">Manage all flights in the system</p> */}
-        </div>
-        <button
-          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-lg font-medium flex items-center"
-          onClick={() => setShowAddModal(true)}
-        >
-          <i className="fas fa-plus mr-2"></i>Add New Flight
-        </button>
-      </div>
-
-      {/* Statistics Cards */}
-      {/* <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-        <div className="bg-white rounded-lg shadow p-6">
-          <div className="flex justify-between items-center">
-            <div>
-              <h5 className="text-gray-500 text-sm font-medium">
-                Total Flights
-              </h5>
-              <h3 className="text-2xl font-bold text-gray-800 mt-1">
-                {flights.length}
-              </h3>
-            </div>
-            <i className="fas fa-plane text-3xl text-blue-500"></i>
-          </div>
-        </div>
-        <div className="bg-white rounded-lg shadow p-6">
-          <div className="flex justify-between items-center">
-            <div>
-              <h5 className="text-gray-500 text-sm font-medium">Published</h5>
-              <h3 className="text-2xl font-bold text-gray-800 mt-1">
-                {publishedCount}
-              </h3>
-            </div>
-            <i className="fas fa-globe text-3xl text-green-500"></i>
-          </div>
-        </div>
-        <div className="bg-white rounded-lg shadow p-6">
-          <div className="flex justify-between items-center">
-            <div>
-              <h5 className="text-gray-500 text-sm font-medium">Draft</h5>
-              <h3 className="text-2xl font-bold text-gray-800 mt-1">
-                {draftCount}
-              </h3>
-            </div>
-            <i className="fas fa-file-alt text-3xl text-yellow-500"></i>
-          </div>
-        </div>
-      </div> */}
-
-      {/* Search Bar */}
-      <div className="bg-white dark:bg-black rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 mb-6 transition-colors">
-        <div className="p-4">
-          <div className="relative">
-            {/* Icon */}
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <i className="fas fa-search text-gray-400 dark:text-gray-500 text-sm"></i>
-            </div>
-
-            <input
-              type="text"
-              className="w-full pl-9 pr-3 py-2 text-sm
-                   border border-gray-300 dark:border-gray-700
-                   rounded-lg
-                   bg-gray-50 dark:bg-neutral-100
-                   text-black dark:text-white
-                   placeholder-gray-400 dark:placeholder-gray-500
-                   focus:bg-white dark:focus:bg-neutral-100
-                   focus:ring-1 focus:ring-black dark:focus:ring-white
-                   outline-none transition"
-              placeholder="Search flights by flight number, airline, or airport code..."
-              value={searchTerm}
-              onChange={handleSearch}
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* Flights Table */}
-      <div className="bg-white rounded-lg shadow">
-        <div className="p-4 overflow-x-auto">
-          <table className="min-w-full text-sm text-left text-gray-700">
-            <thead className="bg-gray-100 text-xs uppercase text-gray-600">
-              <tr>
-                <th className="px-4 py-3">Flight</th>
-                <th className="px-4 py-3">Airline</th>
-                <th className="px-4 py-3">Route</th>
-                <th className="px-4 py-3">Departure</th>
-                {/* <th className="px-4 py-3">Duration</th> */}
-                <th className="px-4 py-3">Price</th>
-                <th className="px-4 py-3">Seats</th>
-                <th className="px-4 py-3">Status</th>
-                <th className="px-4 py-3">Admin</th>
-                <th className="px-4 py-3 text-center">Actions</th>
-              </tr>
-            </thead>
-
-            <tbody className="divide-y text-gray-700">
-              {currentFlights.length > 0 ? (
-                currentFlights.map((row) => (
-                  <tr key={row._id} className="hover:bg-gray-50 transition">
-                    <td className="px-4 py-3 font-bold">{row.flight_number}</td>
-
-                    <td className="px-4 py-3">
-                      <div className="font-medium">
-                        {row.airline?.airline_name}
-                      </div>
-                      <div className="text-gray-500 text-xs">
-                        ({row.airline?.airline_code})
-                      </div>
-                    </td>
-
-                    <td className="px-4 py-3 font-medium">
-                      {row.from_airport?.city} → {row.to_airport?.city}
-                    </td>
-
-                    <td className="px-4 py-3">
-                      <div>
-                        {new Date(row.departure_time).toLocaleDateString()}
-                      </div>
-                      <div className="text-gray-500 text-xs">
-                        {new Date(row.departure_time).toLocaleTimeString([], {
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })}
-                      </div>
-                    </td>
-
-                    {/* <td className="px-4 py-3 font-medium">
-                      {Math.floor(row.duration / 60)}h {row.duration % 60}m
-                    </td> */}
-
-                    <td className="px-4 py-3 font-medium">
-                      {new Intl.NumberFormat("en-IN", {
-                        style: "currency",
-                        currency: "INR",
-                        maximumFractionDigits: 0,
-                      }).format(row.price)}
-                    </td>
-
-                    <td className="px-4 py-3">
-                      <span
-                        className={`px-2 py-1 rounded-full text-xs font-medium ${
-                          row.seats_available < 10
-                            ? "bg-red-100 text-red-700"
-                            : "bg-green-100 text-green-700"
-                        }`}
-                      >
-                        {row.seats_available}
-                      </span>
-                      <span className="ml-1 text-gray-500 text-xs font-medium">
-                        / {row.total_seats}
-                      </span>
-                    </td>
-
-                    <td className="px-4 py-3">
-                      <span
-                        className={`px-2 py-1 rounded-full text-xs font-medium ${
-                          row.status === "Scheduled"
-                            ? "bg-blue-100 text-blue-700"
-                            : row.status === "Delayed"
-                              ? "bg-yellow-100 text-yellow-700"
-                              : row.status === "Cancelled"
-                                ? "bg-red-100 text-red-700"
-                                : "bg-green-100 text-green-700"
-                        }`}
-                      >
-                        {row.status}
-                      </span>
-                    </td>
-
-                    <td className="px-4 py-3">
-                      <span
-                        onClick={() =>
-                          toggleFlightStatus(row._id, row.admin_status)
-                        }
-                        className={`cursor-pointer px-2 py-1 rounded-full text-xs font-medium ${
-                          row.admin_status === "Publish"
-                            ? "bg-green-100 text-green-700 hover:bg-green-200"
-                            : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                        }`}
-                      >
-                        {row.admin_status}
-                      </span>
-                    </td>
-
-                    <td className="px-4 py-3 text-center">
-                      <div className="flex justify-center gap-2">
-                        <button
-                          onClick={() => handleEditClick(row)}
-                          className="text-blue-600 hover:bg-blue-50 p-2 rounded"
-                        >
-                          <i className="fas fa-edit"></i>
-                        </button>
-                        <button
-                          onClick={() => handleDelete(row._id)}
-                          className="text-red-600 hover:bg-red-50 p-2 rounded"
-                        >
-                          <i className="fas fa-trash"></i>
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan="10" className="text-center py-10">
-                    <div className="text-gray-400">
-                      <i className="fas fa-plane text-4xl mb-3"></i>
-                      <p>No flights found</p>
-                    </div>
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-
-          {/* Pagination */}
-          {totalPages > 1 && (
-            <div className="flex justify-center items-center gap-2 mt-5 flex-wrap">
-              {/* Prev Button */}
-              <button
-                disabled={currentPage === 1}
-                onClick={() => setCurrentPage(currentPage - 1)}
-                className={`
-        px-3 py-1.5 text-sm rounded-lg border
-        transition-all duration-200
-        ${
-          currentPage === 1
-            ? "opacity-50 cursor-not-allowed border-gray-300 bg-white text-gray-400"
-            : "border-gray-300 bg-white hover:bg-gray-100 text-gray-700"
-        }
-      `}
-              >
-                ‹ Prev
-              </button>
-
-              {/* Page Numbers */}
-              {[...Array(totalPages)].map((_, i) => {
-                const page = i + 1;
-                const isActive = currentPage === page;
-
-                return (
-                  <button
-                    key={page}
-                    onClick={() => setCurrentPage(page)}
-                    className={`
-            px-3 py-1.5 text-sm rounded-lg border transition-all duration-200
-            ${
-              isActive
-                ? "bg-gradient-to-r from-indigo-600 to-purple-600 text-white border-transparent"
-                : "border-gray-300 bg-white text-gray-700 hover:bg-gray-100"
-            }
-          `}
-                  >
-                    {page}
-                  </button>
-                );
-              })}
-
-              {/* Next Button */}
-              <button
-                disabled={currentPage === totalPages}
-                onClick={() => setCurrentPage(currentPage + 1)}
-                className={`
-        px-3 py-1.5 text-sm rounded-lg border
-        transition-all duration-200
-        ${
-          currentPage === totalPages
-            ? "opacity-50 cursor-not-allowed border-gray-300 bg-white text-gray-400"
-            : "border-gray-300 bg-white hover:bg-gray-100 text-gray-700"
-        }
-      `}
-              >
-                Next ›
-              </button>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {showAddModal && (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center">
-          {/* Backdrop */}
-          <div
-            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-            onClick={() => setShowAddModal(false)}
-          ></div>
-
-          {/* Modal */}
-          <div
-            className="relative w-full max-w-4xl max-h-[90vh] overflow-y-auto p-6
-                    bg-white dark:bg-black
-                    border border-black dark:border-white
-                    rounded-lg shadow-2xl"
-          >
-            {/* Header */}
-            <div className="flex justify-between items-center mb-6">
-              <h3 className="text-lg font-semibold text-black dark:text-white">
-                Add New Flight
-              </h3>
-              <button
-                onClick={() => setShowAddModal(false)}
-                className="text-black dark:text-white text-xl hover:scale-110 transition"
-              >
-                ✕
-              </button>
-            </div>
-
-            <form onSubmit={handleAddFlight}>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* Flight Number */}
-                {/* <div>
-                  <label className="block text-sm font-medium mb-1 text-black dark:text-white">
-                    Flight Number *
-                  </label>
-                  <input
-                    type="text"
-                    name="flight_number"
-                    value={newFlight.flight_number}
-                    onChange={handleNewFlightInputChange}
-                    required
-                    className="w-full px-3 py-2 border rounded-md
-                         bg-white dark:bg-black
-                         text-black dark:text-white
-                         border-black dark:border-white
-                         outline-none"
-                  />
-                </div> */}
-
-                {/* Airline */}
-                <div>
-                  <label className="block text-sm font-medium mb-1 text-black dark:text-white">
-                    Airline *
-                  </label>
-                  <select
-                    name="airline"
-                    value={newFlight.airline}
-                    onChange={handleNewFlightInputChange}
-                    required
-                    className="w-full px-3 py-2 border rounded-md
-                         bg-white dark:bg-black
-                         text-black dark:text-white
-                         border-black dark:border-white
-                         outline-none"
-                  >
-                    <option value="">Select Airline</option>
-                    {Array.isArray(airlines) &&
-                      airlines
-                        .filter((airline) => airline.status === "Publish")
-                        .map((airline) => (
-                          <option key={airline._id} value={airline._id}>
-                            {airline.airline_name} ({airline.airline_code})
-                          </option>
-                        ))}
-                  </select>
-                </div>
-
-                {/* Aircraft Type */}
-                <div>
-                  <label className="block text-sm font-medium mb-1 text-black dark:text-white">
-                    Aircraft Type
-                  </label>
-                  <input
-                    type="text"
-                    name="aircraft_type"
-                    value={newFlight.aircraft_type}
-                    onChange={handleNewFlightInputChange}
-                    className="w-full px-3 py-2 border rounded-md
-                         bg-white dark:bg-black
-                         text-black dark:text-white
-                         border-black dark:border-white
-                         outline-none"
-                  />
-                </div>
-
-                {/* From Airport */}
-                <div>
-                  <label className="block text-sm font-medium mb-1 text-black dark:text-white">
-                    From Airport *
-                  </label>
-                  <select
-                    name="from_airport"
-                    value={newFlight.from_airport}
-                    onChange={handleNewFlightInputChange}
-                    required
-                    className="w-full px-3 py-2 border rounded-md
-                         bg-white dark:bg-black
-                         text-black dark:text-white
-                         border-black dark:border-white
-                         outline-none"
-                  >
-                    <option value="">Select Airport</option>
-                    {Array.isArray(airports) &&
-                      airports
-                        .filter((a) => a.status === "Publish")
-                        .map((airport) => (
-                          <option
-                            key={airport._id}
-                            value={airport._id}
-                            disabled={airport._id === newFlight.to_airport}
-                          >
-                            {airport.iata_code} - {airport.city}
-                          </option>
-                        ))}
-                  </select>
-                </div>
-
-                {/* To Airport */}
-                <div>
-                  <label className="block text-sm font-medium mb-1 text-black dark:text-white">
-                    To Airport *
-                  </label>
-                  <select
-                    name="to_airport"
-                    value={newFlight.to_airport}
-                    onChange={handleNewFlightInputChange}
-                    required
-                    className="w-full px-3 py-2 border rounded-md
-                         bg-white dark:bg-black
-                         text-black dark:text-white
-                         border-black dark:border-white
-                         outline-none"
-                  >
-                    <option value="">Select Airport</option>
-                    {Array.isArray(airports) &&
-                      airports
-                        .filter((a) => a.status === "Publish")
-                        .map((airport) => (
-                          <option
-                            key={airport._id}
-                            value={airport._id}
-                            disabled={airport._id === newFlight.from_airport}
-                          >
-                            {airport.iata_code} - {airport.city}
-                          </option>
-                        ))}
-                  </select>
-                </div>
-
-                {/* Departure Time */}
-                <div>
-                  <label className="block text-sm font-medium mb-1 text-black dark:text-white">
-                    Departure Time *
-                  </label>
-                  <input
-                    type="datetime-local"
-                    name="departure_time"
-                    value={newFlight.departure_time}
-                    onChange={handleNewFlightInputChange}
-                    required
-                    className="w-full px-3 py-2 border rounded-md
-                         bg-white dark:bg-black
-                         text-black dark:text-white
-                         border-black dark:border-white
-                         outline-none"
-                  />
-                </div>
-
-                {/* Arrival Time */}
-                <div>
-                  <label className="block text-sm font-medium mb-1 text-black dark:text-white">
-                    Arrival Time *
-                  </label>
-                  <input
-                    type="datetime-local"
-                    name="arrival_time"
-                    value={newFlight.arrival_time}
-                    onChange={handleNewFlightInputChange}
-                    required
-                    className="w-full px-3 py-2 border rounded-md
-                         bg-white dark:bg-black
-                         text-black dark:text-white
-                         border-black dark:border-white
-                         outline-none"
-                  />
-                </div>
-
-                {/* Price */}
-                <div>
-                  <label className="block text-sm font-medium mb-1 text-black dark:text-white">
-                    Price (₹) *
-                  </label>
-                  <input
-                    type="number"
-                    name="price"
-                    value={newFlight.price}
-                    onChange={handleNewFlightInputChange}
-                    required
-                    min="0"
-                    className="w-full px-3 py-2 border rounded-md
-                         bg-white dark:bg-black
-                         text-black dark:text-white
-                         border-black dark:border-white
-                         outline-none"
-                  />
-                </div>
-
-                {/* Total Seats */}
-                <div>
-                  <label className="block text-sm font-medium mb-1 text-black dark:text-white">
-                    Total Seats *
-                  </label>
-                  <input
-                    type="number"
-                    name="total_seats"
-                    value={newFlight.total_seats}
-                    onChange={handleNewFlightInputChange}
-                    required
-                    min="1"
-                    className="w-full px-3 py-2 border rounded-md
-                         bg-white dark:bg-black
-                         text-black dark:text-white
-                         border-black dark:border-white
-                         outline-none"
-                  />
-                </div>
-
-                {/* Seats Available */}
-                <div>
-                  <label className="block text-sm font-medium mb-1 text-black dark:text-white">
-                    Seats Available
-                  </label>
-                  <input
-                    type="number"
-                    name="seats_available"
-                    value={newFlight.seats_available}
-                    onChange={handleNewFlightInputChange}
-                    min="0"
-                    max={newFlight.total_seats}
-                    className="w-full px-3 py-2 border rounded-md
-                         bg-white dark:bg-black
-                         text-black dark:text-white
-                         border-black dark:border-white
-                         outline-none"
-                  />
-                </div>
-
-                {/* Status */}
-                <div>
-                  <label className="block text-sm font-medium mb-1 text-black dark:text-white">
-                    Status
-                  </label>
-                  <select
-                    name="status"
-                    value={newFlight.status}
-                    onChange={handleNewFlightInputChange}
-                    className="w-full px-3 py-2 border rounded-md
-                         bg-white dark:bg-black
-                         text-black dark:text-white
-                         border-black dark:border-white
-                         outline-none"
-                  >
-                    <option value="Scheduled">Scheduled</option>
-                    <option value="Delayed">Delayed</option>
-                    <option value="Cancelled">Cancelled</option>
-                    <option value="Completed">Completed</option>
-                  </select>
-                </div>
-
-                {/* Admin Status */}
-                <div>
-                  <label className="block text-sm font-medium mb-1 text-black dark:text-white">
-                    Admin Status
-                  </label>
-                  <select
-                    name="admin_status"
-                    value={newFlight.admin_status}
-                    onChange={handleNewFlightInputChange}
-                    className="w-full px-3 py-2 border rounded-md
-                         bg-white dark:bg-black
-                         text-black dark:text-white
-                         border-black dark:border-white
-                         outline-none"
-                  >
-                    <option value="Publish">Publish</option>
-                    <option value="Draft">Draft</option>
-                  </select>
-                </div>
-              </div>
-
-              {/* Buttons */}
-              <div className="mt-6 flex justify-end gap-3">
-                <button
-                  type="button"
-                  onClick={() => setShowAddModal(false)}
-                  className="px-4 py-2 border rounded-md
-                       border-black dark:border-white
-                       text-black dark:text-white
-                       hover:bg-black hover:text-white
-                       dark:hover:bg-white dark:hover:text-black
-                       transition"
-                >
-                  Cancel
-                </button>
-
-                <button
-                  type="submit"
-                  className="px-4 py-2 rounded-md
-                       bg-blue-600 dark:bg-blue-500
-                       text-white dark:text-black
-                       hover:opacity-80 transition"
-                >
-                  Add Flight
-                </button>
-              </div>
-            </form>
+    <div>
+      {loading && (
+        <div className="users-loading-overlay">
+          <div className="users-loading-box">
+            <div className="users-spinner" />
+            <p>Loading...</p>
           </div>
         </div>
       )}
 
-      {/* Edit Flight Modal */}
-      {showEditModal && currentFlight && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto">
-          {/* Backdrop */}
-          <div
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm"
-            onClick={() => setShowEditModal(false)}
-          ></div>
+      {notification.show && (
+        <div
+          className={`users-notification ${notification.type === "error" ? "users-notification-error" : "users-notification-success"}`}
+        >
+          {notification.message}
+        </div>
+      )}
 
-          {/* Modal Box */}
+      {showAdd && (
+        <FlightForm
+          title="Add New Flight"
+          onSubmit={handleCreate}
+          {...commonFormProps}
+        />
+      )}
+      {showEdit && (
+        <FlightForm
+          title="Edit Flight"
+          onSubmit={handleUpdate}
+          {...commonFormProps}
+        />
+      )}
+
+      {/* View Modal */}
+      {showView && selectedFlight && (
+        <div className="pax-modal-overlay" onClick={() => setShowView(false)}>
           <div
-            className="relative z-50 w-full max-w-lg mx-4 rounded-2xl shadow-2xl p-6
-                    bg-white dark:bg-black
-                    border border-black dark:border-white
-                    animate-fadeIn"
+            className="pax-modal pax-modal-lg"
+            onClick={(e) => e.stopPropagation()}
           >
-            {/* Header */}
-            <div className="flex justify-between items-center mb-6">
-              <h3 className="text-xl font-semibold text-black dark:text-white">
-                Edit Flight {currentFlight.flight_number}
-              </h3>
-
+            <div className="pax-modal-header">
+              <h2 className="pax-modal-title">Flight Details</h2>
               <button
-                onClick={() => setShowEditModal(false)}
-                className="text-black dark:text-white text-xl transition hover:scale-110"
+                className="pax-modal-close"
+                onClick={() => setShowView(false)}
               >
-                ✕
+                <X size={20} />
               </button>
             </div>
-
-            {/* Form */}
-            <form onSubmit={handleEditSubmit}>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* Flight Number */}
-                <div>
-                  <label className="block text-sm font-medium mb-1 text-black dark:text-white">
-                    Flight Number
-                  </label>
-                  <input
-                    type="text"
-                    name="flight_number"
-                    value={editFlight.flight_number}
-                    onChange={handleEditInputChange}
-                    required
-                    className="w-full px-3 py-2 rounded-lg border
-                         bg-white dark:bg-black
-                         text-black dark:text-white
-                         border-black dark:border-white
-                         outline-none"
-                  />
-                </div>
-
-                {/* Status */}
-                <div>
-                  <label className="block text-sm font-medium mb-1 text-black dark:text-white">
-                    Status
-                  </label>
-                  <select
-                    name="status"
-                    value={editFlight.status}
-                    onChange={handleEditInputChange}
-                    className="w-full px-3 py-2 rounded-lg border
-                         bg-white dark:bg-black
-                         text-black dark:text-white
-                         border-black dark:border-white
-                         outline-none"
-                  >
-                    <option value="Scheduled">Scheduled</option>
-                    <option value="Delayed">Delayed</option>
-                    <option value="Cancelled">Cancelled</option>
-                    <option value="Completed">Completed</option>
-                  </select>
-                </div>
-
-                {/* Admin Status */}
-                <div>
-                  <label className="block text-sm font-medium mb-1 text-black dark:text-white">
-                    Admin Status
-                  </label>
-                  <select
-                    name="admin_status"
-                    value={editFlight.admin_status}
-                    onChange={handleEditInputChange}
-                    className="w-full px-3 py-2 rounded-lg border
-                         bg-white dark:bg-black
-                         text-black dark:text-white
-                         border-black dark:border-white
-                         outline-none"
-                  >
-                    <option value="Publish">Publish</option>
-                    <option value="Draft">Draft</option>
-                  </select>
-                </div>
-
-                {/* Price */}
-                <div>
-                  <label className="block text-sm font-medium mb-1 text-black dark:text-white">
-                    Price (₹) 
-                  </label>
-                  <input
-                    type="number"
-                    name="price"
-                    value={editFlight.price}
-                    onChange={handleEditInputChange}
-                    min="0"
-                    required
-                    className="w-full px-3 py-2 rounded-lg border
-                         bg-white dark:bg-black
-                         text-black dark:text-white
-                         border-black dark:border-white
-                         outline-none"
-                  />
-                </div>
-
-                {/* Seats Available */}
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-medium mb-1 text-black dark:text-white">
-                    Seats Available
-                  </label>
-                  <input
-                    type="number"
-                    name="seats_available"
-                    value={editFlight.seats_available}
-                    onChange={handleEditInputChange}
-                    min="0"
-                    max={currentFlight.total_seats}
-                    className="w-full px-3 py-2 rounded-lg border
-                         bg-white dark:bg-black
-                         text-black dark:text-white
-                         border-black dark:border-white
-                         outline-none"
-                  />
-                </div>
+            <div className="pax-modal-body">
+              <div className="pax-detail-grid">
+                {[
+                  ["Flight Number", selectedFlight.flight_number],
+                  ["Airline", selectedFlight.airline?.airline_name],
+                  ["Aircraft", selectedFlight.aircraft_type],
+                  [
+                    "From",
+                    `${selectedFlight.from_airport?.airport_code} - ${selectedFlight.from_airport?.city}`,
+                  ],
+                  [
+                    "To",
+                    `${selectedFlight.to_airport?.airport_code} - ${selectedFlight.to_airport?.city}`,
+                  ],
+                  ["Departure", formatTime(selectedFlight.departure_time)],
+                  ["Arrival", formatTime(selectedFlight.arrival_time)],
+                  ["Duration", formatDuration(selectedFlight.duration)],
+                  [
+                    "Price",
+                    `₹${selectedFlight.price?.toLocaleString("en-IN")}`,
+                  ],
+                  ["Seats Available", selectedFlight.seats_available],
+                  ["Total Seats", selectedFlight.total_seats],
+                  ["Status", selectedFlight.status],
+                  ["Publish Status", selectedFlight.admin_status],
+                ].map(([label, value]) => (
+                  <div className="pax-detail-row" key={label}>
+                    <span className="pax-detail-label">{label}</span>
+                    <span className="pax-detail-value">{value || "—"}</span>
+                  </div>
+                ))}
               </div>
+            </div>
+            <div className="pax-modal-footer">
+              <button className="btn-export" onClick={() => setShowView(false)}>
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
-              {/* Buttons */}
-              <div className="mt-6 flex justify-end gap-3">
-                <button
-                  type="button"
-                  onClick={() => setShowEditModal(false)}
-                  className="px-4 py-2 rounded-lg border
-                       border-black dark:border-white
-                       text-black dark:text-white
-                       hover:bg-black hover:text-white
-                       dark:hover:bg-white dark:hover:text-black
-                       transition"
-                >
-                  Cancel
-                </button>
+      {/* Page Header */}
+      <div className="admin-page-header">
+        <div>
+          <h1 className="admin-page-title">Flight Management</h1>
+          <p className="admin-page-subtitle">
+            Total: <strong>{totalCount}</strong> flights
+          </p>
+        </div>
+        <div className="admin-header-actions">
+          {/* Export Format Select */}
+          <select
+            className="btn-export-select"
+            value={exportFormat}
+            onChange={(e) => setExportFormat(e.target.value)}
+          >
+            <option value="csv">CSV</option>
+            <option value="json">JSON</option>
+          </select>
 
-                <button
-                  type="submit"
-                  className="px-4 py-2 bg-blue-600 dark:bg-blue-500
-                       text-white dark:text-black
-                       rounded-lg transition shadow-md
-                       hover:opacity-80"
-                >
-                  Update Flight
-                </button>
-              </div>
-            </form>
+          {/* Export Button */}
+          <button className="btn-export" onClick={exportFlights}>
+            <Download size={16} /> Export
+          </button>
+
+          {/* Add Flight Button */}
+          <button
+            className="btn-add-user"
+            onClick={() => {
+              setFormData(EMPTY_FORM);
+              setShowAdd(true);
+            }}
+          >
+            <Plus size={16} /> Add Flight
+          </button>
+        </div>
+      </div>
+
+      {/* Filters */}
+      <div className="users-filter-card">
+        <div className="contacts-filter-grid">
+          <div
+            className="admin-search-wrapper"
+            style={{ gridColumn: "span 2" }}
+          >
+            <Search size={16} className="admin-search-icon" />
+            <input
+              type="text"
+              placeholder="Search by flight number..."
+              value={query}
+              onChange={(e) => {
+                setQuery(e.target.value);
+                setCurrentPage(1);
+              }}
+              className="admin-input admin-input-search"
+            />
+          </div>
+          <select
+            className="admin-select"
+            value={statusFilter}
+            onChange={(e) => {
+              setStatusFilter(e.target.value);
+              setCurrentPage(1);
+            }}
+          >
+            <option value="all">All Status</option>
+            <option value="Scheduled">Scheduled</option>
+            <option value="Delayed">Delayed</option>
+            <option value="Cancelled">Cancelled</option>
+            <option value="Completed">Completed</option>
+          </select>
+        </div>
+      </div>
+
+      {/* Bulk Actions Bar */}
+      {selectedFlights.length > 0 && (
+        <div className="users-bulk-bar">
+          <span className="users-bulk-count">
+            {selectedFlights.length} flight(s) selected
+          </span>
+          <div className="users-bulk-actions">
+            <button
+              className="users-bulk-btn users-bulk-active"
+              onClick={() => handleBulkStatus("Publish")}
+            >
+              Set Publish
+            </button>
+            <button
+              className="users-bulk-btn users-bulk-clear"
+              onClick={() => handleBulkStatus("Draft")}
+            >
+              Set Draft
+            </button>
+            <button
+              className="users-bulk-btn users-bulk-blocked"
+              onClick={handleBulkDelete}
+            >
+              Delete Selected
+            </button>
+            <button
+              className="users-bulk-btn users-bulk-clear"
+              onClick={() => {
+                setSelectedFlights([]);
+                setSelectAll(false);
+              }}
+            >
+              Clear
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Table */}
+      <div className="admin-table-container">
+        <div className="admin-table-scroll">
+          <table className="admin-table">
+            <thead>
+              <tr>
+                {/* Select All Checkbox */}
+                <th>
+                  <button
+                    onClick={handleSelectAll}
+                    className="passengers-check-btn"
+                  >
+                    {selectAll ? (
+                      <CheckSquare size={16} style={{ color: "#667eea" }} />
+                    ) : (
+                      <Square
+                        size={16}
+                        style={{ color: "var(--text-secondary)" }}
+                      />
+                    )}
+                  </button>
+                </th>
+                <th>Flight</th>
+                <th>Airline</th>
+                <th>Route</th>
+                <th>Departure</th>
+                <th>Duration</th>
+                <th>Price</th>
+                <th>Seats</th>
+                <th>Status</th>
+                <th>Publish</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {flights.length === 0 ? (
+                <tr>
+                  <td colSpan={11} className="admin-table-empty">
+                    <Plane size={48} className="admin-table-empty-icon" />
+                    <p>No flights found</p>
+                  </td>
+                </tr>
+              ) : (
+                flights.map((f) => {
+                  const isSelected = selectedFlights.includes(f._id);
+                  return (
+                    <tr
+                      key={f._id}
+                      style={
+                        isSelected
+                          ? { background: "rgba(102,126,234,0.08)" }
+                          : {}
+                      }
+                    >
+                      {/* Row Checkbox */}
+                      <td>
+                        <button
+                          onClick={() => toggleFlightSelection(f._id)}
+                          className="passengers-check-btn"
+                        >
+                          {isSelected ? (
+                            <CheckSquare
+                              size={16}
+                              style={{ color: "#667eea" }}
+                            />
+                          ) : (
+                            <Square
+                              size={16}
+                              style={{ color: "var(--text-secondary)" }}
+                            />
+                          )}
+                        </button>
+                      </td>
+                      <td className="cell-accent">{f.flight_number}</td>
+                      <td>{f.airline?.airline_name || "—"}</td>
+                      <td className="cell-muted">
+                        {f.from_airport?.airport_code} →{" "}
+                        {f.to_airport?.airport_code}
+                      </td>
+                      <td
+                        className="cell-muted"
+                        style={{ fontSize: "0.75rem" }}
+                      >
+                        {formatTime(f.departure_time)}
+                      </td>
+                      <td>{formatDuration(f.duration)}</td>
+                      <td className="cell-success">
+                        ₹{f.price?.toLocaleString("en-IN")}
+                      </td>
+                      <td>
+                        <span style={{ fontSize: "0.8rem" }}>
+                          {f.seats_available}/{f.total_seats}
+                        </span>
+                      </td>
+                      <td>
+                        <span
+                          className={STATUS_CLASS[f.status] || "badge-pending"}
+                        >
+                          {f.status}
+                        </span>
+                      </td>
+                      <td>
+                        <button
+                          onClick={() => handleToggle(f._id)}
+                          style={{
+                            background: "none",
+                            border: "none",
+                            cursor: "pointer",
+                          }}
+                        >
+                          {f.admin_status === "Publish" ? (
+                            <ToggleRight size={22} color="#22c55e" />
+                          ) : (
+                            <ToggleLeft size={22} color="#94a3b8" />
+                          )}
+                        </button>
+                      </td>
+                      <td>
+                        <div className="cell-actions">
+                          <button
+                            className="users-action-btn users-action-view"
+                            title="View"
+                            onClick={() => {
+                              setSelectedFlight(f);
+                              setShowView(true);
+                            }}
+                          >
+                            <Eye size={14} />
+                          </button>
+                          <button
+                            className="users-action-btn users-action-edit"
+                            title="Edit"
+                            onClick={() => openEdit(f)}
+                          >
+                            <Edit2 size={14} />
+                          </button>
+                          <button
+                            className="users-action-btn users-action-delete"
+                            title="Delete"
+                            onClick={() => handleDelete(f._id)}
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="admin-pagination">
+          <p className="admin-pagination-info">
+            Showing {(currentPage - 1) * perPage + 1}–
+            {Math.min(currentPage * perPage, totalCount)} of {totalCount}
+          </p>
+          <div className="admin-pagination-buttons">
+            <button
+              className="pagination-btn"
+              disabled={currentPage === 1}
+              onClick={() => setCurrentPage((p) => p - 1)}
+            >
+              <ChevronLeft size={16} /> Prev
+            </button>
+            {[...Array(totalPages)].map((_, i) => (
+              <button
+                key={i + 1}
+                onClick={() => setCurrentPage(i + 1)}
+                className={`pagination-btn ${currentPage === i + 1 ? "pagination-btn-active" : ""}`}
+              >
+                {i + 1}
+              </button>
+            ))}
+            <button
+              className="pagination-btn"
+              disabled={currentPage === totalPages}
+              onClick={() => setCurrentPage((p) => p + 1)}
+            >
+              Next <ChevronRight size={16} />
+            </button>
           </div>
         </div>
       )}
@@ -998,4 +1060,4 @@ const Flights = () => {
   );
 };
 
-export default Flights;
+export default AdminFlights;

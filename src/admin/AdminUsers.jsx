@@ -484,14 +484,14 @@ const AdminUsers = () => {
               <div className="admin-modal-footer">
                 <button
                   type="button"
-                  className="btn-secondary"
+                  className="btn-export"
                   onClick={closeForm}
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="btn-primary"
+                  className="btn-add-user"
                   disabled={loading}
                 >
                   <Save size={16} />
@@ -546,7 +546,7 @@ const AdminUsers = () => {
             </div>
             <div className="admin-modal-footer">
               <button
-                className="btn-secondary"
+                className="btn-export"
                 onClick={() => setViewUser(null)}
               >
                 Close

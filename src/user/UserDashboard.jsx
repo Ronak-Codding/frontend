@@ -12,7 +12,7 @@ import {
   Smartphone,
   Building2,
   Wallet,
-  IndianRupee, //Yeh add karo
+  IndianRupee, 
 } from "lucide-react";
 import "./UserLayout.css";
 import "./UserPages.css";
@@ -23,7 +23,6 @@ const UserDashboard = () => {
   const [loading, setLoading] = useState(true);
   const user = JSON.parse(localStorage.getItem("user") || "{}");
 
-  // Display name fix
   const displayName =
     user.firstName || user.fullname || user.name || "Traveller";
 
@@ -32,11 +31,9 @@ const UserDashboard = () => {
       setLoading(true);
       try {
         const [bRes, pRes] = await Promise.all([
-          //  Bookings - email se
           fetch(
             `http://localhost:5000/api/booking/my-bookings/${encodeURIComponent(user.email)}`,
           ),
-          //  Payments - sahi URL + email filter
           fetch(
             `http://localhost:5000/api/payment?email=${encodeURIComponent(user.email)}&limit=100`,
           ),
@@ -65,7 +62,7 @@ const UserDashboard = () => {
     (b) => b.status === "cancelled" || b.status === "Cancelled",
   ).length;
 
-  //  Sirf successful payments ka total
+  //   successful payments  total
   const totalSpent = payments
     .filter((p) => p.status === "success")
     .reduce((s, p) => s + (p.amount || 0), 0);

@@ -6,7 +6,7 @@ export default function Breadcrumb({ title }) {
       className="relative h-[400px] flex items-center justify-center text-white"
       style={{
         backgroundImage:
-          "url('https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=1920&q=80')",
+          "url( 'https://images.unsplash.com/photo-1507812984078-917a274065be?w=1920&q=80')",
         backgroundSize: "cover",
         backgroundPosition: "center",
       }}

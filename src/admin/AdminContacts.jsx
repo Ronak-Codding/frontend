@@ -701,7 +701,7 @@ const AdminContacts = () => {
 
             <div className="admin-modal-footer">
               <button
-                className="btn-secondary"
+                className="btn-export"
                 onClick={() => setViewContact(null)}
               >
                 Close

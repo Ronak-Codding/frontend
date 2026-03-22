@@ -4,7 +4,7 @@ import { Menu, X, Plane } from "lucide-react";
 
 const navLinks = [
   { label: "Home", href: "/" },
-  { label: "Flight Search", href: "#flight-search" },
+  { label: "Flight Search", href: "/user/search" },
   { label: "About", href: "/about" },
   { label: "FAQs", href: "/faqs" },
   { label: "Contact", href: "/contact" },

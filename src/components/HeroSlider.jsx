@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const slides = [
   {
@@ -89,6 +90,7 @@ const faqs = [
 export default function HeroSlider() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -166,11 +168,7 @@ export default function HeroSlider() {
         >
           <button
             className="group relative overflow-hidden rounded-full bg-primary px-8 py-4 text-sm font-semibold uppercase tracking-wider text-primary-foreground transition-all hover:shadow-[0_0_30px_rgba(212,168,83,0.4)]"
-            onClick={() => {
-              document
-                .getElementById("flight-search")
-                ?.scrollIntoView({ behavior: "smooth" });
-            }}
+            onClick={() => navigate("/user/search")}
           >
             <span className="relative z-10">Book Your Flight</span>
             <div className="absolute inset-0 -translate-x-full bg-white/20 transition-transform group-hover:translate-x-full" />
@@ -225,7 +223,7 @@ export default function HeroSlider() {
           />
         ))}
       </div>
-      
+
       {/* Decorative Elements */}
       <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-background to-transparent" />
       <div className="absolute left-0 top-0 h-full w-32 bg-gradient-to-r from-background/50 to-transparent" />

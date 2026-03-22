@@ -286,7 +286,7 @@ const AdminBookings = () => {
             </div>
             <div className="pax-modal-footer">
               <button
-                className="btn-secondary"
+                className="btn-export"
                 onClick={() => setShowViewModal(false)}
               >
                 Close
@@ -322,9 +322,9 @@ const AdminBookings = () => {
           </button>
 
           {/* Add Booking Button */}
-          <button className="btn-add-user" onClick={() => setShowAdd(true)}>
+          {/* <button className="btn-add-user" onClick={() => setShowAdd(true)}>
             <Plus size={16} /> Add Booking
-          </button>
+          </button> */}
         </div>
       </div>
 

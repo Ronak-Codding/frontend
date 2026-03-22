@@ -1,4 +1,5 @@
 import { ArrowRight } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const destinations = [
   {
@@ -45,7 +46,10 @@ const destinations = [
   },
 ];
 
+
+
 export default function Destinations() {
+  const navigate = useNavigate();
   return (
     <section id="destinations" className="bg-background px-4 py-20 lg:py-28">
       <div className="mx-auto max-w-7xl">
@@ -103,7 +107,7 @@ export default function Destinations() {
 
                 {/* Hover Overlay */}
                 <div className="absolute inset-0 flex items-center justify-center bg-primary/20 opacity-0 transition-opacity group-hover:opacity-100">
-                  <span className="rounded-full border-2 border-white px-4 sm:px-6 py-2 sm:py-3 text-xs sm:text-sm font-semibold uppercase tracking-wider text-white">
+                  <span className="rounded-full border-2 border-white px-4 sm:px-6 py-2 sm:py-3 text-xs sm:text-sm font-semibold uppercase tracking-wider text-white" onClick={() => navigate("/user/search")}>
                     Explore
                   </span>
                 </div>

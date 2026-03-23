@@ -23,7 +23,7 @@ import UserRoute from "./components/UserRoute";
 import HomePage from "./pages/Home";
 import Login from "./pages/Login";
 import ForgotPassword from "./pages/ForgotPassword";
-import ResetPassword from "./pages/ResetPassword";
+// import ResetPassword from "./pages/ResetPassword";
 import Register from "./pages/Register";
 import PrivacyPolicy from "./pages/Privacy";
 import TermsOfService from "./pages/TermsOfService";
@@ -50,7 +50,7 @@ export default function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
-        <Route path="/reset-password/:token" element={<ResetPassword />} />
+        {/* <Route path="/reset-password/:token" element={<ResetPassword />} /> */}
         <Route path="/faqs" element={<FAQs />} />
         <Route path="/about" element={<About />} />
         <Route path="/contact" element={<Contact />} />

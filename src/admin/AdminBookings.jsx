@@ -45,11 +45,8 @@ const AdminBookings = () => {
   });
   const [statusFilter, setStatusFilter] = useState("all");
   const [dateRange, setDateRange] = useState({ start: "", end: "" });
-
   const [selectedBookings, setSelectedBookings] = useState([]);
   const [selectAll, setSelectAll] = useState(false);
-
-  // ── Export format state ──
   const [exportFormat, setExportFormat] = useState("csv");
 
   const showNotification = (message, type = "success") => {
@@ -107,7 +104,6 @@ const AdminBookings = () => {
     }
   };
 
-  // ── Checkbox handlers ──
   const handleSelectAll = () => {
     if (selectAll) {
       setSelectedBookings([]);
@@ -124,7 +120,6 @@ const AdminBookings = () => {
     );
   };
 
-  // ── Bulk Delete ──
   const handleBulkDelete = async () => {
     if (!window.confirm(`${selectedBookings.length} bookings delete karo?`))
       return;
@@ -148,7 +143,6 @@ const AdminBookings = () => {
     }
   };
 
-  // ── Bulk Status Update ──
   const handleBulkStatus = async (status) => {
     setLoading(true);
     try {
@@ -174,7 +168,6 @@ const AdminBookings = () => {
     }
   };
 
-  // ── Export (CSV + JSON) ──
   const exportBookings = async () => {
     if (exportFormat === "csv") {
       try {
@@ -190,7 +183,6 @@ const AdminBookings = () => {
         showNotification("Export failed", "error");
       }
     } else {
-      // JSON export — current fetched bookings data
       const blob = new Blob([JSON.stringify(bookings, null, 2)], {
         type: "application/json",
       });
@@ -207,7 +199,6 @@ const AdminBookings = () => {
 
   return (
     <div>
-      {/* Loading */}
       {loading && (
         <div className="users-loading-overlay">
           <div className="users-loading-box">
@@ -217,7 +208,6 @@ const AdminBookings = () => {
         </div>
       )}
 
-      {/* Notification */}
       {notification.show && (
         <div
           className={`users-notification ${notification.type === "error" ? "users-notification-error" : "users-notification-success"}`}
@@ -226,7 +216,7 @@ const AdminBookings = () => {
         </div>
       )}
 
-      {/* View Modal */}
+      {/* ── View Modal ── */}
       {showViewModal && viewBooking && (
         <div
           className="pax-modal-overlay"
@@ -265,12 +255,15 @@ const AdminBookings = () => {
                   ["Phone", viewBooking.phone],
                   ["Flight", viewBooking.flightNumber],
                   ["Route", `${viewBooking.from} → ${viewBooking.to}`],
+                  ["Date", viewBooking.date || "—"],
                   ["Seats", viewBooking.seats?.join(", ") || "—"],
-                  ["Passengers", viewBooking.passengersCount],
+                  ["Total Passengers", viewBooking.passengersCount],
                   [
                     "Amount",
                     `₹${viewBooking.totalPrice?.toLocaleString("en-IN")}`,
                   ],
+                  ["Payment Method", viewBooking.paymentMethod || "—"],
+                  ["Transaction ID", viewBooking.transactionId || "—"],
                   ["Status", viewBooking.status],
                   [
                     "Booked On",
@@ -283,6 +276,78 @@ const AdminBookings = () => {
                   </div>
                 ))}
               </div>
+
+              {/* ── Passengers List ── */}
+              {viewBooking.passengers?.length > 0 && (
+                <div style={{ marginTop: "1.5rem" }}>
+                  <p
+                    style={{
+                      fontSize: "0.75rem",
+                      fontWeight: 700,
+                      textTransform: "uppercase",
+                      color: "var(--text-secondary)",
+                      marginBottom: "0.75rem",
+                    }}
+                  >
+                    Passenger Details
+                  </p>
+                  {viewBooking.passengers.map((p, i) => (
+                    <div
+                      key={i}
+                      style={{
+                        border: "1px solid var(--border)",
+                        borderRadius: "0.75rem",
+                        padding: "0.75rem 1rem",
+                        marginBottom: "0.5rem",
+                        background: "var(--card-bg, rgba(255,255,255,0.03))",
+                      }}
+                    >
+                      <p
+                        style={{
+                          fontWeight: 600,
+                          fontSize: "0.85rem",
+                          marginBottom: "0.4rem",
+                          color: "var(--text-primary)",
+                        }}
+                      >
+                        Passenger {i + 1} — {p.fullName || "—"}
+                      </p>
+                      <div
+                        style={{
+                          display: "grid",
+                          gridTemplateColumns: "1fr 1fr",
+                          gap: "0.25rem 1rem",
+                          fontSize: "0.8rem",
+                          color: "var(--text-secondary)",
+                        }}
+                      >
+                        <span>
+                          Seat: <strong>{p.seat || "—"}</strong>
+                        </span>
+                        <span>
+                          Gender: <strong>{p.gender || "—"}</strong>
+                        </span>
+                        <span>
+                          Passport: <strong>{p.passportNumber || "—"}</strong>
+                        </span>
+                        <span>
+                          Nationality: <strong>{p.nationality || "—"}</strong>
+                        </span>
+                        {p.email && (
+                          <span>
+                            Email: <strong>{p.email}</strong>
+                          </span>
+                        )}
+                        {p.phone && (
+                          <span>
+                            Phone: <strong>{p.phone}</strong>
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
             <div className="pax-modal-footer">
               <button
@@ -296,17 +361,15 @@ const AdminBookings = () => {
         </div>
       )}
 
-      {/* Page Header */}
+      {/* ── Page Header ── */}
       <div className="admin-page-header">
         <div>
           <h1 className="admin-page-title">Bookings Management</h1>
           <p className="admin-page-subtitle">
-            Total: <strong>{totalCount}</strong> | Filtered:{" "}
-            <strong>{totalCount}</strong>
+            Total: <strong>{totalCount}</strong>
           </p>
         </div>
         <div className="admin-header-actions">
-          {/* Export Format Select */}
           <select
             className="btn-export-select"
             value={exportFormat}
@@ -315,20 +378,16 @@ const AdminBookings = () => {
             <option value="csv">CSV</option>
             <option value="json">JSON</option>
           </select>
-
-          {/* Export Button */}
           <button className="btn-export" onClick={exportBookings}>
             <Download size={16} /> Export
           </button>
-
-          {/* Add Booking Button */}
-          {/* <button className="btn-add-user" onClick={() => setShowAdd(true)}>
+          <button className="btn-add-user" onClick={() => setShowAdd(true)}>
             <Plus size={16} /> Add Booking
-          </button> */}
+          </button>
         </div>
       </div>
 
-      {/* Filters */}
+      {/* ── Filters ── */}
       <div className="users-filter-card">
         <div className="contacts-filter-grid">
           <div
@@ -381,7 +440,7 @@ const AdminBookings = () => {
         </div>
       </div>
 
-      {/* Bulk Actions Bar */}
+      {/* ── Bulk Actions ── */}
       {selectedBookings.length > 0 && (
         <div className="users-bulk-bar">
           <span className="users-bulk-count">
@@ -396,8 +455,10 @@ const AdminBookings = () => {
                 padding: "0.4rem 0.8rem",
                 borderRadius: "0.5rem",
                 border: "1px solid var(--border)",
-                background: "white",
+                background: "var(--card-bg, #1e2535)",
+                color: "var(--text-primary, #e2e8f0)",
                 fontSize: "0.8rem",
+                cursor: "pointer",
               }}
             >
               <option value="" disabled>
@@ -426,13 +487,12 @@ const AdminBookings = () => {
         </div>
       )}
 
-      {/* Table */}
+      {/* ── Table ── */}
       <div className="admin-table-container">
         <div className="admin-table-scroll">
           <table className="admin-table">
             <thead>
               <tr>
-                {/* Select All Checkbox */}
                 <th>
                   <button
                     onClick={handleSelectAll}
@@ -449,11 +509,13 @@ const AdminBookings = () => {
                   </button>
                 </th>
                 <th>Booking Ref</th>
-                <th>User</th>
+                <th>Passenger</th>
                 <th>Email</th>
                 <th>Flight</th>
                 <th>Route</th>
-                <th>Passengers</th>
+                <th>Date</th>
+                <th>Seats</th>
+                <th>Pax</th>
                 <th>Amount</th>
                 <th>Status</th>
                 <th>Booked On</th>
@@ -463,7 +525,7 @@ const AdminBookings = () => {
             <tbody>
               {bookings.length === 0 ? (
                 <tr>
-                  <td colSpan={11} className="admin-table-empty">
+                  <td colSpan={13} className="admin-table-empty">
                     <BookOpen size={48} className="admin-table-empty-icon" />
                     <p>No bookings found</p>
                   </td>
@@ -480,7 +542,6 @@ const AdminBookings = () => {
                           : {}
                       }
                     >
-                      {/* Row Checkbox */}
                       <td>
                         <button
                           onClick={() => toggleBookingSelection(b._id)}
@@ -501,9 +562,7 @@ const AdminBookings = () => {
                       </td>
                       <td className="cell-accent">{b.bookingRef}</td>
                       <td>
-                        <div className="admin-avatar-info">
-                          <p className="admin-avatar-name">{b.userName}</p>
-                        </div>
+                        <p className="admin-avatar-name">{b.userName}</p>
                       </td>
                       <td
                         className="cell-muted"
@@ -518,6 +577,19 @@ const AdminBookings = () => {
                       </td>
                       <td className="cell-muted">
                         {b.from} → {b.to}
+                      </td>
+                      <td
+                        className="cell-muted"
+                        style={{ fontSize: "0.75rem" }}
+                      >
+                        {b.date || "—"}
+                      </td>
+                      {/* ✅ Seats column — new model se aata hai */}
+                      <td
+                        className="cell-muted"
+                        style={{ fontSize: "0.75rem" }}
+                      >
+                        {b.seats?.join(", ") || "—"}
                       </td>
                       <td>
                         <span className="booking-passengers-badge">
@@ -576,7 +648,7 @@ const AdminBookings = () => {
         </div>
       </div>
 
-      {/* Pagination */}
+      {/* ── Pagination ── */}
       {totalPages > 1 && (
         <div className="admin-pagination">
           <p className="admin-pagination-info">
@@ -610,7 +682,7 @@ const AdminBookings = () => {
         </div>
       )}
 
-      {/* Add Booking Modal */}
+      {/* ── Add Booking Modal ── */}
       {showAdd && (
         <AddBookingModal
           onClose={() => setShowAdd(false)}

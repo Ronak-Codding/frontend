@@ -26,6 +26,7 @@ const emptyPassenger = {
   passportExpiry: "",
   email: "",
   phone: "",
+  seat: "", // ✅ New field — individual seat per passenger
 };
 
 const AddBookingModal = ({ onClose, onSuccess }) => {
@@ -62,13 +63,10 @@ const AddBookingModal = ({ onClose, onSuccess }) => {
         `http://localhost:5000/api/flights/search?from=${searchParams.from}&to=${searchParams.to}&date=${searchParams.date}&passengers=${searchParams.passengers}`,
       );
       const data = await res.json();
-
       if (!res.ok) throw new Error(data.error || "Search failed");
-
       const flights = data.data || [];
-      if (flights.length === 0) {
+      if (flights.length === 0)
         setError("Koi flight nahi mili. Alag date ya route try karo.");
-      }
       setFlightResults(flights);
     } catch (err) {
       setError(err.message || "Flight search failed");
@@ -80,8 +78,6 @@ const AddBookingModal = ({ onClose, onSuccess }) => {
   // ── Flight Select ──
   const handleSelectFlight = (flight) => {
     setSelectedFlight(flight);
-
-    // Passengers count ke hisaab se forms set karo
     const count = parseInt(searchParams.passengers) || 1;
     setPassengers(Array.from({ length: count }, () => ({ ...emptyPassenger })));
   };
@@ -108,6 +104,7 @@ const AddBookingModal = ({ onClose, onSuccess }) => {
       flightNumber: seg ? `${seg.carrierCode}${seg.number}` : "—",
       from: seg?.departure?.iataCode || searchParams.from,
       to: seg?.arrival?.iataCode || searchParams.to,
+      date: searchParams.date,
       departure: seg?.departure?.at
         ? new Date(seg.departure.at).toLocaleTimeString("en-IN", {
             hour: "2-digit",
@@ -147,13 +144,18 @@ const AddBookingModal = ({ onClose, onSuccess }) => {
 
     try {
       const info = getFlightInfo(selectedFlight);
+
+      // ✅ Seats array — har passenger ka individual seat
+      const seats = passengers.map((p) => p.seat || "");
+
       const body = {
         flightNumber: info.flightNumber,
         from: info.from,
         to: info.to,
-        seats: [],
+        date: info.date, // ✅ date save hogi
+        seats, // ✅ seats array ["12A","13B"]
         totalPrice: parseFloat(info.price) || 0,
-        passengers,
+        passengers, // ✅ full passenger objects
       };
 
       const res = await fetch("http://localhost:5000/api/booking/", {
@@ -191,7 +193,6 @@ const AddBookingModal = ({ onClose, onSuccess }) => {
           </button>
         </div>
 
-        {/* Error */}
         {error && (
           <div
             className="booking-error-msg"
@@ -298,7 +299,7 @@ const AddBookingModal = ({ onClose, onSuccess }) => {
                     <div
                       className="users-spinner"
                       style={{ width: 16, height: 16, borderWidth: 2 }}
-                    />
+                    />{" "}
                     Searching...
                   </>
                 ) : (
@@ -308,7 +309,7 @@ const AddBookingModal = ({ onClose, onSuccess }) => {
                 )}
               </button>
 
-              {/* ── Flight Results ── */}
+              {/* ── Step 2: Flight Results ── */}
               {flightResults.length > 0 && (
                 <>
                   <h3
@@ -408,7 +409,7 @@ const AddBookingModal = ({ onClose, onSuccess }) => {
                 </>
               )}
 
-              {/* ── Step 3: Passengers ── */}
+              {/* ── Step 3: Passenger Details ── */}
               {selectedFlight && (
                 <>
                   <div
@@ -523,9 +524,9 @@ const AddBookingModal = ({ onClose, onSuccess }) => {
                             className="pax-form-select"
                           >
                             <option value="">Select</option>
-                            <option value="male">Male</option>
-                            <option value="female">Female</option>
-                            <option value="other">Other</option>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                            <option value="Other">Other</option>
                           </select>
                         </div>
                         <div className="pax-form-group">
@@ -607,6 +608,25 @@ const AddBookingModal = ({ onClose, onSuccess }) => {
                             className="pax-form-input"
                           />
                         </div>
+
+                        {/* ✅ Seat field — har passenger ke liye */}
+                        <div className="pax-form-group">
+                          <label className="pax-form-label">Seat Number</label>
+                          <input
+                            type="text"
+                            value={p.seat}
+                            onChange={(e) =>
+                              handlePassengerChange(
+                                index,
+                                "seat",
+                                e.target.value.toUpperCase(),
+                              )
+                            }
+                            placeholder="e.g. 12A"
+                            className="pax-form-input"
+                          />
+                        </div>
+
                         {index === 0 && (
                           <>
                             <div className="pax-form-group">
@@ -668,7 +688,7 @@ const AddBookingModal = ({ onClose, onSuccess }) => {
                   <div
                     className="users-spinner"
                     style={{ width: 16, height: 16, borderWidth: 2 }}
-                  />
+                  />{" "}
                   Processing...
                 </>
               ) : (

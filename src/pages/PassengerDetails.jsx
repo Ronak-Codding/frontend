@@ -24,7 +24,7 @@ const COUNTRIES = [
   "Japan",
 ];
 
-function PassengerForm({ index, data, onChange }) {
+function PassengerForm({ index, data, onChange, seat }) {
   const handleChange = (field, value) => {
     onChange(index, { ...data, [field]: value });
   };
@@ -36,6 +36,12 @@ function PassengerForm({ index, data, onChange }) {
           {index + 1}
         </div>
         Passenger {index + 1}
+        {/* ✅ Seat number show karo passenger header ma */}
+        {seat && (
+          <span className="ml-auto text-xs font-medium text-muted-foreground bg-secondary/60 px-2 py-1 rounded-lg">
+            Seat: {seat}
+          </span>
+        )}
       </h3>
 
       <div className="grid gap-4 md:grid-cols-2">
@@ -67,9 +73,9 @@ function PassengerForm({ index, data, onChange }) {
             className="w-full rounded-xl border border-border bg-secondary/50 px-4 py-3 text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
           >
             <option value="">Select Gender</option>
-            <option value="male">Male</option>
-            <option value="female">Female</option>
-            <option value="other">Other</option>
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+            <option value="Other">Other</option>
           </select>
         </div>
 
@@ -194,15 +200,17 @@ export default function PassengerDetails() {
   const searchParams = new URLSearchParams(location.search);
 
   const flight = searchParams.get("flight");
-  const seats = searchParams.get("seats")?.split(",") || [];
+  const seats = searchParams.get("seats")?.split(",").filter(Boolean) || [];
   const price = searchParams.get("price");
   const from = searchParams.get("from");
   const to = searchParams.get("to");
   const passengers = parseInt(searchParams.get("passengers") || "1");
-  const date = searchParams.get("date");
+  const date = searchParams.get("date") || "";
 
   const [forms, setForms] = useState(
-    Array.from({ length: passengers }, () => ({})),
+    Array.from({ length: passengers }, (_, i) => ({
+      seat: seats[i] || "", // ✅ har passenger ka seat pre-fill karo
+    })),
   );
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -239,24 +247,32 @@ export default function PassengerDetails() {
     setError(null);
 
     try {
-      // Step 1: Passenger save karo
-      const res = await fetch("http://localhost:5000/api/booking/", {
+      // ══════════════════════════════════════════════════════
+      // Step 1: Booking save karo
+      // ✅ New model: date + seats array bhi pass karo
+      // ✅ har passenger ka seat form data ma already hai
+      // ══════════════════════════════════════════════════════
+      const bookingRes = await fetch("http://localhost:5000/api/booking/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           flightNumber: flight,
           from,
           to,
-          seats,
+          date, // ✅ Booking model ma date save hogi
+          seats: forms.map((f) => f.seat || ""), // ✅ seats array from forms
           totalPrice: parseFloat(price),
-          passengers: forms,
+          passengers: forms, // ✅ har passenger ka seat bhi include hai
         }),
       });
 
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Save failed");
+      const bookingData = await bookingRes.json();
+      if (!bookingRes.ok)
+        throw new Error(bookingData.error || "Booking save failed");
 
+      // ══════════════════════════════════════════════════════
       // Step 2: PayU initiate karo
+      // ══════════════════════════════════════════════════════
       const payuRes = await fetch(
         "http://localhost:5000/api/payment/payu-initiate",
         {
@@ -267,12 +283,12 @@ export default function PassengerDetails() {
             name: forms[0].fullName,
             email: forms[0].email,
             phone: forms[0].phone,
-            bookingId: data.bookingId,
+            bookingId: bookingData.bookingId,
             from,
             to,
             flight,
-            date: date || "", // ✅ date pass karo
-            seats: seats.join(","), // ✅ seats pass karo
+            date,
+           seats: forms.map((f) => f.seat).filter(Boolean).join(","),
           }),
         },
       );
@@ -280,7 +296,9 @@ export default function PassengerDetails() {
       const payuData = await payuRes.json();
       if (!payuData.success) throw new Error("PayU initiate failed");
 
+      // ══════════════════════════════════════════════════════
       // Step 3: Hidden form → PayU submit
+      // ══════════════════════════════════════════════════════
       const form = document.createElement("form");
       form.method = "POST";
       form.action = payuData.payuUrl;
@@ -306,13 +324,15 @@ export default function PassengerDetails() {
     <div className="min-h-screen bg-background px-4 py-10">
       <div className="mx-auto max-w-3xl">
         {/* Header */}
-        <div className="mb-8 flex items-center gap-3">
+        <div className="mb-8 flex items-center gap-3 flex-wrap">
           <Plane className="h-6 w-6 text-primary" />
           <h1 className="text-2xl font-bold text-foreground">
             Passenger Details
           </h1>
           <span className="text-sm text-muted-foreground">
-            {from} → {to} · Seats: {seats.join(", ")}
+            {from} → {to}
+            {seats.length > 0 && ` · Seats: ${seats.join(", ")}`}
+            {date && ` · ${date}`}
           </span>
         </div>
 
@@ -324,6 +344,7 @@ export default function PassengerDetails() {
               index={index}
               data={data}
               onChange={handleChange}
+              seat={seats[index] || ""} // ✅ seat prop pass karo
             />
           ))}
         </div>

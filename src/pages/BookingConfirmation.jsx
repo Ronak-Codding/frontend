@@ -22,14 +22,11 @@ export default function BookingConfirmation() {
   const to = searchParams.get("to");
   const flight = searchParams.get("flight");
   const date = searchParams.get("date");
-
-  // ✅ URL se seats lo (PayU redirect se aata hai)
   const seatsParam = searchParams.get("seats") || "";
 
   const [booking, setBooking] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Fetch booking details from MongoDB
   useEffect(() => {
     async function fetchBooking() {
       try {
@@ -48,196 +45,301 @@ export default function BookingConfirmation() {
     fetchBooking();
   }, [bookingId]);
 
-  // ✅ Seats - pehle booking se lo, nahi toh URL param se
   const displaySeats =
-    booking?.seats?.length > 0 ? booking.seats.join(", ") : seatsParam || "—";
+    booking?.seats?.filter(Boolean).length > 0
+      ? booking.seats.filter(Boolean).join(", ")
+      : seatsParam || "—";
 
-  // ✅ Passengers count - booking se lo
   const passengersCount = booking?.passengers?.length || 1;
+  const firstPassenger = booking?.passengers?.[0] || null;
 
   const shortId = bookingId
     ? "BK" + bookingId.slice(-6).toUpperCase()
     : "BK" + Math.random().toString(36).slice(2, 8).toUpperCase();
 
   return (
-    <div className="min-h-screen bg-background px-4 py-10">
-      <div className="mx-auto max-w-2xl">
-        {/* Success Banner */}
-        <div className="mb-8 flex flex-col items-center text-center">
-          <div className="mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-emerald-500/20">
-            <CheckCircle className="h-10 w-10 text-emerald-500" />
-          </div>
-          <h1 className="text-3xl font-bold text-foreground">
-            Booking Confirmed!
-          </h1>
-          <p className="mt-2 text-muted-foreground">
-            Your ticket has been booked successfully. Have a great flight! ✈️
-          </p>
-        </div>
+    <>
+      {/* ── Print Styles ── */}
+      <style>{`
+        @media print {
+          /* Hide everything except the ticket */
+          body * { visibility: hidden; }
+          #printable-ticket, #printable-ticket * { visibility: visible; }
+          #printable-ticket {
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100% !important;
+            padding: 24px !important;
+            margin: 0 !important;
+            background: #0f172a !important;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+          }
 
-        {/* Ticket Card */}
-        <div className="relative mb-6 overflow-hidden rounded-2xl border border-border/50 bg-card/80 shadow-2xl backdrop-blur-xl">
-          {/* Top colored bar */}
-          <div className="h-2 w-full bg-primary" />
+          /* Dark card — matches screen */
+          #printable-ticket .ticket-card {
+            background: #1e293b !important;
+            border: 1px solid rgba(255,255,255,0.08) !important;
+            box-shadow: none !important;
+            border-radius: 16px !important;
+            overflow: hidden !important;
+          }
 
-          {/* Ticket Header */}
-          <div className="flex items-center justify-between border-b border-border/30 p-6">
-            <div>
-              <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                Booking ID
-              </p>
-              <p className="font-mono text-xl font-bold text-primary">
-                {shortId}
-              </p>
+          /* Amber top bar */
+          #printable-ticket .ticket-topbar {
+            background: #f59e0b !important;
+            height: 8px !important;
+          }
+
+          /* Amber primary text (booking ID, price) */
+          #printable-ticket .text-primary { color: #f59e0b !important; }
+
+          /* Main text */
+          #printable-ticket .text-foreground { color: #f1f5f9 !important; }
+
+          /* Muted labels */
+          #printable-ticket .text-muted-foreground { color: #94a3b8 !important; }
+
+          /* Confirmed badge */
+          #printable-ticket .text-emerald-500 { color: #10b981 !important; }
+          #printable-ticket .bg-emerald-500\\/10 { background: rgba(16,185,129,0.15) !important; }
+          #printable-ticket .border-emerald-500\\/30 { border-color: rgba(16,185,129,0.3) !important; }
+
+          /* Plane icon circle */
+          #printable-ticket .bg-primary\\/10 { background: rgba(245,158,11,0.15) !important; }
+
+          /* Borders & dividers */
+          #printable-ticket .border-border\\/30,
+          #printable-ticket .border-border\\/50,
+          #printable-ticket .border-border { border-color: rgba(255,255,255,0.1) !important; }
+
+          /* Dashed divider notch circles */
+          #printable-ticket .notch { background: #0f172a !important; }
+
+          /* Plane icon color */
+          #printable-ticket .text-primary svg { color: #f59e0b !important; }
+
+          /* Hide action buttons */
+          #print-actions { display: none !important; }
+
+          /* Hide success banner */
+          #success-banner { display: none !important; }
+
+          /* Grid & passenger section visibility */
+          #printable-ticket .grid { display: grid !important; }
+          #printable-ticket .passenger-section { display: block !important; }
+
+          /* No page break inside ticket */
+          #printable-ticket { page-break-inside: avoid; }
+        }
+
+        @media screen {
+          #printable-ticket {
+            /* Screen styles handled by Tailwind */
+          }
+        }
+      `}</style>
+
+      <div className="min-h-screen bg-background px-4 py-10">
+        <div className="mx-auto max-w-2xl">
+          {/* ── Success Banner (hidden on print) ── */}
+          <div
+            id="success-banner"
+            className="mb-8 flex flex-col items-center text-center"
+          >
+            <div className="mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-emerald-500/20">
+              <CheckCircle className="h-10 w-10 text-emerald-500" />
             </div>
-            <div className="flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-4 py-1.5">
-              <div className="h-2 w-2 rounded-full bg-emerald-500" />
-              <span className="text-sm font-medium text-emerald-500">
-                Confirmed
-              </span>
-            </div>
-          </div>
-
-          {/* Flight Info */}
-          <div className="p-6">
-            <div className="flex items-center justify-between">
-              {/* From */}
-              <div className="text-center">
-                <p className="text-4xl font-bold text-foreground">{from}</p>
-                <p className="mt-1 text-sm text-muted-foreground">Origin</p>
-              </div>
-
-              {/* Middle */}
-              <div className="flex flex-col items-center gap-2">
-                <div className="flex items-center gap-2">
-                  <div className="h-px w-16 bg-border" />
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
-                    <Plane className="h-5 w-5 text-primary" />
-                  </div>
-                  <div className="h-px w-16 bg-border" />
-                </div>
-                <p className="text-sm font-semibold text-foreground">
-                  {flight}
-                </p>
-              </div>
-
-              {/* To */}
-              <div className="text-center">
-                <p className="text-4xl font-bold text-foreground">{to}</p>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  Destination
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Dashed Divider */}
-          <div className="relative flex items-center px-6">
-            <div className="absolute -left-4 h-8 w-8 rounded-full bg-background" />
-            <div className="w-full border-t-2 border-dashed border-border/50" />
-            <div className="absolute -right-4 h-8 w-8 rounded-full bg-background" />
-          </div>
-
-          {/* Ticket Details */}
-          <div className="grid grid-cols-2 gap-4 p-6 md:grid-cols-4">
-            <div>
-              <p className="mb-1 flex items-center gap-1 text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                <Calendar className="h-3 w-3" /> Date
-              </p>
-              <p className="font-semibold text-foreground">{date || "—"}</p>
-            </div>
-            <div>
-              <p className="mb-1 flex items-center gap-1 text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                <Users className="h-3 w-3" /> Passengers
-              </p>
-              <p className="font-semibold text-foreground">
-                {passengersCount} Adult(s)
-              </p>
-            </div>
-            <div>
-              <p className="mb-1 flex items-center gap-1 text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                <Ticket className="h-3 w-3" /> Seat(s)
-              </p>
-              {/* ✅ Fixed - booking se ya URL se seats dikhao */}
-              <p className="font-semibold text-foreground">{displaySeats}</p>
-            </div>
-            <div>
-              <p className="mb-1 flex items-center gap-1 text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                <MapPin className="h-3 w-3" /> Class
-              </p>
-              <p className="font-semibold text-foreground">Economy</p>
-            </div>
-          </div>
-
-          {/* Dashed Divider */}
-          <div className="relative flex items-center px-6">
-            <div className="absolute -left-4 h-8 w-8 rounded-full bg-background" />
-            <div className="w-full border-t-2 border-dashed border-border/50" />
-            <div className="absolute -right-4 h-8 w-8 rounded-full bg-background" />
-          </div>
-
-          {/* Passenger Info from MongoDB */}
-          {booking?.passengers?.[0] && (
-            <div className="p-6 border-b border-border/30">
-              <p className="mb-3 text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                Passenger Info
-              </p>
-              <div className="grid grid-cols-2 gap-3 text-sm">
-                <div>
-                  <span className="text-muted-foreground">Name: </span>
-                  <span className="font-medium text-foreground">
-                    {booking.passengers[0].fullName}
-                  </span>
-                </div>
-                <div>
-                  <span className="text-muted-foreground">Passport: </span>
-                  <span className="font-medium text-foreground">
-                    {booking.passengers[0].passportNumber}
-                  </span>
-                </div>
-                <div>
-                  <span className="text-muted-foreground">Email: </span>
-                  <span className="font-medium text-foreground">
-                    {booking.passengers[0].email}
-                  </span>
-                </div>
-                <div>
-                  <span className="text-muted-foreground">Phone: </span>
-                  <span className="font-medium text-foreground">
-                    {booking.passengers[0].phone}
-                  </span>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Price */}
-          <div className="flex items-center justify-between p-6">
-            <p className="text-muted-foreground">Total Amount Paid</p>
-            <p className="text-2xl font-bold text-primary">
-              ₹{price.toLocaleString("en-IN")}
+            <h1 className="text-3xl font-bold text-foreground">
+              Booking Confirmed!
+            </h1>
+            <p className="mt-2 text-muted-foreground">
+              Your ticket has been booked successfully. Have a great flight!
             </p>
           </div>
-        </div>
 
-        {/* Action Buttons */}
-        <div className="flex gap-4">
-          <button
-            onClick={() => window.print()}
-            className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-border bg-secondary/50 px-6 py-3 text-sm font-semibold text-foreground hover:bg-secondary transition-all"
+          {/* ── Ticket Card (printable) ── */}
+          <div
+            id="printable-ticket"
+            className="relative mb-6 overflow-hidden rounded-2xl border border-border/50 bg-card/80 shadow-2xl backdrop-blur-xl ticket-card"
           >
-            <Download className="h-4 w-4" />
-            Download Ticket
-          </button>
-          <button
-            onClick={() => navigate("/")}
-            className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground hover:opacity-90 transition-all"
-          >
-            <Home className="h-4 w-4" />
-            Back to Home
-          </button>
+            {/* Top colored bar */}
+            <div className="h-2 w-full bg-primary ticket-topbar" />
+
+            {/* Ticket Header */}
+            <div className="flex items-center justify-between border-b border-border/30 p-6">
+              <div>
+                <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                  Booking ID
+                </p>
+                <p className="font-mono text-xl font-bold text-primary">
+                  {shortId}
+                </p>
+              </div>
+              <div className="flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-4 py-1.5">
+                <div className="h-2 w-2 rounded-full bg-emerald-500" />
+                <span className="text-sm font-medium text-emerald-500">
+                  Confirmed
+                </span>
+              </div>
+            </div>
+
+            {/* Flight Info */}
+            <div className="p-6">
+              <div className="flex items-center justify-between">
+                <div className="text-center">
+                  <p className="text-4xl font-bold text-foreground">{from}</p>
+                  <p className="mt-1 text-sm text-muted-foreground">Origin</p>
+                </div>
+                <div className="flex flex-col items-center gap-2">
+                  <div className="flex items-center gap-2">
+                    <div className="h-px w-16 bg-border" />
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
+                      <Plane className="h-5 w-5 text-primary" />
+                    </div>
+                    <div className="h-px w-16 bg-border" />
+                  </div>
+                  <p className="text-sm font-semibold text-foreground">
+                    {flight}
+                  </p>
+                </div>
+                <div className="text-center">
+                  <p className="text-4xl font-bold text-foreground">{to}</p>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    Destination
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Dashed Divider */}
+            <div className="relative flex items-center px-6">
+              <div className="notch absolute -left-4 h-8 w-8 rounded-full bg-background" />
+              <div className="w-full border-t-2 border-dashed border-border/50" />
+              <div className="notch absolute -right-4 h-8 w-8 rounded-full bg-background" />
+            </div>
+
+            {/* Ticket Details */}
+            <div className="grid grid-cols-2 gap-4 p-6 md:grid-cols-4">
+              <div>
+                <p className="mb-1 flex items-center gap-1 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                  <Calendar className="h-3 w-3" /> Date
+                </p>
+                <p className="font-semibold text-foreground">
+                  {booking?.date || date || "—"}
+                </p>
+              </div>
+              <div>
+                <p className="mb-1 flex items-center gap-1 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                  <Users className="h-3 w-3" /> Passengers
+                </p>
+                <p className="font-semibold text-foreground">
+                  {passengersCount} Adult(s)
+                </p>
+              </div>
+              <div>
+                <p className="mb-1 flex items-center gap-1 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                  <Ticket className="h-3 w-3" /> Seat(s)
+                </p>
+                <p className="font-semibold text-foreground">{displaySeats}</p>
+              </div>
+              <div>
+                <p className="mb-1 flex items-center gap-1 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                  <MapPin className="h-3 w-3" /> Class
+                </p>
+                <p className="font-semibold text-foreground">Economy</p>
+              </div>
+            </div>
+
+            {/* Dashed Divider */}
+            <div className="relative flex items-center px-6">
+              <div className="notch absolute -left-4 h-8 w-8 rounded-full bg-background" />
+              <div className="w-full border-t-2 border-dashed border-border/50" />
+              <div className="notch absolute -right-4 h-8 w-8 rounded-full bg-background" />
+            </div>
+
+            {/* ── Passenger Info ── */}
+            {firstPassenger && (
+              <div className="passenger-section p-6 border-b border-border/30">
+                <p className="mb-3 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                  Passenger Info
+                </p>
+                <div className="grid grid-cols-2 gap-3 text-sm">
+                  <div>
+                    <span className="text-muted-foreground">Name: </span>
+                    <span className="font-medium text-foreground">
+                      {firstPassenger.fullName || "—"}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">Passport: </span>
+                    <span className="font-medium text-foreground">
+                      {firstPassenger.passportNumber || "—"}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">Email: </span>
+                    <span className="font-medium text-foreground">
+                      {firstPassenger.email || "—"}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">Phone: </span>
+                    <span className="font-medium text-foreground">
+                      {firstPassenger.phone || "—"}
+                    </span>
+                  </div>
+                  {firstPassenger.seat && (
+                    <div>
+                      <span className="text-muted-foreground">Seat: </span>
+                      <span className="font-medium text-foreground">
+                        {firstPassenger.seat}
+                      </span>
+                    </div>
+                  )}
+                  {booking?.passengers?.length > 1 && (
+                    <div>
+                      <span className="text-muted-foreground">
+                        Total Passengers:{" "}
+                      </span>
+                      <span className="font-medium text-foreground">
+                        {booking.passengers.length}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Price */}
+            <div className="flex items-center justify-between p-6">
+              <p className="text-muted-foreground">Total Amount Paid</p>
+              <p className="text-2xl font-bold text-primary">
+                ₹{price.toLocaleString("en-IN")}
+              </p>
+            </div>
+          </div>
+
+          {/* ── Action Buttons (hidden on print) ── */}
+          <div id="print-actions" className="flex gap-4">
+            <button
+              onClick={() => window.print()}
+              className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-border bg-secondary/50 px-6 py-3 text-sm font-semibold text-foreground hover:bg-secondary transition-all"
+            >
+              <Download className="h-4 w-4" />
+              Download Ticket
+            </button>
+            <button
+              onClick={() => navigate("/")}
+              className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground hover:opacity-90 transition-all"
+            >
+              <Home className="h-4 w-4" />
+              Back to Home
+            </button>
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }

@@ -1,44 +1,72 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
 import { X, Save } from "lucide-react";
 import "./AdminTables.css";
-// import "./AdminUsers.css";
 import "./AdminPassengers.css";
+
+const COUNTRIES = [
+  "India",
+  "United States",
+  "United Kingdom",
+  "UAE",
+  "Canada",
+  "Australia",
+  "Singapore",
+  "Germany",
+  "France",
+  "Japan",
+];
 
 const PassengerModal = ({ passenger, onClose, refresh }) => {
   const isEdit = Boolean(passenger);
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
   const [formData, setFormData] = useState({
-    booking_id: "",
-    name: "",
-    age: "",
+    bookingId: "",
+    fullName: "",
     gender: "Male",
-    seat_number: "",
+    dob: "",
+    nationality: "",
+    passportNumber: "",
+    passportExpiry: "",
+    email: "",
+    phone: "",
+    seat: "",
   });
 
+  // ── Fetch bookings for dropdown (Add mode only) ──
   useEffect(() => {
-    const fetchBookings = async () => {
-      try {
-        const res = await axios.get(
-          "http://localhost:5000/api/bookings/allBookings",
-        );
-        setBookings(res.data);
-      } catch {
-        console.error("Failed to load bookings");
-      }
-    };
-    fetchBookings();
-  }, []);
+    if (!isEdit) {
+      const fetchBookings = async () => {
+        try {
+          const res = await fetch(
+            "http://localhost:5000/api/booking?limit=100",
+          );
+          const data = await res.json();
+          setBookings(data.bookings || []);
+        } catch {
+          console.error("Failed to load bookings");
+        }
+      };
+      fetchBookings();
+    }
+  }, [isEdit]);
 
+  // ── Pre-fill form in edit mode ──
   useEffect(() => {
     if (passenger) {
       setFormData({
-        booking_id: passenger.booking_id?._id || "",
-        name: passenger.name,
-        age: passenger.age,
-        gender: passenger.gender,
-        seat_number: passenger.seat_number || "",
+        bookingId: passenger.bookingId || "",
+        fullName: passenger.fullName || "",
+        gender: passenger.gender || "Male",
+        dob: passenger.dob || "",
+        nationality: passenger.nationality || "",
+        passportNumber: passenger.passportNumber || "",
+        passportExpiry: passenger.passportExpiry || "",
+        email: passenger.email || "",
+        phone: passenger.phone || "",
+        seat: passenger.seat || "",
       });
     }
   }, [passenger]);
@@ -46,22 +74,42 @@ const PassengerModal = ({ passenger, onClose, refresh }) => {
   const handleChange = (e) =>
     setFormData({ ...formData, [e.target.name]: e.target.value });
 
+  // ══════════════════════════════════════════════════════════
+  // ✅ Submit — Add: POST /api/passenger/passengers
+  //            Edit: PUT /api/passenger/passengers/:id
+  // ══════════════════════════════════════════════════════════
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!isEdit && !formData.bookingId) {
+      setError("Booking select karo");
+      return;
+    }
+    if (!formData.fullName) {
+      setError("Full name required hai");
+      return;
+    }
     setLoading(true);
+    setError("");
     try {
-      if (isEdit) {
-        await axios.put(
-          `http://localhost:5000/api/passengers/updatePassenger/${passenger._id}`,
-          formData,
-        );
-      } else {
-        await axios.post("http://localhost:5000/api/passengers", formData);
+      const url = isEdit
+        ? `http://localhost:5000/api/passenger/passengers/${passenger._id}`
+        : `http://localhost:5000/api/passenger/passengers`;
+
+      const res = await fetch(url, {
+        method: isEdit ? "PUT" : "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+
+      if (!res.ok) {
+        const msg = await res.json();
+        throw new Error(msg.error || "Operation failed");
       }
+
       refresh();
       onClose();
     } catch (err) {
-      console.error(err.response?.data?.message || "Operation failed");
+      setError(err.message || "Operation failed");
     } finally {
       setLoading(false);
     }
@@ -70,7 +118,7 @@ const PassengerModal = ({ passenger, onClose, refresh }) => {
   return (
     <div className="pax-modal-overlay" onClick={onClose}>
       <div
-        className="pax-modal pax-modal-sm"
+        className="pax-modal pax-modal-md"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="pax-modal-header">
@@ -82,18 +130,30 @@ const PassengerModal = ({ passenger, onClose, refresh }) => {
           </button>
         </div>
 
+        {error && (
+          <div
+            className="booking-error-msg"
+            style={{ margin: "0 1.5rem 1rem" }}
+          >
+            {error}
+          </div>
+        )}
+
         <form onSubmit={handleSubmit}>
           <div className="pax-modal-body">
-            <div className="pax-form-stack">
-              {/* Booking - Add mode only */}
+            <div className="pax-form-grid">
+              {/* ── Booking dropdown — Add mode only ── */}
               {!isEdit && (
-                <div className="pax-form-group">
+                <div
+                  className="pax-form-group"
+                  style={{ gridColumn: "span 2" }}
+                >
                   <label className="pax-form-label">
                     Booking <span className="pax-required">*</span>
                   </label>
                   <select
-                    name="booking_id"
-                    value={formData.booking_id}
+                    name="bookingId"
+                    value={formData.bookingId}
                     onChange={handleChange}
                     required
                     className="pax-form-select"
@@ -101,72 +161,134 @@ const PassengerModal = ({ passenger, onClose, refresh }) => {
                     <option value="">Select Booking</option>
                     {bookings.map((b) => (
                       <option key={b._id} value={b._id}>
-                        {b.bookingReference} — {b.user_id?.firstName}{" "}
-                        {b.user_id?.lastName} ({b.flight_id?.flight_number})
+                        {b.bookingRef} — {b.flightNumber} | {b.from} → {b.to} |{" "}
+                        {b.userName}
                       </option>
                     ))}
                   </select>
                 </div>
               )}
 
-              {/* Name */}
+              {/* ── Full Name ── */}
               <div className="pax-form-group">
                 <label className="pax-form-label">
-                  Passenger Name <span className="pax-required">*</span>
+                  Full Name <span className="pax-required">*</span>
                 </label>
                 <input
-                  name="name"
-                  value={formData.name}
+                  name="fullName"
+                  value={formData.fullName}
                   onChange={handleChange}
                   required
-                  placeholder="Enter passenger name"
+                  placeholder="As on passport"
                   className="pax-form-input"
                 />
               </div>
 
-              {/* Age + Gender */}
-              <div className="pax-form-row">
-                <div className="pax-form-group">
-                  <label className="pax-form-label">
-                    Age <span className="pax-required">*</span>
-                  </label>
-                  <input
-                    type="number"
-                    name="age"
-                    value={formData.age}
-                    onChange={handleChange}
-                    required
-                    min="0"
-                    max="120"
-                    placeholder="e.g., 25"
-                    className="pax-form-input"
-                  />
-                </div>
-                <div className="pax-form-group">
-                  <label className="pax-form-label">Gender</label>
-                  <select
-                    name="gender"
-                    value={formData.gender}
-                    onChange={handleChange}
-                    className="pax-form-select"
-                  >
-                    <option value="Male">Male</option>
-                    <option value="Female">Female</option>
-                    <option value="Other">Other</option>
-                  </select>
-                </div>
+              {/* ── Gender ── */}
+              <div className="pax-form-group">
+                <label className="pax-form-label">Gender</label>
+                <select
+                  name="gender"
+                  value={formData.gender}
+                  onChange={handleChange}
+                  className="pax-form-select"
+                >
+                  <option value="Male">Male</option>
+                  <option value="Female">Female</option>
+                  <option value="Other">Other</option>
+                </select>
               </div>
 
-              {/* Seat */}
+              {/* ── DOB ── */}
+              <div className="pax-form-group">
+                <label className="pax-form-label">Date of Birth</label>
+                <input
+                  type="date"
+                  name="dob"
+                  value={formData.dob}
+                  onChange={handleChange}
+                  className="pax-form-input"
+                />
+              </div>
+
+              {/* ── Nationality ── */}
+              <div className="pax-form-group">
+                <label className="pax-form-label">Nationality</label>
+                <select
+                  name="nationality"
+                  value={formData.nationality}
+                  onChange={handleChange}
+                  className="pax-form-select"
+                >
+                  <option value="">Select Country</option>
+                  {COUNTRIES.map((c) => (
+                    <option key={c} value={c}>
+                      {c}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* ── Passport Number ── */}
+              <div className="pax-form-group">
+                <label className="pax-form-label">Passport Number</label>
+                <input
+                  name="passportNumber"
+                  value={formData.passportNumber}
+                  onChange={handleChange}
+                  placeholder="A1234567"
+                  className="pax-form-input"
+                />
+              </div>
+
+              {/* ── Passport Expiry ── */}
+              <div className="pax-form-group">
+                <label className="pax-form-label">Passport Expiry</label>
+                <input
+                  type="date"
+                  name="passportExpiry"
+                  value={formData.passportExpiry}
+                  onChange={handleChange}
+                  className="pax-form-input"
+                />
+              </div>
+
+              {/* ── Email ── */}
+              <div className="pax-form-group">
+                <label className="pax-form-label">Email</label>
+                <input
+                  type="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  placeholder="email@example.com"
+                  className="pax-form-input"
+                />
+              </div>
+
+              {/* ── Phone ── */}
+              <div className="pax-form-group">
+                <label className="pax-form-label">Phone</label>
+                <input
+                  type="tel"
+                  name="phone"
+                  value={formData.phone}
+                  onChange={handleChange}
+                  placeholder="+91 98765 43210"
+                  className="pax-form-input"
+                />
+              </div>
+
+              {/* ── Seat ── */}
               <div className="pax-form-group">
                 <label className="pax-form-label">
                   Seat Number <span className="pax-optional">(optional)</span>
                 </label>
                 <input
-                  name="seat_number"
-                  value={formData.seat_number}
+                  name="seat"
+                  value={formData.seat}
                   onChange={handleChange}
-                  placeholder="e.g., 12A"
+                  placeholder="e.g. 12A"
                   className="pax-form-input"
                 />
               </div>

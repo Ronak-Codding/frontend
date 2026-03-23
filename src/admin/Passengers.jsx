@@ -10,12 +10,11 @@ import {
   X,
   Save,
   Users,
-  Eye,
-  CheckSquare,
-  Square,
-  Mail,
   MapPin,
   FileText,
+  Mail,
+  CheckSquare,
+  Square,
 } from "lucide-react";
 import "./AdminTables.css";
 import "./AdminPassengers.css";
@@ -44,6 +43,7 @@ export default function AdminPassengers({ token }) {
     direction: "asc",
   });
   const [exportFormat, setExportFormat] = useState("csv");
+
   const [formData, setFormData] = useState({
     fullName: "",
     gender: "",
@@ -53,17 +53,8 @@ export default function AdminPassengers({ token }) {
     passportExpiry: "",
     email: "",
     phone: "",
-    flightNumber: "",
-    from: "",
-    to: "",
     seat: "",
-    totalPrice: "",
   });
-
-  const authHeaders = {
-    "Content-Type": "application/json",
-    Authorization: `Bearer ${token}`,
-  };
 
   const showNotification = (message, type = "success") => {
     setNotification({ show: true, message, type });
@@ -84,6 +75,9 @@ export default function AdminPassengers({ token }) {
     return () => clearTimeout(t);
   }, [searchTerm, gender]);
 
+  // ══════════════════════════════════════════════════════════
+  // ✅ Fetch — new route /api/passenger/allpassengers
+  // ══════════════════════════════════════════════════════════
   const fetchPassengers = async () => {
     setLoading(true);
     try {
@@ -94,8 +88,7 @@ export default function AdminPassengers({ token }) {
         ...(gender !== "all" && { gender }),
       });
       const res = await fetch(
-        `http://localhost:5000/api/admin/passengers?${params}`,
-        { headers: authHeaders },
+        `http://localhost:5000/api/passenger/allpassengers?${params}`,
       );
       const data = await res.json();
       setFilteredPassengers(data.passengers || []);
@@ -144,13 +137,15 @@ export default function AdminPassengers({ token }) {
         : " ↓"
       : "";
 
-  const handleDelete = async (bId, pIdx) => {
+  // ══════════════════════════════════════════════════════════
+  // ✅ Delete — new route /api/passenger/passengers/:id
+  // ══════════════════════════════════════════════════════════
+  const handleDelete = async (id) => {
     if (!window.confirm("Delete this passenger?")) return;
     setLoading(true);
     try {
-      await fetch(`http://localhost:5000/api/admin/passengers/${bId}/${pIdx}`, {
+      await fetch(`http://localhost:5000/api/passenger/passengers/${id}`, {
         method: "DELETE",
-        headers: authHeaders,
       });
       showNotification("Passenger deleted");
       fetchPassengers();
@@ -161,6 +156,9 @@ export default function AdminPassengers({ token }) {
     }
   };
 
+  // ══════════════════════════════════════════════════════════
+  // ✅ Edit — open modal with passenger data
+  // ══════════════════════════════════════════════════════════
   const handleEdit = (p) => {
     setEditData(p);
     setFormData({
@@ -172,34 +170,36 @@ export default function AdminPassengers({ token }) {
       passportExpiry: p.passportExpiry || "",
       email: p.email || "",
       phone: p.phone || "",
-      flightNumber: p.flightNumber || "",
-      from: p.from || "",
-      to: p.to || "",
       seat: p.seat || "",
-      totalPrice: p.totalPrice || "",
     });
     setShowModal(true);
   };
 
+  // ══════════════════════════════════════════════════════════
+  // ✅ Save — new route /api/passenger/passengers/:id
+  // ══════════════════════════════════════════════════════════
   const handleSave = async () => {
     setLoading(true);
     try {
-      const [bId, pIdx] = editData._id.split("_");
-      await fetch(`http://localhost:5000/api/admin/passengers/${bId}/${pIdx}`, {
-        method: "PUT",
-        headers: authHeaders,
-        body: JSON.stringify(formData),
-      });
+      await fetch(
+        `http://localhost:5000/api/passenger/passengers/${editData._id}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(formData),
+        },
+      );
       showNotification("Passenger updated");
       setShowModal(false);
       fetchPassengers();
     } catch {
-      showNotification("Operation failed", "error");
+      showNotification("Update failed", "error");
     } finally {
       setLoading(false);
     }
   };
 
+  // ── Checkbox ──
   const handleSelectAll = () => {
     setSelectAll(!selectAll);
     setSelectedPassengers(
@@ -211,19 +211,20 @@ export default function AdminPassengers({ token }) {
       prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
     );
 
+  // ══════════════════════════════════════════════════════════
+  // ✅ Bulk Delete — new route uses direct _id
+  // ══════════════════════════════════════════════════════════
   const handleBulkDelete = async () => {
     if (!window.confirm(`Delete ${selectedPassengers.length} passengers?`))
       return;
     setLoading(true);
     try {
       await Promise.all(
-        selectedPassengers.map((id) => {
-          const [b, i] = id.split("_");
-          return fetch(`http://localhost:5000/api/admin/passengers/${b}/${i}`, {
+        selectedPassengers.map((id) =>
+          fetch(`http://localhost:5000/api/passenger/passengers/${id}`, {
             method: "DELETE",
-            headers: authHeaders,
-          });
-        }),
+          }),
+        ),
       );
       showNotification(`${selectedPassengers.length} deleted`);
       setSelectedPassengers([]);
@@ -236,19 +237,21 @@ export default function AdminPassengers({ token }) {
     }
   };
 
+  // ══════════════════════════════════════════════════════════
+  // ✅ Bulk Gender Update — new route uses direct _id
+  // ══════════════════════════════════════════════════════════
   const handleBulkGenderUpdate = async (newGender) => {
     if (!newGender) return;
     setLoading(true);
     try {
       await Promise.all(
-        selectedPassengers.map((id) => {
-          const [b, i] = id.split("_");
-          return fetch(`http://localhost:5000/api/admin/passengers/${b}/${i}`, {
+        selectedPassengers.map((id) =>
+          fetch(`http://localhost:5000/api/passenger/passengers/${id}`, {
             method: "PUT",
-            headers: authHeaders,
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ gender: newGender }),
-          });
-        }),
+          }),
+        ),
       );
       showNotification(
         `${selectedPassengers.length} passengers updated to ${newGender}`,
@@ -333,6 +336,7 @@ export default function AdminPassengers({ token }) {
         })
       : "—";
 
+  // ── Form fields for Edit Modal ──
   const FORM_FIELDS = [
     {
       label: "Full Name",
@@ -366,26 +370,11 @@ export default function AdminPassengers({ token }) {
       type: "tel",
       placeholder: "+91 98765 43210",
     },
-    {
-      label: "Flight Number",
-      field: "flightNumber",
-      type: "text",
-      placeholder: "AI 302",
-    },
-    { label: "From", field: "from", type: "text", placeholder: "BOM" },
-    { label: "To", field: "to", type: "text", placeholder: "DEL" },
     { label: "Seat", field: "seat", type: "text", placeholder: "12A" },
-    {
-      label: "Total Price (₹)",
-      field: "totalPrice",
-      type: "number",
-      placeholder: "15000",
-    },
   ];
 
   return (
     <div>
-      {/* Loading */}
       {loading && (
         <div className="users-loading-overlay">
           <div className="users-loading-box">
@@ -395,7 +384,6 @@ export default function AdminPassengers({ token }) {
         </div>
       )}
 
-      {/* Notification */}
       {notification.show && (
         <div
           className={`users-notification ${notification.type === "error" ? "users-notification-error" : "users-notification-success"}`}
@@ -491,6 +479,7 @@ export default function AdminPassengers({ token }) {
                     ["Flight", viewPassenger.flightNumber],
                     ["From", viewPassenger.from],
                     ["To", viewPassenger.to],
+                    ["Date", viewPassenger.date || "—"],
                     ["Seat", viewPassenger.seat],
                     [
                       "Total Price",
@@ -510,7 +499,7 @@ export default function AdminPassengers({ token }) {
             </div>
             <div className="pax-modal-footer">
               <button
-                className="btn-secondary"
+                className="btn-export"
                 onClick={() => setShowViewModal(false)}
               >
                 Close
@@ -568,9 +557,9 @@ export default function AdminPassengers({ token }) {
                     }
                   >
                     <option value="">Select Gender</option>
-                    <option value="male">Male</option>
-                    <option value="female">Female</option>
-                    <option value="other">Other</option>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                    <option value="Other">Other</option>
                   </select>
                 </div>
               </div>
@@ -616,7 +605,7 @@ export default function AdminPassengers({ token }) {
         </div>
         <div className="admin-header-actions">
           <select
-             className="btn-export-select"
+            className="btn-export-select"
             value={exportFormat}
             onChange={(e) => setExportFormat(e.target.value)}
           >
@@ -629,14 +618,14 @@ export default function AdminPassengers({ token }) {
         </div>
       </div>
 
-      {/* ── Search + Gender ── */}
+      {/* ── Filters ── */}
       <div className="users-filter-card">
         <div className="pax-search-row">
           <div className="admin-search-wrapper" style={{ flex: 1 }}>
             <Search size={16} className="admin-search-icon" />
             <input
               type="text"
-              placeholder="Search by Name, Booking Ref, Seat, Passport..."
+              placeholder="Search by Name, Booking Ref, Seat, Passport, Email..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="admin-input admin-input-search"
@@ -651,9 +640,9 @@ export default function AdminPassengers({ token }) {
             }}
           >
             <option value="all">All Genders</option>
-            <option value="male">Male</option>
-            <option value="female">Female</option>
-            <option value="other">Other</option>
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+            <option value="Other">Other</option>
           </select>
         </div>
       </div>
@@ -673,9 +662,9 @@ export default function AdminPassengers({ token }) {
               <option value="" disabled>
                 Change Gender
               </option>
-              <option value="male">Set Male</option>
-              <option value="female">Set Female</option>
-              <option value="other">Set Other</option>
+              <option value="Male">Set Male</option>
+              <option value="Female">Set Female</option>
+              <option value="Other">Set Other</option>
             </select>
             <button
               className="users-bulk-btn users-bulk-blocked"
@@ -695,6 +684,7 @@ export default function AdminPassengers({ token }) {
           </div>
         </div>
       )}
+
       {/* ── Table ── */}
       <div className="admin-table-container">
         <div className="admin-table-scroll">
@@ -793,15 +783,7 @@ export default function AdminPassengers({ token }) {
                     </td>
                     <td className="cell-muted">{(page - 1) * 10 + i + 1}</td>
                     <td>
-                      <div className="admin-avatar-cell">
-                        {/* <div className="admin-avatar">
-                          {p.fullName?.charAt(0) || "?"}
-                        </div> */}
-                        <div className="admin-avatar-info">
-                          <p className="admin-avatar-name">{p.fullName}</p>
-                          {/* <p className="admin-avatar-sub">{p.phone || "—"}</p> */}
-                        </div>
-                      </div>
+                      <p className="admin-avatar-name">{p.fullName}</p>
                     </td>
                     <td className="cell-muted">
                       {p.age || calculateAge(p.dob) || "—"}
@@ -822,7 +804,7 @@ export default function AdminPassengers({ token }) {
                     <td className="cell-mono">{p.seat || "—"}</td>
                     <td className="cell-accent">{p.bookingRef || "—"}</td>
                     <td>{p.flightNumber || "—"}</td>
-                    <td>
+                    <td className="cell-muted">
                       {p.from} → {p.to}
                     </td>
                     <td className="cell-muted" style={{ fontSize: "0.75rem" }}>
@@ -833,7 +815,7 @@ export default function AdminPassengers({ token }) {
                     </td>
                     <td>
                       <div className="cell-actions">
-                        {/* <button
+                        <button
                           className="users-action-btn users-action-view"
                           title="View"
                           onClick={() => {
@@ -841,8 +823,8 @@ export default function AdminPassengers({ token }) {
                             setShowViewModal(true);
                           }}
                         >
-                          <Eye size={12} />
-                        </button> */}
+                          <Search size={12} />
+                        </button>
                         <button
                           className="users-action-btn users-action-edit"
                           title="Edit"
@@ -850,13 +832,11 @@ export default function AdminPassengers({ token }) {
                         >
                           <Edit2 size={12} />
                         </button>
+                        {/* ✅ Direct _id use — no more "bookingId_index" split */}
                         <button
                           className="users-action-btn users-action-delete"
                           title="Delete"
-                          onClick={() => {
-                            const [b, idx] = p._id.split("_");
-                            handleDelete(b, parseInt(idx));
-                          }}
+                          onClick={() => handleDelete(p._id)}
                         >
                           <Trash2 size={12} />
                         </button>

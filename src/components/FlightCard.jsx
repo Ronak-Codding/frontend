@@ -3,25 +3,36 @@ import { useNavigate } from "react-router-dom";
 
 export default function FlightCard({ flight, date, passengers }) {
   const navigate = useNavigate();
-  const offer = flight.itineraries[0];
-  const segment = offer.segments[0];
-  const price = flight.price.total;
-  const currency = flight.price.currency;
-  const duration = offer.duration.replace("PT", "").toLowerCase(); // e.g. "2h 30m"
+  const offer    = flight.itineraries[0];
+  const segment  = offer.segments[0];
+  const price    = flight.price.total;
+  const duration = offer.duration.replace("PT", "").toLowerCase();
 
-  const departure = segment.departure.at.split("T"); // ["2026-04-01", "06:00:00"]
-  const arrival = segment.arrival.at.split("T");
+  const departure = segment.departure.at.split("T");
+  const arrival   = segment.arrival.at.split("T");
+
+  // ✅ Fix: "6E 6E978" double avoid
+  // DB:   carrierCode="6E", number="6E978" → "6E978"
+  // Mock: carrierCode="AI", number="101"   → "AI101"
+  const displayFlightNumber = segment.number.startsWith(segment.carrierCode)
+    ? segment.number
+    : `${segment.carrierCode}${segment.number}`;
 
   const handleSelect = () => {
-    const searchParams = new URLSearchParams(window.location.search);
-   navigate(
-      `/seats?flight=${segment.carrierCode}${segment.number}&price=${price}&from=${segment.departure.iataCode}&to=${segment.arrival.iataCode}&passengers=${passengers || 1}&date=${date || ""}`
+    navigate(
+      `/seats?flight=${displayFlightNumber}` +
+      `&price=${price}` +
+      `&from=${segment.departure.iataCode}` +
+      `&to=${segment.arrival.iataCode}` +
+      `&passengers=${passengers || 1}` +
+      `&date=${date || ""}`
     );
   };
 
   return (
     <div className="rounded-2xl border border-border/50 bg-card/80 p-6 shadow-md backdrop-blur-xl hover:border-primary/40 transition-all">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+
         {/* Airline + Flight No */}
         <div className="flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
@@ -29,7 +40,7 @@ export default function FlightCard({ flight, date, passengers }) {
           </div>
           <div>
             <p className="font-semibold text-foreground">
-              {segment.carrierCode} {segment.number}
+              {displayFlightNumber}
             </p>
             <p className="text-xs text-muted-foreground">
               {segment.aircraft?.code || "Aircraft"}
@@ -72,10 +83,14 @@ export default function FlightCard({ flight, date, passengers }) {
               {parseFloat(price).toLocaleString("en-IN")}
             </span>
           </div>
-          <button className="rounded-xl bg-primary px-6 py-2.5 text-sm font-semibold text-primary-foreground hover:opacity-90 transition-all" onClick={handleSelect}>
+          <button
+            onClick={handleSelect}
+            className="rounded-xl bg-primary px-6 py-2.5 text-sm font-semibold text-primary-foreground hover:opacity-90 transition-all"
+          >
             Select
           </button>
         </div>
+
       </div>
     </div>
   );

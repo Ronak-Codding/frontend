@@ -25,7 +25,7 @@ export default function HomePage() {
     <div className="min-h-screen bg-background font-body">
       <Navbar />
       <HeroSlider />
-      <BookingForm />
+      {/* <BookingForm /> */}
       <div id="destinations">
         <Destinations />
       </div>

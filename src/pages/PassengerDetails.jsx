@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import {
   User,
   Mail,
@@ -9,6 +9,7 @@ import {
   Globe,
   ChevronRight,
   Plane,
+  Receipt,
 } from "lucide-react";
 
 const COUNTRIES = [
@@ -24,6 +25,27 @@ const COUNTRIES = [
   "Japan",
 ];
 
+// ── GST Helper ──
+const GST_RATE = 0.18;
+function calcGST(baseAmount) {
+  const base  = parseFloat(baseAmount) || 0;
+  const gst   = base * GST_RATE;
+  const cgst  = gst / 2;
+  const sgst  = gst / 2;
+  const total = base + gst;
+  return { base, gst, cgst, sgst, total };
+}
+function fmt(n) {
+  return new Intl.NumberFormat("en-IN", {
+    style: "currency",
+    currency: "INR",
+    maximumFractionDigits: 0,
+  }).format(n || 0);
+}
+
+// ══════════════════════════════════════════════════════════
+// PassengerForm
+// ══════════════════════════════════════════════════════════
 function PassengerForm({ index, data, onChange, seat }) {
   const handleChange = (field, value) => {
     onChange(index, { ...data, [field]: value });
@@ -36,7 +58,6 @@ function PassengerForm({ index, data, onChange, seat }) {
           {index + 1}
         </div>
         Passenger {index + 1}
-        {/* ✅ Seat number show karo passenger header ma */}
         {seat && (
           <span className="ml-auto text-xs font-medium text-muted-foreground bg-secondary/60 px-2 py-1 rounded-lg">
             Seat: {seat}
@@ -194,26 +215,92 @@ function PassengerForm({ index, data, onChange, seat }) {
   );
 }
 
+// ══════════════════════════════════════════════════════════
+// GST Breakdown Card
+// ══════════════════════════════════════════════════════════
+function GSTBreakdownCard({ basePrice }) {
+  const { base, cgst, sgst, gst, total } = calcGST(basePrice);
+
+  return (
+    <div className="rounded-2xl border border-border/50 bg-card/80 p-5 backdrop-blur-xl shadow-md">
+      {/* Title */}
+      <div className="mb-4 flex items-center gap-2">
+        <Receipt className="h-4 w-4 text-primary" />
+        <h3 className="text-sm font-semibold text-foreground uppercase tracking-wider">
+          Price Breakdown
+        </h3>
+      </div>
+
+      <div className="flex flex-col gap-2 text-sm">
+        {/* Base Fare */}
+        <div className="flex items-center justify-between text-muted-foreground">
+          <span>Base Fare</span>
+          <span className="font-medium text-foreground">{fmt(base)}</span>
+        </div>
+
+        {/* CGST */}
+        <div className="flex items-center justify-between text-muted-foreground">
+          <span>CGST (9%)</span>
+          <span className="font-medium text-foreground">{fmt(cgst)}</span>
+        </div>
+
+        {/* SGST */}
+        <div className="flex items-center justify-between text-muted-foreground">
+          <span>SGST (9%)</span>
+          <span className="font-medium text-foreground">{fmt(sgst)}</span>
+        </div>
+
+        {/* GST note */}
+        <div className="flex items-center justify-between text-xs text-muted-foreground/70 pb-1">
+          <span>Total GST (18%)</span>
+          <span>{fmt(gst)}</span>
+        </div>
+
+        {/* Divider */}
+        <div className="border-t border-border/60 my-1" />
+
+        {/* Total */}
+        <div className="flex items-center justify-between">
+          <span className="font-semibold text-foreground">
+            Total Payable <span className="text-xs font-normal text-muted-foreground">(incl. GST)</span>
+          </span>
+          <span className="text-lg font-bold text-primary">{fmt(total)}</span>
+        </div>
+      </div>
+
+      {/* GST badge */}
+      <div className="mt-3 rounded-lg bg-yellow-500/10 border border-yellow-500/20 px-3 py-2 text-xs text-yellow-600 dark:text-yellow-400">
+        🧾 GST of 18% (CGST 9% + SGST 9%) is applicable on base fare as per Govt. regulations.
+      </div>
+    </div>
+  );
+}
+
+// ══════════════════════════════════════════════════════════
+// Main Page
+// ══════════════════════════════════════════════════════════
 export default function PassengerDetails() {
   const location = useLocation();
-  const navigate = useNavigate();
   const searchParams = new URLSearchParams(location.search);
 
-  const flight = searchParams.get("flight");
-  const seats = searchParams.get("seats")?.split(",").filter(Boolean) || [];
-  const price = searchParams.get("price");
-  const from = searchParams.get("from");
-  const to = searchParams.get("to");
+  const flight     = searchParams.get("flight");
+  const seats      = searchParams.get("seats")?.split(",").filter(Boolean) || [];
+  const price      = searchParams.get("price");
+  const from       = searchParams.get("from");
+  const to         = searchParams.get("to");
   const passengers = parseInt(searchParams.get("passengers") || "1");
-  const date = searchParams.get("date") || "";
+  const date       = searchParams.get("date") || "";
+
+  // GST calculated from base price (URL ma base price aave chhe)
+  const { base, cgst, sgst, gst, total } = calcGST(price);
 
   const [forms, setForms] = useState(
     Array.from({ length: passengers }, (_, i) => ({
-      seat: seats[i] || "", // ✅ har passenger ka seat pre-fill karo
+      seat: seats[i] || "",
     })),
   );
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [error, setError]     = useState(null);
 
   const handleChange = (index, data) => {
     setForms((prev) => prev.map((f, i) => (i === index ? data : f)));
@@ -222,18 +309,11 @@ export default function PassengerDetails() {
   const validate = () => {
     for (let i = 0; i < forms.length; i++) {
       const f = forms[i];
-      if (
-        !f.fullName ||
-        !f.gender ||
-        !f.dob ||
-        !f.nationality ||
-        !f.passportNumber ||
-        !f.passportExpiry
-      ) {
-        return `Passenger ${i + 1} ki saari details bharo`;
+      if (!f.fullName || !f.gender || !f.dob || !f.nationality || !f.passportNumber || !f.passportExpiry) {
+        return `Passenger ${i + 1} Details incomplete `;
       }
       if (i === 0 && (!f.email || !f.phone)) {
-        return "Contact details (email & phone) required hain";
+        return "Contact details (email & phone) required for first passenger";
       }
     }
     return null;
@@ -247,11 +327,7 @@ export default function PassengerDetails() {
     setError(null);
 
     try {
-      // ══════════════════════════════════════════════════════
-      // Step 1: Booking save karo
-      // ✅ New model: date + seats array bhi pass karo
-      // ✅ har passenger ka seat form data ma already hai
-      // ══════════════════════════════════════════════════════
+      // Step 1: Booking save
       const bookingRes = await fetch("http://localhost:5000/api/booking/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -259,56 +335,49 @@ export default function PassengerDetails() {
           flightNumber: flight,
           from,
           to,
-          date, // ✅ Booking model ma date save hogi
-          seats: forms.map((f) => f.seat || ""), // ✅ seats array from forms
-          totalPrice: parseFloat(price),
-          passengers: forms, // ✅ har passenger ka seat bhi include hai
+          date,
+          seats:      forms.map((f) => f.seat || ""),
+          totalPrice: total,          // ✅ GST included total send 
+          passengers: forms,
         }),
       });
 
       const bookingData = await bookingRes.json();
-      if (!bookingRes.ok)
-        throw new Error(bookingData.error || "Booking save failed");
+      if (!bookingRes.ok) throw new Error(bookingData.error || "Booking save failed");
 
-      // ══════════════════════════════════════════════════════
-      // Step 2: PayU initiate karo
-      // ══════════════════════════════════════════════════════
-      const payuRes = await fetch(
-        "http://localhost:5000/api/payment/payu-initiate",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            amount: price,
-            name: forms[0].fullName,
-            email: forms[0].email,
-            phone: forms[0].phone,
-            bookingId: bookingData.bookingId,
-            from,
-            to,
-            flight,
-            date,
-           seats: forms.map((f) => f.seat).filter(Boolean).join(","),
-          }),
-        },
-      );
+      // Step 2: PayU initiate
+      // Backend ma GST add thase — base price moko
+      const payuRes = await fetch("http://localhost:5000/api/payment/payu-initiate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          amount:    price,           // base price (backend GST add karse)
+          name:      forms[0].fullName,
+          email:     forms[0].email,
+          phone:     forms[0].phone,
+          bookingId: bookingData.bookingId,
+          from,
+          to,
+          flight,
+          date,
+          seats:     forms.map((f) => f.seat).filter(Boolean).join(","),
+        }),
+      });
 
       const payuData = await payuRes.json();
       if (!payuData.success) throw new Error("PayU initiate failed");
 
-      // ══════════════════════════════════════════════════════
       // Step 3: Hidden form → PayU submit
-      // ══════════════════════════════════════════════════════
       const form = document.createElement("form");
-      form.method = "POST";
-      form.action = payuData.payuUrl;
+      form.method  = "POST";
+      form.action  = payuData.payuUrl;
       form.style.display = "none";
 
       Object.entries(payuData.payuData).forEach(([key, value]) => {
-        const input = document.createElement("input");
-        input.type = "hidden";
-        input.name = key;
-        input.value = value ?? "";
+        const input  = document.createElement("input");
+        input.type   = "hidden";
+        input.name   = key;
+        input.value  = value ?? "";
         form.appendChild(input);
       });
 
@@ -323,12 +392,11 @@ export default function PassengerDetails() {
   return (
     <div className="min-h-screen bg-background px-4 py-10">
       <div className="mx-auto max-w-3xl">
-        {/* Header */}
+
+        {/* ── Header ── */}
         <div className="mb-8 flex items-center gap-3 flex-wrap">
           <Plane className="h-6 w-6 text-primary" />
-          <h1 className="text-2xl font-bold text-foreground">
-            Passenger Details
-          </h1>
+          <h1 className="text-2xl font-bold text-foreground">Passenger Details</h1>
           <span className="text-sm text-muted-foreground">
             {from} → {to}
             {seats.length > 0 && ` · Seats: ${seats.join(", ")}`}
@@ -336,7 +404,7 @@ export default function PassengerDetails() {
           </span>
         </div>
 
-        {/* Forms */}
+        {/* ── Passenger Forms ── */}
         <div className="flex flex-col gap-6">
           {forms.map((data, index) => (
             <PassengerForm
@@ -344,24 +412,32 @@ export default function PassengerDetails() {
               index={index}
               data={data}
               onChange={handleChange}
-              seat={seats[index] || ""} // ✅ seat prop pass karo
+              seat={seats[index] || ""}
             />
           ))}
         </div>
 
-        {/* Error */}
+        {/* ── GST Breakdown Card ── */}
+        <div className="mt-6">
+          <GSTBreakdownCard basePrice={price} />
+        </div>
+
+        {/* ── Error ── */}
         {error && (
           <div className="mt-4 rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-400">
             {error}
           </div>
         )}
 
-        {/* Bottom Bar */}
+        {/* ── Bottom Bar ── */}
         <div className="mt-6 flex items-center justify-between rounded-2xl border border-border/50 bg-card/80 p-4 backdrop-blur-xl">
           <div>
-            <p className="text-sm text-muted-foreground">Total Amount</p>
+            <p className="text-xs text-muted-foreground">
+              Base {fmt(base)} + GST {fmt(gst)}
+            </p>
             <p className="text-xl font-bold text-primary">
-              ₹{parseFloat(price).toLocaleString("en-IN")}
+              {fmt(total)}
+              <span className="ml-1 text-xs font-normal text-muted-foreground">incl. GST</span>
             </p>
           </div>
           <button
@@ -373,6 +449,7 @@ export default function PassengerDetails() {
             <ChevronRight className="h-4 w-4" />
           </button>
         </div>
+
       </div>
     </div>
   );

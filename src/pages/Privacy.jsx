@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import Footer from "../components/Footer";
 import Navbar from "../components/Navbar";
 import Breadcrumb from "../components/Breadcrumb";
-import './PrivacyPolicy.css';
+import "./PrivacyPolicy.css";
 
 const sections = [
   {
@@ -169,13 +169,11 @@ export default function PrivacyPolicy() {
   };
 
   return (
-    <div style={{ fontFamily: "'Georgia', 'Times New Roman', serif", background: "#ffffff", minHeight: "100vh", color: "#1a1a2e" }}>
-     
-
+    <div className="privacy-policy-page">
       {/* NAV */}
-     <Navbar />
+      <Navbar />
 
-      <Breadcrumb title= "Privacy Policy" />
+      <Breadcrumb title="Privacy Policy" />
       {/* MAIN */}
       <div className="main-layout">
         {/* SIDEBAR */}
@@ -188,7 +186,9 @@ export default function PrivacyPolicy() {
                 className={`sidebar-item${activeSection === s.id ? " active" : ""}`}
                 onClick={() => {
                   setActiveSection(s.id);
-                  document.getElementById(s.id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+                  document
+                    .getElementById(s.id)
+                    ?.scrollIntoView({ behavior: "smooth", block: "start" });
                 }}
               >
                 <span className="item-icon">{s.icon}</span>
@@ -202,14 +202,22 @@ export default function PrivacyPolicy() {
         <main className="content">
           <div className="intro-block">
             <p>
-              SkyReserve Airlines (<strong>"we," "us," or "our"</strong>) is committed to protecting your personal information. This Privacy Policy explains how we collect, use, disclose, and safeguard your data when you use our reservation services, website, or mobile application. By booking with us, you agree to the practices described herein. We encourage you to read this document carefully.
+              SkyJet Airlines (<strong>"we," "us," or "our"</strong>) is
+              committed to protecting your personal information. This Privacy
+              Policy explains how we collect, use, disclose, and safeguard your
+              data when you use our reservation services, website, or mobile
+              application. By booking with us, you agree to the practices
+              described herein. We encourage you to read this document
+              carefully.
             </p>
           </div>
 
           {sections.map((section) => {
-            const isOpen = expandedSections[section.id] !== false && expandedSections[section.id] !== undefined
-              ? expandedSections[section.id]
-              : true;
+            const isOpen =
+              expandedSections[section.id] !== false &&
+              expandedSections[section.id] !== undefined
+                ? expandedSections[section.id]
+                : true;
 
             return (
               <div key={section.id} id={section.id} className="section-card">
@@ -221,7 +229,9 @@ export default function PrivacyPolicy() {
                     <div className="section-icon">{section.icon}</div>
                     <span className="section-title">{section.title}</span>
                   </div>
-                  <div className={`section-toggle${isOpen ? " open" : ""}`}>▼</div>
+                  <div className={`section-toggle${isOpen ? " open" : ""}`}>
+                    ▼
+                  </div>
                 </button>
 
                 {isOpen && (
@@ -242,10 +252,15 @@ export default function PrivacyPolicy() {
 
       {/* LAST UPDATED */}
       <div className="last-updated">
-        <p>This policy was last updated on <strong>March 1, 2026</strong>. We reserve the right to amend this policy at any time. Material changes will be communicated via email or a prominent notice on our website at least 30 days prior to taking effect.</p>
+        <p>
+          This policy was last updated on <strong>March 1, 2026</strong>. We
+          reserve the right to amend this policy at any time. Material changes
+          will be communicated via email or a prominent notice on our website at
+          least 30 days prior to taking effect.
+        </p>
       </div>
 
-     <Footer />
+      <Footer />
     </div>
   );
 }

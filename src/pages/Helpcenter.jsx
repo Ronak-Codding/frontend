@@ -1,4 +1,34 @@
 import { useState } from "react";
+import {
+  Plane,
+  Ticket,
+  Luggage,
+  Armchair,
+  CreditCard,
+  Globe,
+  Phone,
+  MessageCircle,
+  Mail,
+  Twitter,
+  AlertCircle,
+  X,
+  ArrowRight,
+  Star,
+  Clock,
+  TrendingUp,
+  Users,
+  MapPin,
+  ChevronRight,
+  Search,
+  Filter,
+  BookOpen,
+  HelpCircle,
+  MessageSquare,
+  Headphones,
+  Shield,
+  Award,
+  CheckCircle,
+} from "lucide-react";
 import "./HelpCenter.css";
 import Footer from "../components/Footer";
 import Navbar from "../components/Navbar";
@@ -8,7 +38,7 @@ import Breadcrumb from "../components/Breadcrumb";
 const CATEGORIES = [
   {
     id: 1,
-    icon: "✈️",
+    icon: Plane,
     color: "blue",
     title: "Booking & Reservations",
     desc: "Manage your flights, seat selection, and booking modifications.",
@@ -16,7 +46,7 @@ const CATEGORIES = [
   },
   {
     id: 2,
-    icon: "🎫",
+    icon: Ticket,
     color: "gold",
     title: "Check-in & Boarding",
     desc: "Online check-in, boarding pass, and gate information.",
@@ -24,7 +54,7 @@ const CATEGORIES = [
   },
   {
     id: 3,
-    icon: "🧳",
+    icon: Luggage,
     color: "teal",
     title: "Baggage & Allowances",
     desc: "Carry-on rules, checked bags, fees and lost luggage claims.",
@@ -32,7 +62,7 @@ const CATEGORIES = [
   },
   {
     id: 4,
-    icon: "💺",
+    icon: Armchair,
     color: "purple",
     title: "Seat Upgrades",
     desc: "Upgrade to business or first class and loyalty rewards.",
@@ -40,7 +70,7 @@ const CATEGORIES = [
   },
   {
     id: 5,
-    icon: "💳",
+    icon: CreditCard,
     color: "green",
     title: "Payments & Refunds",
     desc: "Payment methods, cancellation policies and refund timelines.",
@@ -48,7 +78,7 @@ const CATEGORIES = [
   },
   {
     id: 6,
-    icon: "🌐",
+    icon: Globe,
     color: "red",
     title: "Special Assistance",
     desc: "Accessibility services, unaccompanied minors and medical needs.",
@@ -136,27 +166,27 @@ const STATUS_ITEMS = [
 
 const CONTACT_METHODS = [
   {
-    icon: "📞",
+    icon: Phone,
     method: "Phone Support",
     detail: "1-800-FLY-ALTA\nAvailable in 12 languages",
     avail: "24 / 7",
   },
   {
-    icon: "💬",
+    icon: MessageCircle,
     method: "Live Chat",
     detail: "Connect with an agent instantly through our app or website",
     avail: "Daily 6AM – Midnight",
   },
   {
-    icon: "📧",
+    icon: Mail,
     method: "Email Us",
-    detail: "support@altaair.com\nResponse within 4 hours",
+    detail: "support@skyjet.com\nResponse within 4 hours",
     avail: "Response in 4 hrs",
   },
   {
-    icon: "𝕏",
+    icon: Twitter,
     method: "Social Media",
-    detail: "@AltaAirlines on X and Facebook for quick updates",
+    detail: "@SkyjetAirlines on X and Facebook for quick updates",
     avail: "Daily 7AM – 10PM",
   },
 ];
@@ -199,15 +229,6 @@ const ARTICLES = [
   },
 ];
 
-const NAV_LINKS = [
-  "Home",
-  "Book",
-  "Manage",
-  "Check-in",
-  "Destinations",
-  "Help Center",
-];
-
 /* ───── Component ───── */
 export default function HelpCenter() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -225,18 +246,22 @@ export default function HelpCenter() {
   );
 
   return (
-    <>
+    <div className="help-center-page">
       <Navbar />
-      <Breadcrumb title="Help Center"/>
+      <Breadcrumb title="Help Center" />
+
       {/* ── Stats Strip ── */}
       <div className="stats-strip">
         {[
-          { num: "99.2%", label: "Customer Satisfaction" },
-          { num: "< 2 min", label: "Average Response Time" },
-          { num: "24 / 7", label: "Support Available" },
-          { num: "180+", label: "Destinations Supported" },
+          { num: "99.2%", label: "Customer Satisfaction", icon: Star },
+          { num: "< 2 min", label: "Average Response Time", icon: Clock },
+          { num: "24 / 7", label: "Support Available", icon: Headphones },
+          { num: "180+", label: "Destinations Supported", icon: Globe },
         ].map((s) => (
           <div key={s.label} className="stat-item">
+            <div className="stat-icon">
+              <s.icon size={20} strokeWidth={1.5} />
+            </div>
             <div className="stat-num">{s.num}</div>
             <div className="stat-label">{s.label}</div>
           </div>
@@ -244,11 +269,13 @@ export default function HelpCenter() {
       </div>
 
       {/* ── Main Content ── */}
-      <main className="main">
+      <main className="help-main">
         {/* Travel Alert */}
         {alertVisible && (
           <div className="alert-banner">
-            <span className="alert-icon">⚠️</span>
+            <span className="alert-icon">
+              <AlertCircle size={18} />
+            </span>
             <div className="alert-content">
               <div className="alert-title">
                 Travel Advisory — Updated March 12, 2026
@@ -264,14 +291,17 @@ export default function HelpCenter() {
               className="alert-close"
               onClick={() => setAlertVisible(false)}
             >
-              ✕
+              <X size={16} />
             </button>
           </div>
         )}
 
         {/* Browse by Topic */}
         <div className="section-heading">
-          <span className="section-tag">Browse Topics</span>
+          <span className="section-tag">
+            <BookOpen size={12} />
+            Browse Topics
+          </span>
           <h2>What do you need help with?</h2>
           <p>
             Select a category to find guides and answers specific to your needs.
@@ -279,28 +309,35 @@ export default function HelpCenter() {
         </div>
 
         <div className="categories-grid">
-          {CATEGORIES.map((c) => (
-            <a key={c.id} href="#" className="cat-card">
-              <div className={`cat-icon ${c.color}`}>{c.icon}</div>
-              <div className="cat-title">{c.title}</div>
-              <div className="cat-desc">{c.desc}</div>
-              <div className="cat-count">{c.count}</div>
-              <span className="cat-arrow">→</span>
-            </a>
-          ))}
+          {CATEGORIES.map((c) => {
+            const Icon = c.icon;
+            return (
+              <a key={c.id} href="#" className="cat-card">
+                <div className={`cat-icon ${c.color}`}>
+                  <Icon size={24} strokeWidth={1.5} />
+                </div>
+                <div className="cat-title">{c.title}</div>
+                <div className="cat-desc">{c.desc}</div>
+                <div className="cat-count">{c.count}</div>
+                <span className="cat-arrow">
+                  <ChevronRight size={16} />
+                </span>
+              </a>
+            );
+          })}
         </div>
 
         {/* Popular Articles */}
         <div className="section-heading">
-          <span className="section-tag">Top Articles</span>
+          <span className="section-tag">
+            <TrendingUp size={12} />
+            Top Articles
+          </span>
           <h2>Popular Help Articles</h2>
           <p>The most-read guides from our knowledge base this month.</p>
         </div>
 
-        <div
-          className="articles-list"
-          style={{ marginBottom: "clamp(3rem,6vw,5rem)" }}
-        >
+        <div className="articles-list">
           {ARTICLES.map((a, i) => (
             <a key={i} href="#" className="article-item">
               <span className="article-rank">0{i + 1}</span>
@@ -308,14 +345,19 @@ export default function HelpCenter() {
                 <div className="article-title">{a.title}</div>
                 <div className="article-meta">{a.views}</div>
               </div>
-              <span className="article-icon">→</span>
+              <span className="article-icon">
+                <ArrowRight size={14} />
+              </span>
             </a>
           ))}
         </div>
 
         {/* Contact Methods */}
         <div className="section-heading">
-          <span className="section-tag">Get in Touch</span>
+          <span className="section-tag">
+            <MessageSquare size={12} />
+            Get in Touch
+          </span>
           <h2>Contact Our Support Team</h2>
           <p>
             Choose the channel that works best for you — we're here around the
@@ -324,23 +366,61 @@ export default function HelpCenter() {
         </div>
 
         <div className="contact-grid">
-          {CONTACT_METHODS.map((c) => (
-            <a key={c.method} href="#" className="contact-card">
-              <span className="contact-icon">{c.icon}</span>
-              <div className="contact-method">{c.method}</div>
-              <div
-                className="contact-detail"
-                style={{ whiteSpace: "pre-line" }}
-              >
-                {c.detail}
-              </div>
-              <div className="contact-avail">{c.avail}</div>
-            </a>
-          ))}
+          {CONTACT_METHODS.map((c) => {
+            const Icon = c.icon;
+            return (
+              <a key={c.method} href="#" className="contact-card">
+                <span className="contact-icon">
+                  <Icon size={28} strokeWidth={1.5} />
+                </span>
+                <div className="contact-method">{c.method}</div>
+                <div
+                  className="contact-detail"
+                  style={{ whiteSpace: "pre-line" }}
+                >
+                  {c.detail}
+                </div>
+                <div className="contact-avail">{c.avail}</div>
+              </a>
+            );
+          })}
         </div>
+
+        {/* FAQ Section (Optional - can be uncommented) */}
+        {/* <div className="section-heading">
+          <span className="section-tag">
+            <HelpCircle size={12} />
+            Frequently Asked
+          </span>
+          <h2>Common Questions</h2>
+          <p>Quick answers to our most frequently asked questions.</p>
+        </div>
+
+        <div className="faq-grid">
+          {FAQ_ITEMS.map((faq) => (
+            <div
+              key={faq.id}
+              className={`faq-item ${openFaq === faq.id ? "open" : ""}`}
+            >
+              <button
+                className="faq-question"
+                onClick={() => toggleFaq(faq.id)}
+              >
+                <span>{faq.q}</span>
+                <ChevronRight
+                  size={16}
+                  className={`faq-icon ${openFaq === faq.id ? "open" : ""}`}
+                />
+              </button>
+              <div className="faq-answer">
+                <p>{faq.a}</p>
+              </div>
+            </div>
+          ))}
+        </div> */}
       </main>
 
       <Footer />
-    </>
+    </div>
   );
 }

@@ -25,7 +25,7 @@ export default function BookingConfirmation() {
   const seatsParam = searchParams.get("seats") || "";
 
   const [booking, setBooking] = useState(null);
-  const [loading, setLoading] = useState(true);
+  // const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function fetchBooking() {
@@ -39,7 +39,7 @@ export default function BookingConfirmation() {
       } catch (err) {
         console.error("Booking fetch error:", err);
       } finally {
-        setLoading(false);
+        // setLoading(false);
       }
     }
     fetchBooking();

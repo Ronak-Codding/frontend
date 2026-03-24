@@ -23,7 +23,6 @@ import UserRoute from "./components/UserRoute";
 import HomePage from "./pages/Home";
 import Login from "./pages/Login";
 import ForgotPassword from "./pages/ForgotPassword";
-// import ResetPassword from "./pages/ResetPassword";
 import Register from "./pages/Register";
 import PrivacyPolicy from "./pages/Privacy";
 import TermsOfService from "./pages/TermsOfService";
@@ -50,7 +49,6 @@ export default function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
-        {/* <Route path="/reset-password/:token" element={<ResetPassword />} /> */}
         <Route path="/faqs" element={<FAQs />} />
         <Route path="/about" element={<About />} />
         <Route path="/contact" element={<Contact />} />
@@ -58,12 +56,43 @@ export default function App() {
         <Route path="/privacy" element={<PrivacyPolicy />} />
         <Route path="/termofservice" element={<TermsOfService />} />
         <Route path="/cookiepolicy" element={<CookiePolicy />} />
-        <Route path="//helpcenter" element={<HelpCenter />} />
-        <Route path="/results" element={<SearchResults />} />
-        <Route path="/seats" element={<SeatSelection />} />
-        <Route path="/passengers" element={<PassengerDetails />} />
-        <Route path="/confirmation" element={<BookingConfirmation />} />
+        <Route path="/helpcenter" element={<HelpCenter />} />
         <Route path="/admin-login" element={<AdminLogin />} />
+
+        {/* ✅ Protected — Login */}
+
+        <Route
+          path="/results"
+          element={
+            <UserRoute>
+              <SearchResults />
+            </UserRoute>
+          }
+        />
+        <Route
+          path="/seats"
+          element={
+            <UserRoute>
+              <SeatSelection />
+            </UserRoute>
+          }
+        />
+        <Route
+          path="/passengers"
+          element={
+            <UserRoute>
+              <PassengerDetails />
+            </UserRoute>
+          }
+        />
+        <Route
+          path="/confirmation"
+          element={
+            <UserRoute>
+              <BookingConfirmation />
+            </UserRoute>
+          }
+        />
 
         {/* Admin */}
         <Route

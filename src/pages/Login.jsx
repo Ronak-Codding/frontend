@@ -40,7 +40,9 @@ const Login = () => {
         }),
       );
 
-      navigate("/user");
+      window.dispatchEvent(new Event("auth:change"));
+
+      navigate("/");
     } catch (err) {
       alert("Server error");
     }

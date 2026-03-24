@@ -15,19 +15,35 @@ export default function BookingForm() {
   const [passengers, setPassengers] = useState(
     searchParams.get("passengers") || "1",
   );
-
   const [fromAirport, setFromAirport] = useState(
     fromCode ? { airport_code: fromCode, city: fromCode } : null,
   );
   const [toAirport, setToAirport] = useState(
     toCode ? { airport_code: toCode, city: toCode } : null,
   );
+
+  // ✅ Login check state
+  const [showLoginAlert, setShowLoginAlert] = useState(false);
+
   const navigate = useNavigate();
 
   const handleSearch = () => {
-    console.log("fromAirport:", fromAirport);
-    console.log("toAirport:", toAirport);
-    if (!fromAirport || !toAirport) return;
+    console.log("Search clicked");
+
+    const token = localStorage.getItem("usertoken");
+
+    if (!token || token === "undefined" || token === "null") {
+      setShowLoginAlert(true);
+      return;
+    }
+    if (!departureDate) {
+      alert("Please select departure date");
+      return;
+    }
+    if (fromAirport.airport_code === toAirport.airport_code) {
+      alert("From and To airports cannot be same");
+      return;
+    }
     navigate(
       `/results?from=${fromAirport.airport_code}&to=${toAirport.airport_code}&date=${departureDate}&passengers=${passengers}`,
     );
@@ -37,6 +53,67 @@ export default function BookingForm() {
     <section id="flight-search" className="relative -mt-32 z-20 px-4 pb-20">
       <div className="mx-auto max-w-6xl">
         <div className="rounded-2xl border border-border/50 bg-card/80 p-6 shadow-2xl backdrop-blur-xl md:p-8">
+          {/* Login Alert Modal */}
+          {showLoginAlert && (
+            <div
+              className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+              onClick={() => setShowLoginAlert(false)}
+            >
+              <div
+                className="mx-4 w-full max-w-sm rounded-2xl border border-border/50 bg-card p-6 shadow-2xl"
+                onClick={(e) => e.stopPropagation()}
+              >
+                {/* Icon */}
+                <div className="mb-4 flex justify-center">
+                  <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/10">
+                    <Plane className="h-7 w-7 text-primary" />
+                  </div>
+                </div>
+
+                {/* Text */}
+                <h3 className="mb-2 text-center text-lg font-bold text-foreground">
+                  Login Required
+                </h3>
+                <p className="mb-6 text-center text-sm text-muted-foreground">
+                  Please login to search and book flights.
+                </p>
+
+                {/* Buttons */}
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => setShowLoginAlert(false)}
+                    className="flex-1 rounded-xl border border-border bg-secondary/50 py-2.5 text-sm font-medium text-foreground hover:bg-secondary transition-all"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={() => {
+                      setShowLoginAlert(false);
+                      navigate("/login");
+                    }}
+                    className="flex-1 rounded-xl bg-primary py-2.5 text-sm font-semibold text-primary-foreground hover:opacity-90 transition-all"
+                  >
+                    Login
+                  </button>
+                </div>
+
+                {/* Register link */}
+                <p className="mt-3 text-center text-xs text-muted-foreground">
+                  New user?
+                  <button
+                    onClick={() => {
+                      setShowLoginAlert(false);
+                      navigate("/register");
+                    }}
+                    className="text-primary underline-offset-2 hover:underline"
+                  >
+                    Register here
+                  </button>
+                </p>
+              </div>
+            </div>
+          )}
+
           {/* Trip Type Toggle */}
           <div className="mb-6 flex gap-4">
             <button
@@ -76,7 +153,6 @@ export default function BookingForm() {
                     onSelect={(airport) => setFromAirport(airport)}
                   />
                 </div>
-                {/* <Plane className="absolute right-3 top-1/2 h-5 w-5 -translate-y-1/2 rotate-45 text-muted-foreground" /> */}
               </div>
             </div>
 
@@ -91,7 +167,6 @@ export default function BookingForm() {
                     onSelect={(airport) => setToAirport(airport)}
                   />
                 </div>
-                {/* <Plane className="absolute right-3 top-1/2 h-5 w-5 -translate-y-1/2 -rotate-45 text-muted-foreground" /> */}
               </div>
             </div>
 
@@ -135,7 +210,7 @@ export default function BookingForm() {
                 <select
                   value={passengers}
                   onChange={(e) => setPassengers(e.target.value)}
-                  className=" w-full rounded-xl border border-border bg-secondary/50 px-4 py-4 pr-10 text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 appearance-none"
+                  className="w-full rounded-xl border border-border bg-secondary/50 px-4 py-4 pr-10 text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 appearance-none"
                 >
                   <option value="1">1 Adult</option>
                   <option value="2">2 Adult</option>

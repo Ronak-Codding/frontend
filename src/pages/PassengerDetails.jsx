@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import {
   User,
@@ -28,10 +28,10 @@ const COUNTRIES = [
 // ── GST Helper ──
 const GST_RATE = 0.18;
 function calcGST(baseAmount) {
-  const base  = parseFloat(baseAmount) || 0;
-  const gst   = base * GST_RATE;
-  const cgst  = gst / 2;
-  const sgst  = gst / 2;
+  const base = parseFloat(baseAmount) || 0;
+  const gst = base * GST_RATE;
+  const cgst = gst / 2;
+  const sgst = gst / 2;
   const total = base + gst;
   return { base, gst, cgst, sgst, total };
 }
@@ -262,7 +262,10 @@ function GSTBreakdownCard({ basePrice }) {
         {/* Total */}
         <div className="flex items-center justify-between">
           <span className="font-semibold text-foreground">
-            Total Payable <span className="text-xs font-normal text-muted-foreground">(incl. GST)</span>
+            Total Payable{" "}
+            <span className="text-xs font-normal text-muted-foreground">
+              (incl. GST)
+            </span>
           </span>
           <span className="text-lg font-bold text-primary">{fmt(total)}</span>
         </div>
@@ -270,7 +273,8 @@ function GSTBreakdownCard({ basePrice }) {
 
       {/* GST badge */}
       <div className="mt-3 rounded-lg bg-yellow-500/10 border border-yellow-500/20 px-3 py-2 text-xs text-yellow-600 dark:text-yellow-400">
-        🧾 GST of 18% (CGST 9% + SGST 9%) is applicable on base fare as per Govt. regulations.
+        🧾 GST of 18% (CGST 9% + SGST 9%) is applicable on base fare as per
+        Govt. regulations.
       </div>
     </div>
   );
@@ -283,16 +287,15 @@ export default function PassengerDetails() {
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
 
-  const flight     = searchParams.get("flight");
-  const seats      = searchParams.get("seats")?.split(",").filter(Boolean) || [];
-  const price      = searchParams.get("price");
-  const from       = searchParams.get("from");
-  const to         = searchParams.get("to");
+  const flight = searchParams.get("flight");
+  const seats = searchParams.get("seats")?.split(",").filter(Boolean) || [];
+  const price = searchParams.get("price");
+  const from = searchParams.get("from");
+  const to = searchParams.get("to");
   const passengers = parseInt(searchParams.get("passengers") || "1");
-  const date       = searchParams.get("date") || "";
+  const date = searchParams.get("date") || "";
 
-  // GST calculated from base price (URL ma base price aave chhe)
-  const { base, cgst, sgst, gst, total } = calcGST(price);
+  const { base, gst, total } = calcGST(price);
 
   const [forms, setForms] = useState(
     Array.from({ length: passengers }, (_, i) => ({
@@ -300,7 +303,54 @@ export default function PassengerDetails() {
     })),
   );
   const [loading, setLoading] = useState(false);
-  const [error, setError]     = useState(null);
+  const [error, setError] = useState(null);
+
+  // ── Auto-fill Passenger 1 from logged-in user profile ──
+  useEffect(() => {
+    const fetchAndFill = async () => {
+      try {
+        const stored = localStorage.getItem("user");
+        if (!stored) return; // Guest user — skip
+
+        const userData = JSON.parse(stored);
+        const userId = userData?.id;
+        if (!userId) return;
+
+        const res = await fetch(
+          `http://localhost:5000/api/user/oneUser/${userId}`,
+        );
+        if (!res.ok) return;
+
+        const user = await res.json();
+
+        // Full name banavo
+        const nameParts = [user.firstName, user.middleName, user.lastName]
+          .filter(Boolean)
+          .join(" ")
+          .trim();
+
+        // Sirf Passenger 1 (index 0) auto-fill karo
+        setForms((prev) =>
+          prev.map(
+            (f, i) =>
+              i === 0
+                ? {
+                    ...f,
+                    fullName: nameParts,
+                    email: user.email || "",
+                    phone: user.phone || "",
+                  }
+                : f, // Passenger 2, 3... blank raheshe
+          ),
+        );
+      } catch (err) {
+        console.error("Auto-fill failed:", err);
+        // Silent fail — user manually bharashe
+      }
+    };
+
+    fetchAndFill();
+  }, []); // Sirf ek vaar — mount thay tyare
 
   const handleChange = (index, data) => {
     setForms((prev) => prev.map((f, i) => (i === index ? data : f)));
@@ -309,8 +359,15 @@ export default function PassengerDetails() {
   const validate = () => {
     for (let i = 0; i < forms.length; i++) {
       const f = forms[i];
-      if (!f.fullName || !f.gender || !f.dob || !f.nationality || !f.passportNumber || !f.passportExpiry) {
-        return `Passenger ${i + 1} Details incomplete `;
+      if (
+        !f.fullName ||
+        !f.gender ||
+        !f.dob ||
+        !f.nationality ||
+        !f.passportNumber ||
+        !f.passportExpiry
+      ) {
+        return `Passenger ${i + 1} Details incomplete`;
       }
       if (i === 0 && (!f.email || !f.phone)) {
         return "Contact details (email & phone) required for first passenger";
@@ -336,48 +393,54 @@ export default function PassengerDetails() {
           from,
           to,
           date,
-          seats:      forms.map((f) => f.seat || ""),
-          totalPrice: total,          // ✅ GST included total send 
+          seats: forms.map((f) => f.seat || ""),
+          totalPrice: total,
           passengers: forms,
         }),
       });
 
       const bookingData = await bookingRes.json();
-      if (!bookingRes.ok) throw new Error(bookingData.error || "Booking save failed");
+      if (!bookingRes.ok)
+        throw new Error(bookingData.error || "Booking save failed");
 
       // Step 2: PayU initiate
-      // Backend ma GST add thase — base price moko
-      const payuRes = await fetch("http://localhost:5000/api/payment/payu-initiate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          amount:    price,           // base price (backend GST add karse)
-          name:      forms[0].fullName,
-          email:     forms[0].email,
-          phone:     forms[0].phone,
-          bookingId: bookingData.bookingId,
-          from,
-          to,
-          flight,
-          date,
-          seats:     forms.map((f) => f.seat).filter(Boolean).join(","),
-        }),
-      });
+      const payuRes = await fetch(
+        "http://localhost:5000/api/payment/payu-initiate",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            amount: price,
+            name: forms[0].fullName,
+            email: forms[0].email,
+            phone: forms[0].phone,
+            bookingId: bookingData.bookingId,
+            from,
+            to,
+            flight,
+            date,
+            seats: forms
+              .map((f) => f.seat)
+              .filter(Boolean)
+              .join(","),
+          }),
+        },
+      );
 
       const payuData = await payuRes.json();
       if (!payuData.success) throw new Error("PayU initiate failed");
 
       // Step 3: Hidden form → PayU submit
       const form = document.createElement("form");
-      form.method  = "POST";
-      form.action  = payuData.payuUrl;
+      form.method = "POST";
+      form.action = payuData.payuUrl;
       form.style.display = "none";
 
       Object.entries(payuData.payuData).forEach(([key, value]) => {
-        const input  = document.createElement("input");
-        input.type   = "hidden";
-        input.name   = key;
-        input.value  = value ?? "";
+        const input = document.createElement("input");
+        input.type = "hidden";
+        input.name = key;
+        input.value = value ?? "";
         form.appendChild(input);
       });
 
@@ -392,11 +455,12 @@ export default function PassengerDetails() {
   return (
     <div className="min-h-screen bg-background px-4 py-10">
       <div className="mx-auto max-w-3xl">
-
         {/* ── Header ── */}
         <div className="mb-8 flex items-center gap-3 flex-wrap">
           <Plane className="h-6 w-6 text-primary" />
-          <h1 className="text-2xl font-bold text-foreground">Passenger Details</h1>
+          <h1 className="text-2xl font-bold text-foreground">
+            Passenger Details
+          </h1>
           <span className="text-sm text-muted-foreground">
             {from} → {to}
             {seats.length > 0 && ` · Seats: ${seats.join(", ")}`}
@@ -437,7 +501,9 @@ export default function PassengerDetails() {
             </p>
             <p className="text-xl font-bold text-primary">
               {fmt(total)}
-              <span className="ml-1 text-xs font-normal text-muted-foreground">incl. GST</span>
+              <span className="ml-1 text-xs font-normal text-muted-foreground">
+                incl. GST
+              </span>
             </p>
           </div>
           <button
@@ -449,7 +515,6 @@ export default function PassengerDetails() {
             <ChevronRight className="h-4 w-4" />
           </button>
         </div>
-
       </div>
     </div>
   );

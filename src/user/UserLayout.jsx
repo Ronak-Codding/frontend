@@ -63,6 +63,7 @@ const UserLayout = () => {
   const handleLogout = () => {
     localStorage.removeItem("usertoken");
     localStorage.removeItem("user");
+    window.dispatchEvent(new Event("auth:change"));
     navigate("/login");
   };
 

@@ -341,7 +341,7 @@ const ForgotPassword = () => {
         style={s.card}
       >
         {/* App name */}
-        <p style={s.title}>MyTrip</p>
+        <p style={s.title}>SkyJet</p>
 
         {/* Step indicator */}
         {step < STEP_SUCCESS && (

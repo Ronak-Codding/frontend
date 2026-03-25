@@ -59,7 +59,7 @@ export default function App() {
         <Route path="/helpcenter" element={<HelpCenter />} />
         <Route path="/admin-login" element={<AdminLogin />} />
 
-        {/* ✅ Protected — Login */}
+        {/*Protected — Login */}
 
         <Route
           path="/results"

@@ -642,14 +642,12 @@ const AdminFlights = () => {
       : "—";
   const formatDuration = (mins) =>
     mins ? `${Math.floor(mins / 60)}h ${mins % 60}m` : "—";
-
   const STATUS_CLASS = {
-    Scheduled: "badge-confirmed",
-    Delayed: "badge-pending",
+    Scheduled: "badge-scheduled",
+    Delayed: "badge-delayed",
     Cancelled: "badge-cancelled",
-    Completed: "badge-confirmed",
+    Completed: "badge-completed",
   };
-
   const closeForm = () => {
     setShowAdd(false);
     setShowEdit(false);
@@ -666,7 +664,7 @@ const AdminFlights = () => {
   };
 
   return (
-    <div>
+    <div style={{ position: "relative", minHeight: "200px" }}>
       {loading && (
         <div className="users-loading-overlay">
           <div className="users-loading-box">

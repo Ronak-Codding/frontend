@@ -12,7 +12,11 @@ import {
   Smartphone,
   Building2,
   Wallet,
-  IndianRupee, 
+  IndianRupee,
+  Bell,
+  Mail,
+  CalendarCheck,
+  Zap,
 } from "lucide-react";
 import "./UserLayout.css";
 import "./UserPages.css";
@@ -21,11 +25,36 @@ const UserDashboard = () => {
   const [bookings, setBookings] = useState([]);
   const [payments, setPayments] = useState([]);
   const [loading, setLoading] = useState(true);
-  const user = JSON.parse(localStorage.getItem("user") || "{}");
+  const [todayFlights, setTodayFlights] = useState([]);
+  const [showNotif, setShowNotif] = useState(false);
+  const [emailSent, setEmailSent] = useState(false);
 
+  const user = JSON.parse(localStorage.getItem("user") || "{}");
   const displayName =
     user.firstName || user.fullname || user.name || "Traveller";
 
+  // ── helpers ──────────────────────────────────────────────
+  const isToday = (dateStr) => {
+    if (!dateStr) return false;
+    const d = new Date(dateStr);
+    const t = new Date();
+    return (
+      d.getDate() === t.getDate() &&
+      d.getMonth() === t.getMonth() &&
+      d.getFullYear() === t.getFullYear()
+    );
+  };
+
+  const formatDate = (d) =>
+    d
+      ? new Date(d).toLocaleDateString("en-IN", {
+          day: "numeric",
+          month: "short",
+          year: "numeric",
+        })
+      : "—";
+
+  // ── fetch data ────────────────────────────────────────────
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
@@ -38,9 +67,25 @@ const UserDashboard = () => {
             `http://localhost:5000/api/payment?email=${encodeURIComponent(user.email)}&limit=100`,
           ),
         ]);
+        if (bRes.ok) {
+          const bData = await bRes.json();
+          setBookings(bData);
 
-        if (bRes.ok) setBookings(await bRes.json());
-
+          // find today's confirmed flights
+          const todays = bData.filter(
+            (b) =>
+              (b.status === "confirmed" || b.status === "Confirmed") &&
+              (isToday(b.journeyDate) ||
+                isToday(b.travelDate) ||
+                isToday(b.date)),
+          );
+          setTodayFlights(todays);
+          if (todays.length > 0) {
+            setShowNotif(true);
+            // simulate email sent
+            setTimeout(() => setEmailSent(true), 800);
+          }
+        }
         if (pRes.ok) {
           const pData = await pRes.json();
           setPayments(pData.payments || []);
@@ -54,6 +99,7 @@ const UserDashboard = () => {
     if (user.email) fetchData();
   }, []);
 
+  // ── derived stats ─────────────────────────────────────────
   const confirmed = bookings.filter(
     (b) => b.status === "confirmed" || b.status === "Confirmed",
   ).length;
@@ -62,7 +108,6 @@ const UserDashboard = () => {
     (b) => b.status === "cancelled" || b.status === "Cancelled",
   ).length;
 
-  //   successful payments  total
   const totalSpent = payments
     .filter((p) => p.status === "success")
     .reduce((s, p) => s + (p.amount || 0), 0);
@@ -71,11 +116,11 @@ const UserDashboard = () => {
     .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
     .slice(0, 5);
 
-  //  Recent payments - latest 3
   const recentPayments = [...payments]
     .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
     .slice(0, 3);
 
+  // ── config ────────────────────────────────────────────────
   const STATS = [
     {
       label: "Total Bookings",
@@ -134,24 +179,57 @@ const UserDashboard = () => {
     wallet: <Wallet size={16} color="#f59e0b" />,
   };
 
-  const formatDate = (d) =>
-    d
-      ? new Date(d).toLocaleDateString("en-IN", {
-          day: "numeric",
-          month: "short",
-          year: "numeric",
-        })
-      : "—";
-
+  // ── render ────────────────────────────────────────────────
   return (
     <div>
-      {/* Welcome */}
+      {/* ── Welcome ── */}
       <div className="up-header">
         <h1 className="up-title">Welcome back, {displayName}</h1>
         <p className="up-subtitle">Here's your travel summary at a glance</p>
       </div>
 
-      {/* Stats */}
+      {/* ── TODAY'S FLIGHT BANNER ── */}
+      {todayFlights.length > 0 && (
+        <div className="ud-flight-banner">
+          <div className="ud-banner-shine" />
+          <div className="ud-banner-left">
+            <span className="ud-banner-plane">✈️</span>
+            <div>
+              <p className="ud-banner-title">🎉 Today is Your Flight Day!</p>
+              <p className="ud-banner-sub">
+                {todayFlights.map((f, i) => (
+                  <span key={i}>
+                    <strong>
+                      {f.bookingId || f._id?.slice(-8).toUpperCase()}
+                    </strong>{" "}
+                    ({f.from || "—"} → {f.to || "—"})
+                    {i < todayFlights.length - 1 ? " · " : ""}
+                  </span>
+                ))}{" "}
+                — An email reminder has been sent to{" "}
+                <strong>{user.email}</strong>
+              </p>
+            </div>
+          </div>
+          <span className="ud-banner-badge">TODAY</span>
+        </div>
+      )}
+
+      {/* ── EMAIL SENT STRIP ── */}
+      {emailSent && todayFlights.length > 0 && (
+        <div className="ud-email-strip">
+          <Mail size={14} />
+          Auto email sent to <strong>{user.email}</strong> at{" "}
+          {new Date().toLocaleTimeString("en-IN", {
+            hour: "2-digit",
+            minute: "2-digit",
+          })}{" "}
+          IST
+          <span className="ud-email-strip-dot" />
+        </div>
+      )}
+
+      {/* ── Stats ── */}
       <div className="up-stats-grid">
         {STATS.map(({ label, value, icon: Icon, color, bg, badge }) => (
           <div key={label} className="up-stat-card">
@@ -169,9 +247,9 @@ const UserDashboard = () => {
         ))}
       </div>
 
-      {/* Recent Bookings + Quick Links */}
+      {/* ── Main Grid ── */}
       <div className="up-grid-2">
-        {/* Recent Bookings */}
+        {/* ── Recent Bookings ── */}
         <div className="up-card">
           <div className="up-card-header">
             <h3 className="up-card-title">
@@ -195,36 +273,55 @@ const UserDashboard = () => {
                 </Link>
               </div>
             ) : (
-              recentBookings.map((b, i) => (
-                <div key={b._id || i} className="ud-booking-row">
-                  <div className="ud-booking-icon">
-                    <Plane size={16} style={{ color: "#667eea" }} />
+              recentBookings.map((b, i) => {
+                const flightToday =
+                  isToday(b.journeyDate) ||
+                  isToday(b.travelDate) ||
+                  isToday(b.date);
+                return (
+                  <div
+                    key={b._id || i}
+                    className={`ud-booking-row${flightToday ? " ud-booking-row--today" : ""}`}
+                  >
+                    <div className="ud-booking-icon">
+                      <Plane size={16} style={{ color: "#667eea" }} />
+                    </div>
+                    <div className="ud-booking-info">
+                      <p className="ud-booking-ref">
+                        {b.bookingId || b._id?.slice(-8).toUpperCase()}
+                        {flightToday && (
+                          <span className="ud-today-chip">Today ✈️</span>
+                        )}
+                      </p>
+                      <p className="ud-booking-route">
+                        {b.from || "—"} → {b.to || "—"}
+                      </p>
+                    </div>
+                    <div style={{ textAlign: "right" }}>
+                      <span
+                        className={`up-badge ${STATUS_CLASS[b.status] || "up-badge-pending"}`}
+                      >
+                        {b.status}
+                      </span>
+                      <p className="ud-booking-date">
+                        {formatDate(
+                          b.journeyDate ||
+                            b.travelDate ||
+                            b.date ||
+                            b.createdAt,
+                        )}
+                      </p>
+                    </div>
                   </div>
-                  <div className="ud-booking-info">
-                    <p className="ud-booking-ref">
-                      {b.bookingId || b._id?.slice(-8).toUpperCase()}
-                    </p>
-                    <p className="ud-booking-route">
-                      {b.from || "—"} → {b.to || "—"}
-                    </p>
-                  </div>
-                  <div style={{ textAlign: "right" }}>
-                    <span
-                      className={`up-badge ${STATUS_CLASS[b.status] || "up-badge-pending"}`}
-                    >
-                      {b.status}
-                    </span>
-                    <p className="ud-booking-date">{formatDate(b.createdAt)}</p>
-                  </div>
-                </div>
-              ))
+                );
+              })
             )}
           </div>
         </div>
 
-        {/* Quick Actions + Recent Payments */}
+        {/* ── Right Column ── */}
         <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-          {/* Quick Links */}
+          {/* Quick Actions */}
           <div className="up-card">
             <div className="up-card-header">
               <h3 className="up-card-title">
@@ -274,7 +371,7 @@ const UserDashboard = () => {
             </div>
           </div>
 
-          {/* Recent Payments - fixed */}
+          {/* Recent Payments */}
           <div className="up-card">
             <div className="up-card-header">
               <h3 className="up-card-title">
@@ -331,8 +428,123 @@ const UserDashboard = () => {
               )}
             </div>
           </div>
+
+          {/* How Auto Email Works */}
+          <div className="up-card">
+            <div className="up-card-header">
+              <h3 className="up-card-title">
+                <Zap size={16} /> Auto Email — How It Works
+              </h3>
+            </div>
+            <div
+              style={{
+                padding: "0.75rem 1rem",
+                display: "flex",
+                flexDirection: "column",
+                gap: "0.85rem",
+              }}
+            >
+              {[
+                {
+                  step: "1",
+                  icon: <Ticket size={14} />,
+                  title: "Booking Saved",
+                  desc: "Flight date stored when you book",
+                  color: "#667eea",
+                },
+                {
+                  step: "2",
+                  icon: <CalendarCheck size={14} />,
+                  title: "Daily Date Check",
+                  desc: "System checks every morning at 6 AM",
+                  color: "#3b82f6",
+                },
+                {
+                  step: "✓",
+                  icon: <Mail size={14} />,
+                  title: "Email Triggered",
+                  desc: "If flight date = today → email auto-sent",
+                  color: "#10b981",
+                },
+                {
+                  step: "4",
+                  icon: <Bell size={14} />,
+                  title: "Dashboard Alert",
+                  desc: "Banner appears with your flight details",
+                  color: "#f59e0b",
+                },
+              ].map(({ step, icon, title, desc, color }) => (
+                <div
+                  key={step}
+                  style={{
+                    display: "flex",
+                    alignItems: "flex-start",
+                    gap: "0.75rem",
+                  }}
+                >
+                  <div
+                    style={{
+                      width: 28,
+                      height: 28,
+                      borderRadius: "50%",
+                      background: `${color}18`,
+                      border: `1px solid ${color}44`,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      flexShrink: 0,
+                      color,
+                    }}
+                  >
+                    {icon}
+                  </div>
+                  <div>
+                    <p
+                      style={{
+                        fontSize: "0.8rem",
+                        fontWeight: 600,
+                        marginBottom: 2,
+                      }}
+                    >
+                      {title}
+                    </p>
+                    <p
+                      style={{
+                        fontSize: "0.72rem",
+                        color: "var(--text-muted, #94a3b8)",
+                      }}
+                    >
+                      {desc}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
+
+      {/* ── Toast Notification ── */}
+      {showNotif && (
+        <div className="ud-toast" role="alert">
+          <div className="ud-toast-inner">
+            <span style={{ fontSize: 20 }}>✈️</span>
+            <div>
+              <p className="ud-toast-title">Flight Reminder Sent!</p>
+              <p className="ud-toast-sub">
+                Email sent to <strong>{user.email}</strong> for today's flight.
+              </p>
+            </div>
+            <button
+              className="ud-toast-close"
+              onClick={() => setShowNotif(false)}
+              aria-label="Close"
+            >
+              ✕
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -9,6 +9,7 @@ import {
   ChevronRight,
   X,
   RefreshCw,
+  Download,
 } from "lucide-react";
 import "./UserLayout.css";
 import "./UserPages.css";
@@ -21,7 +22,7 @@ const UserBookings = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [viewBooking, setViewBooking] = useState(null);
 
-  // ✅ Refund modal state
+  // Refund modal state
   const [refundModal, setRefundModal] = useState(false);
   const [refundBooking, setRefundBooking] = useState(null);
   const [refundReason, setRefundReason] = useState("");
@@ -64,6 +65,43 @@ const UserBookings = () => {
   useEffect(() => {
     setCurrentPage(1);
   }, [search, statusFilter]);
+
+  // ── Download Boarding Pass ──
+  const downloadBoardingPass = async (booking) => {
+    try {
+      // Passengers fetch by bookingId
+      const pasRes = await fetch(
+        `http://localhost:5000/api/passenger/onepassenger/${booking._id}`,
+      );
+      if (!pasRes.ok) throw new Error("Passengers not found");
+      const passengers = await pasRes.json();
+
+      if (!passengers?.length) {
+        showNotification("No passenger found for this booking", "error");
+        return;
+      }
+
+      // Each passenger no boarding pass download karo
+      for (const passenger of passengers) {
+        const res = await fetch(
+          `http://localhost:5000/api/booking/${booking._id}/boarding-pass/${passenger._id}`,
+        );
+        if (!res.ok) throw new Error("PDF generation failed");
+
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `boarding-pass-${booking.flightNumber}-${passenger.fullName || "passenger"}.pdf`;
+        a.click();
+        URL.revokeObjectURL(url);
+      }
+
+      showNotification("✅ Boarding pass downloaded!");
+    } catch {
+      showNotification("Failed to download boarding pass", "error");
+    }
+  };
 
   const filteredBookings = bookings.filter((b) => {
     const matchSearch =
@@ -117,14 +155,12 @@ const UserBookings = () => {
     }
     setRefundLoading(true);
     try {
-      // Payment find karo is booking ke liye
       const payRes = await fetch(
         `http://localhost:5000/api/payment?email=${encodeURIComponent(user.email)}&limit=100`,
       );
       const payData = await payRes.json();
       const payments = payData.payments || [];
 
-      // Booking ID se match karo
       const matchedPayment = payments.find(
         (p) =>
           p.bookingId?.toString() === refundBooking._id?.toString() &&
@@ -137,7 +173,6 @@ const UserBookings = () => {
         return;
       }
 
-      // Refund request submit karo
       const res = await fetch(
         `http://localhost:5000/api/payment/refund/${matchedPayment._id}`,
         {
@@ -197,7 +232,11 @@ const UserBookings = () => {
       {/* Notification */}
       {notification.show && (
         <div
-          className={`up-notification ${notification.type === "error" ? "up-notification-error" : "up-notification-success"}`}
+          className={`up-notification ${
+            notification.type === "error"
+              ? "up-notification-error"
+              : "up-notification-success"
+          }`}
         >
           {notification.message}
         </div>
@@ -236,7 +275,6 @@ const UserBookings = () => {
             </div>
 
             <div className="pax-modal-body">
-              {/* Booking Info */}
               <div
                 style={{
                   background: "rgba(245,158,11,0.08)",
@@ -282,7 +320,6 @@ const UserBookings = () => {
                 </div>
               </div>
 
-              {/* Reason Select */}
               <div className="pax-form-group">
                 <label className="pax-form-label">
                   Refund Reason <span className="pax-required">*</span>
@@ -301,7 +338,6 @@ const UserBookings = () => {
                 </select>
               </div>
 
-              {/* Custom reason if Other */}
               {refundReason === "Other" && (
                 <div
                   className="pax-form-group"
@@ -328,7 +364,9 @@ const UserBookings = () => {
                   borderRadius: "0.5rem",
                 }}
               >
-                ℹ️ Refund request admin. It will take 3-5 business days to process. After approval, the amount will be automatically returned to the original payment method.
+                ℹ️ Refund request admin review karega. It will take 3-5 business
+                days to process. After approval, the amount will be
+                automatically returned to the original payment method.
               </p>
             </div>
 
@@ -392,6 +430,7 @@ const UserBookings = () => {
                 <X size={20} />
               </button>
             </div>
+
             <div className="pax-modal-body">
               <div className="ub-detail-grid">
                 {[
@@ -449,7 +488,34 @@ const UserBookings = () => {
                 </div>
               )}
             </div>
+
             <div className="pax-modal-footer">
+              {/* Download Boarding Pass - confirmed booking pe */}
+              {(viewBooking.status === "confirmed" ||
+                viewBooking.status === "Confirmed") && (
+                <button
+                  onClick={() => {
+                    downloadBoardingPass(viewBooking);
+                    setViewBooking(null);
+                  }}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "0.4rem",
+                    background: "rgba(108,99,255,0.15)",
+                    color: "#6c63ff",
+                    border: "1px solid rgba(108,99,255,0.4)",
+                    borderRadius: "0.6rem",
+                    padding: "0.5rem 1rem",
+                    cursor: "pointer",
+                    fontWeight: 600,
+                    fontSize: "0.85rem",
+                  }}
+                >
+                  <Download size={15} /> Download Boarding Pass
+                </button>
+              )}
+
               {/* Cancel button */}
               {(viewBooking.status === "confirmed" ||
                 viewBooking.status === "Confirmed") && (
@@ -463,6 +529,7 @@ const UserBookings = () => {
                   <XCircle size={15} /> Cancel Booking
                 </button>
               )}
+
               {/* Refund button - cancelled booking pe */}
               {(viewBooking.status === "cancelled" ||
                 viewBooking.status === "Cancelled") && (
@@ -485,6 +552,7 @@ const UserBookings = () => {
                   <RefreshCw size={15} /> Request Refund
                 </button>
               )}
+
               <button
                 className="up-btn-secondary"
                 onClick={() => setViewBooking(null)}
@@ -571,6 +639,7 @@ const UserBookings = () => {
                   </div>
                 </div>
               </div>
+
               <div className="ub-card-right">
                 <div style={{ textAlign: "right" }}>
                   <p className="ub-card-price">
@@ -592,6 +661,23 @@ const UserBookings = () => {
                   >
                     <Eye size={15} />
                   </button>
+
+                  {/* Download Boarding Pass - confirmed booking pe */}
+                  {(b.status === "confirmed" || b.status === "Confirmed") && (
+                    <button
+                      className="ub-action-btn"
+                      onClick={() => downloadBoardingPass(b)}
+                      title="Download Boarding Pass"
+                      style={{
+                        background: "rgba(108,99,255,0.1)",
+                        color: "#6c63ff",
+                        border: "1px solid rgba(108,99,255,0.3)",
+                      }}
+                    >
+                      <Download size={15} />
+                    </button>
+                  )}
+
                   {/* Cancel - confirmed booking pe */}
                   {(b.status === "confirmed" || b.status === "Confirmed") && (
                     <button
@@ -602,7 +688,8 @@ const UserBookings = () => {
                       <XCircle size={15} />
                     </button>
                   )}
-                  {/*  Refund - cancelled booking pe */}
+
+                  {/* Refund - cancelled booking pe */}
                   {(b.status === "cancelled" || b.status === "Cancelled") && (
                     <button
                       className="ub-action-btn"
@@ -644,7 +731,9 @@ const UserBookings = () => {
               <button
                 key={i}
                 onClick={() => setCurrentPage(i + 1)}
-                className={`ub-page-btn ${currentPage === i + 1 ? "ub-page-btn-active" : ""}`}
+                className={`ub-page-btn ${
+                  currentPage === i + 1 ? "ub-page-btn-active" : ""
+                }`}
               >
                 {i + 1}
               </button>

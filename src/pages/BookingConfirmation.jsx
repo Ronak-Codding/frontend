@@ -25,7 +25,7 @@ export default function BookingConfirmation() {
   const seatsParam = searchParams.get("seats") || "";
 
   const [booking, setBooking] = useState(null);
-  // const [loading, setLoading] = useState(true);
+  const [downloading, setDownloading] = useState(false);
 
   useEffect(() => {
     async function fetchBooking() {
@@ -38,12 +38,44 @@ export default function BookingConfirmation() {
         if (res.ok) setBooking(data);
       } catch (err) {
         console.error("Booking fetch error:", err);
-      } finally {
-        // setLoading(false);
       }
     }
     fetchBooking();
   }, [bookingId]);
+
+  // ── Download Boarding Pass PDF ──
+  const downloadBoardingPass = async () => {
+    if (!bookingId) return;
+
+    // Booking data load na thay hoy to wait karo
+    if (!booking?.passengers?.length) {
+      alert("Booking data load નથી થઈ, થોડી વાર રાહ જુઓ અને ફરી try કરો.");
+      return;
+    }
+
+    setDownloading(true);
+    try {
+      for (const passenger of booking.passengers) {
+        const res = await fetch(
+          `http://localhost:5000/api/booking/${bookingId}/boarding-pass/${passenger._id}`,
+        );
+        if (!res.ok) throw new Error("PDF generation failed");
+
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `boarding-pass-${flight}-${passenger.fullName || "passenger"}.pdf`;
+        a.click();
+        URL.revokeObjectURL(url);
+      }
+    } catch (err) {
+      console.error("Download error:", err);
+      alert("Boarding pass download failed. Please try again.");
+    } finally {
+      setDownloading(false);
+    }
+  };
 
   const displaySeats =
     booking?.seats?.filter(Boolean).length > 0
@@ -62,7 +94,6 @@ export default function BookingConfirmation() {
       {/* ── Print Styles ── */}
       <style>{`
         @media print {
-          /* Hide everything except the ticket */
           body * { visibility: hidden; }
           #printable-ticket, #printable-ticket * { visibility: visible; }
           #printable-ticket {
@@ -76,8 +107,6 @@ export default function BookingConfirmation() {
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
           }
-
-          /* Dark card — matches screen */
           #printable-ticket .ticket-card {
             background: #1e293b !important;
             border: 1px solid rgba(255,255,255,0.08) !important;
@@ -85,65 +114,33 @@ export default function BookingConfirmation() {
             border-radius: 16px !important;
             overflow: hidden !important;
           }
-
-          /* Amber top bar */
           #printable-ticket .ticket-topbar {
             background: #f59e0b !important;
             height: 8px !important;
           }
-
-          /* Amber primary text (booking ID, price) */
           #printable-ticket .text-primary { color: #f59e0b !important; }
-
-          /* Main text */
           #printable-ticket .text-foreground { color: #f1f5f9 !important; }
-
-          /* Muted labels */
           #printable-ticket .text-muted-foreground { color: #94a3b8 !important; }
-
-          /* Confirmed badge */
           #printable-ticket .text-emerald-500 { color: #10b981 !important; }
           #printable-ticket .bg-emerald-500\\/10 { background: rgba(16,185,129,0.15) !important; }
           #printable-ticket .border-emerald-500\\/30 { border-color: rgba(16,185,129,0.3) !important; }
-
-          /* Plane icon circle */
           #printable-ticket .bg-primary\\/10 { background: rgba(245,158,11,0.15) !important; }
-
-          /* Borders & dividers */
           #printable-ticket .border-border\\/30,
           #printable-ticket .border-border\\/50,
           #printable-ticket .border-border { border-color: rgba(255,255,255,0.1) !important; }
-
-          /* Dashed divider notch circles */
           #printable-ticket .notch { background: #0f172a !important; }
-
-          /* Plane icon color */
           #printable-ticket .text-primary svg { color: #f59e0b !important; }
-
-          /* Hide action buttons */
           #print-actions { display: none !important; }
-
-          /* Hide success banner */
           #success-banner { display: none !important; }
-
-          /* Grid & passenger section visibility */
           #printable-ticket .grid { display: grid !important; }
           #printable-ticket .passenger-section { display: block !important; }
-
-          /* No page break inside ticket */
           #printable-ticket { page-break-inside: avoid; }
-        }
-
-        @media screen {
-          #printable-ticket {
-            /* Screen styles handled by Tailwind */
-          }
         }
       `}</style>
 
       <div className="min-h-screen bg-background px-4 py-10">
         <div className="mx-auto max-w-2xl">
-          {/* ── Success Banner (hidden on print) ── */}
+          {/* ── Success Banner ── */}
           <div
             id="success-banner"
             className="mb-8 flex flex-col items-center text-center"
@@ -159,7 +156,7 @@ export default function BookingConfirmation() {
             </p>
           </div>
 
-          {/* ── Ticket Card (printable) ── */}
+          {/* ── Ticket Card ── */}
           <div
             id="printable-ticket"
             className="relative mb-6 overflow-hidden rounded-2xl border border-border/50 bg-card/80 shadow-2xl backdrop-blur-xl ticket-card"
@@ -259,7 +256,7 @@ export default function BookingConfirmation() {
               <div className="notch absolute -right-4 h-8 w-8 rounded-full bg-background" />
             </div>
 
-            {/* ── Passenger Info ── */}
+            {/* Passenger Info */}
             {firstPassenger && (
               <div className="passenger-section p-6 border-b border-border/30">
                 <p className="mb-3 text-xs font-medium uppercase tracking-wider text-muted-foreground">
@@ -321,14 +318,34 @@ export default function BookingConfirmation() {
             </div>
           </div>
 
-          {/* ── Action Buttons (hidden on print) ── */}
+          {/* ── Action Buttons ── */}
           <div id="print-actions" className="flex gap-4">
             <button
-              onClick={() => window.print()}
-              className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-border bg-secondary/50 px-6 py-3 text-sm font-semibold text-foreground hover:bg-secondary transition-all"
+              onClick={downloadBoardingPass}
+              disabled={downloading}
+              className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-border bg-secondary/50 px-6 py-3 text-sm font-semibold text-foreground hover:bg-secondary transition-all disabled:opacity-60 disabled:cursor-not-allowed"
             >
-              <Download className="h-4 w-4" />
-              Download Ticket
+              {downloading ? (
+                <>
+                  <div
+                    style={{
+                      width: 16,
+                      height: 16,
+                      border: "2px solid currentColor",
+                      borderTopColor: "transparent",
+                      borderRadius: "50%",
+                      animation: "spin 0.7s linear infinite",
+                      display: "inline-block",
+                    }}
+                  />
+                  Generating PDF...
+                </>
+              ) : (
+                <>
+                  <Download className="h-4 w-4" />
+                  Download Boarding Pass
+                </>
+              )}
             </button>
             <button
               onClick={() => navigate("/")}
@@ -338,6 +355,11 @@ export default function BookingConfirmation() {
               Back to Home
             </button>
           </div>
+
+          {/* Spin animation */}
+          <style>{`
+            @keyframes spin { to { transform: rotate(360deg); } }
+          `}</style>
         </div>
       </div>
     </>

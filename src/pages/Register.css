@@ -105,13 +105,13 @@
   align-items: center;
   gap: 6px;
   margin-bottom: 6px;
-  color: var(--register-text);
+  color: var(--register-text) !important;
   font-weight: 600;
   font-size: 13px;
 }
 
 .form-group label i {
-  color: var(--register-primary);
+  color: var(--register-primary) !important;
   font-size: 13px;
   width: 16px;
   text-align: center;
@@ -120,22 +120,22 @@
 .form-group input {
   width: 100%;
   padding: 12px 14px;
-  border: 2px solid var(--register-border);
+  border: 2px solid var(--register-border) !important;
   border-radius: 8px;
   font-size: 14px;
   transition: all 0.3s ease;
-  background-color: white;
+  background-color: white !important;
   color: #334155;
 }
 
 .form-group input:focus {
   outline: none;
-  border-color: var(--register-primary);
+  border-color: var(--register-primary) !important;
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
 .form-group input.error {
-  border-color: var(--register-error);
+  border-color: var(--register-error) !important;
 }
 
 .form-group input:disabled {
@@ -145,7 +145,7 @@
 }
 
 .error-message {
-  color: var(--register-error);
+  color: var(--register-error) !important;
   font-size: 12px;
   margin-top: 4px;
   display: block;
@@ -169,7 +169,7 @@
   align-items: flex-start;
   gap: 10px;
   cursor: pointer;
-  color: var(--register-text);
+  color: var(--register-text) !important;
   font-weight: 500;
   font-size: 13px;
   line-height: 1.5;
@@ -179,18 +179,18 @@
   margin-top: 2px;
   width: 16px;
   height: 16px;
-  accent-color: var(--register-primary);
+  accent-color: var(--register-primary) !important;
   cursor: pointer;
   flex-shrink: 0;
 }
 
 .checkbox-label input[type="checkbox"].error {
-  outline: 2px solid var(--register-error);
+  outline: 2px solid var(--register-error) !important;
   outline-offset: 2px;
 }
 
 .checkbox-label a {
-  color: var(--register-primary);
+  color: var(--register-primary) !important;
   text-decoration: none;
   font-weight: 600;
 }

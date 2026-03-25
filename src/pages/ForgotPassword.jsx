@@ -13,13 +13,447 @@ import {
   ShieldCheck,
 } from "lucide-react";
 
-// ─── STEP CONSTANTS ───────────────────────────────────────────────────────────
 const STEP_EMAIL = 1;
 const STEP_OTP = 2;
 const STEP_RESET = 3;
 const STEP_SUCCESS = 4;
 
-// ─── OTP INPUT COMPONENT ─────────────────────────────────────────────────────
+/* ─── INLINE CSS ─────────────────────────────────────────────────────────── */
+const css = `
+  @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=DM+Sans:wght@300;400;500;600&display=swap');
+
+  :root {
+    --navy-deep:   #030b1c;
+    --navy:        #071428;
+    --navy-mid:    #0d1f3c;
+    --navy-light:  #14305a;
+    --gold:        #c9a84c;
+    --gold-bright: #e8c76a;
+    --gold-pale:   rgba(201,168,76,0.12);
+    --gold-border: rgba(201,168,76,0.25);
+    --gold-glow:   rgba(201,168,76,0.18);
+    --cream:       #f5edda;
+    --cream-muted: rgba(245,237,218,0.45);
+    --error:       #e05555;
+    --success:     #3ecf8e;
+    --surface:     rgba(7,20,40,0.85);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  .fp-root {
+    min-height: 100vh;
+    background: var(--navy-deep);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+   font-family: 'Outfit', sans-serif;
+    padding: 24px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* ── Ambient background layers ── */
+  .fp-root::before {
+    content: '';
+    position: fixed; inset: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 15% 10%, rgba(201,168,76,.10) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 80% at 88% 90%, rgba(14,32,70,.95)   0%, transparent 60%),
+      radial-gradient(ellipse 50% 50% at 50% 50%, rgba(10,22,52,.60)   0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  /* ── Gold noise grain overlay ── */
+  .fp-root::after {
+    content: '';
+    position: fixed; inset: 0;
+    background-image:
+      radial-gradient(circle, rgba(201,168,76,.06) 1px, transparent 1px);
+    background-size: 28px 28px;
+    pointer-events: none;
+    opacity: .7;
+  }
+
+  /* ── Decorative corner lines ── */
+  .fp-corner {
+    position: fixed;
+    width: 120px; height: 120px;
+    pointer-events: none;
+    z-index: 1;
+  }
+  .fp-corner-tl { top: 24px; left: 24px; border-top: 1px solid var(--gold-border); border-left: 1px solid var(--gold-border); }
+  .fp-corner-br { bottom: 24px; right: 24px; border-bottom: 1px solid var(--gold-border); border-right: 1px solid var(--gold-border); }
+
+  /* ── Card ── */
+  .fp-card {
+    position: relative;
+    z-index: 10;
+    width: 100%;
+    max-width: 440px;
+    background: var(--surface);
+    border: 1px solid var(--gold-border);
+    border-radius: 6px;
+    backdrop-filter: blur(28px);
+    padding: 48px 44px 44px;
+    box-shadow: 
+      0 0 0 1px rgba(201,168,76,.06),
+      0 40px 100px rgba(0,0,0,.65),
+      inset 0 1px 0 rgba(201,168,76,.18);
+  }
+
+  /* ── Top gold rule ── */
+  .fp-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 44px; right: 44px;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    border-radius: 1px;
+  }
+
+  /* ── Brand ── */
+  .fp-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 36px;
+  }
+  .fp-brand-mark {
+    margin-left: 100px;
+    width: 36px; height: 36px;
+    border: 1px solid var(--gold-border);
+    border-radius: 4px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+    background: var(--gold-pale);
+    color: var(--gold);
+    flex-shrink: 0;
+  }
+  .fp-brand-name {
+    text-align: center;
+    font-family: 'Outfit', sans-serif;
+    font-size: 22px;
+    font-weight: 500;
+    color: var(--cream);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  /* ── Step tracker ── */
+  .fp-steps {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    margin-bottom: 32px;
+  }
+  .fp-step-item {
+    display: flex;
+    align-items: center;
+    flex: 1;
+  }
+  .fp-step-dot {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    border: 1px solid var(--gold-border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 600;
+    color: var(--cream-muted);
+    background: var(--navy-mid);
+    flex-shrink: 0;
+    transition: all 0.3s ease;
+    letter-spacing: 0;
+  }
+  .fp-step-dot.active {
+    border-color: var(--gold);
+    background: var(--gold-pale);
+    color: var(--gold);
+    box-shadow: 0 0 12px var(--gold-glow);
+  }
+  .fp-step-dot.done {
+    border-color: var(--success);
+    background: rgba(62,207,142,.12);
+    color: var(--success);
+  }
+  .fp-step-line {
+    flex: 1;
+    height: 1px;
+    background: var(--gold-border);
+    margin: 0 6px;
+    transition: background 0.3s;
+  }
+  .fp-step-line.done { background: var(--success); opacity: .5; }
+
+  /* ── Heading ── */
+  .fp-heading {
+    text-align: center;
+    font-family: 'Times New Roman', serif;
+    font-size: 32px;
+    font-weight: 500;
+    color: var(--cream);
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+    margin-bottom: 6px;
+  }
+  .fp-heading em {
+    font-style: italic;
+    color: var(--gold);
+  }
+  .fp-desc {
+    font-size: 13px;
+    color: var(--cream-muted);
+    line-height: 1.65;
+    margin-bottom: 28px;
+    font-weight: 300;
+  }
+  .fp-desc strong { color: var(--gold); font-weight: 500; }
+
+  /* ── Label ── */
+  .fp-label {
+    display: block;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+    color: white;
+    margin-bottom: 8px;
+  }
+
+  /* ── Input ── */
+  .fp-input-wrap { position: relative; margin-bottom: 20px; }
+  .fp-input-icon {
+    position: absolute;
+    left: 14px; top: 50%;
+    transform: translateY(-50%);
+    color: var(--gold);
+    opacity: .6;
+    pointer-events: none;
+  }
+  .fp-input {
+    width: 100%;
+    background: rgba(3,11,28,.55);
+    border: 1px solid var(--gold-border);
+    border-radius: 4px;
+    padding: 13px 16px;
+    color: var(--cream);
+    font-size: 14px;
+    font-family: 'Outfit', sans-serif;
+    font-weight: 400;
+    outline: none;
+    transition: border-color .2s, box-shadow .2s;
+  }
+  .fp-input.has-icon { padding-left: 42px; }
+  .fp-input.has-toggle { padding-right: 44px; }
+  .fp-input::placeholder { color: rgba(245,237,218,.18); }
+  .fp-input:focus {
+    border-color: rgba(201,168,76,.55);
+    box-shadow: 0 0 0 3px rgba(201,168,76,.10);
+  }
+  .fp-input.err { border-color: rgba(224,85,85,.5); }
+  .fp-input.ok  { border-color: rgba(62,207,142,.4); }
+  .fp-input:disabled { opacity: .4; cursor: not-allowed; }
+
+  .fp-toggle-btn {
+    position: absolute;
+    right: 12px; top: 50%;
+    transform: translateY(-50%);
+    background: none; border: none;
+    color: var(--cream-muted);
+    cursor: pointer; padding: 2px;
+    display: flex; align-items: center;
+    transition: color .2s;
+  }
+  .fp-toggle-btn:hover { color: var(--gold); }
+
+  /* ── OTP Boxes ── */
+  .fp-otp-grid {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-bottom: 20px;
+  }
+  .fp-otp-cell {
+    width: 52px; height: 60px;
+    background: rgba(3,11,28,.60);
+    border: 1px solid var(--gold-border);
+    border-radius: 4px;
+    text-align: center;
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--gold-bright);
+    font-family: 'outfit', serif;
+    outline: none;
+    transition: border-color .2s, box-shadow .2s, background .2s;
+    caret-color: var(--gold);
+  }
+  .fp-otp-cell:focus {
+    border-color: var(--gold);
+    box-shadow: 0 0 0 3px var(--gold-glow);
+    background: rgba(201,168,76,.06);
+  }
+  .fp-otp-cell.filled {
+    border-color: rgba(201,168,76,.5);
+    background: rgba(201,168,76,.07);
+  }
+  .fp-otp-cell:disabled { opacity: .4; cursor: not-allowed; }
+
+  /* ── Password strength ── */
+  .fp-strength {
+    margin-top: 8px;
+    margin-bottom: 4px;
+  }
+  .fp-strength-bars {
+    display: flex; gap: 5px;
+    margin-bottom: 4px;
+  }
+  .fp-strength-bar {
+    flex: 1; height: 3px;
+    border-radius: 2px;
+    background: rgba(245,237,218,.08);
+    transition: background .3s;
+  }
+  .fp-strength-label {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: .04em;
+  }
+
+  /* ── Error box ── */
+  .fp-error {
+    background: rgba(224,85,85,.08);
+    border: 1px solid rgba(224,85,85,.25);
+    border-radius: 4px;
+    padding: 10px 14px;
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    margin-bottom: 18px;
+    font-size: 13px;
+    color: #f09090;
+  }
+
+  /* ── Field note ── */
+  .fp-note {
+    font-size: 11px;
+    margin-top: 4px;
+    font-weight: 400;
+    letter-spacing: .01em;
+  }
+
+  /* ── Primary button ── */
+  .fp-btn {
+    width: 100%;
+    padding: 14px;
+    background: linear-gradient(135deg, var(--gold) 0%, var(--gold-bright) 100%);
+    border: none;
+    border-radius: 4px;
+    color: var(--navy-deep);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: 9px;
+    transition: opacity .2s, transform .15s, box-shadow .2s;
+    box-shadow: 0 4px 20px rgba(201,168,76,.25);
+    position: relative;
+    overflow: hidden;
+  }
+  .fp-btn::after {
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(180deg, rgba(255,255,255,.15) 0%, transparent 60%);
+    pointer-events: none;
+  }
+  .fp-btn:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 28px rgba(201,168,76,.40);
+  }
+  .fp-btn:active:not(:disabled) { transform: translateY(0); }
+  .fp-btn:disabled { opacity: .35; cursor: not-allowed; }
+
+  /* ── Ghost link buttons ── */
+  .fp-link {
+    background: none; border: none;
+    color: var(--gold);
+    font-family: 'Outfit', sans-serif;
+    font-size: 13px; font-weight: 500;
+    cursor: pointer;
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 0;
+    letter-spacing: .02em;
+    transition: opacity .2s;
+    text-decoration: none;
+  }
+  .fp-link:hover { opacity: .75; }
+  .fp-link.muted { color: white; }
+
+  /* ── Divider row ── */
+  .fp-row-btns {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 18px;
+  }
+
+  /* ── Icon circle ── */
+  .fp-icon-ring {
+    width: 64px; height: 64px;
+    border-radius: 50%;
+    border: 1px solid var(--gold-border);
+    background: var(--gold-pale);
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 20px;
+    box-shadow: 0 0 24px var(--gold-glow);
+  }
+
+  /* ── Success screen ── */
+  .fp-success-ring {
+    width: 72px; height: 72px;
+    border-radius: 50%;
+    border: 1px solid rgba(62,207,142,.35);
+    background: rgba(62,207,142,.10);
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 20px;
+    box-shadow: 0 0 28px rgba(62,207,142,.18);
+  }
+
+  .fp-progress-track {
+    width: 100%; height: 2px;
+    background: rgba(245,237,218,.08);
+    border-radius: 1px;
+    overflow: hidden;
+    margin-top: 24px;
+  }
+  .fp-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--gold), var(--gold-bright));
+    border-radius: 1px;
+  }
+
+  /* ── Resend countdown ── */
+  .fp-countdown {
+    text-align: center;
+    margin-top: 16px;
+    font-size: 12px;
+    color: var(--cream-muted);
+  }
+  .fp-countdown strong { color: var(--gold); }
+
+  /* ── Spin ── */
+  .spin { animation: spin .8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── Responsive ── */
+  @media (max-width: 500px) {
+    .fp-card { padding: 36px 24px 32px; }
+    .fp-heading { font-size: 26px; }
+    .fp-otp-cell { width: 42px; height: 52px; font-size: 20px; }
+  }
+`;
+
+/* ─── OTP INPUT ──────────────────────────────────────────────────────────── */
 const OTPInput = ({ value, onChange, disabled }) => {
   const inputsRef = useRef([]);
   const digits = value.split("").concat(Array(6).fill("")).slice(0, 6);
@@ -35,9 +469,8 @@ const OTPInput = ({ value, onChange, disabled }) => {
   };
 
   const handleKeyDown = (idx, e) => {
-    if (e.key === "Backspace" && !digits[idx] && idx > 0) {
+    if (e.key === "Backspace" && !digits[idx] && idx > 0)
       inputsRef.current[idx - 1]?.focus();
-    }
   };
 
   const handlePaste = (e) => {
@@ -47,12 +480,11 @@ const OTPInput = ({ value, onChange, disabled }) => {
       .replace(/\D/g, "")
       .slice(0, 6);
     onChange(pasted);
-    const focusIdx = Math.min(pasted.length, 5);
-    inputsRef.current[focusIdx]?.focus();
+    inputsRef.current[Math.min(pasted.length, 5)]?.focus();
   };
 
   return (
-    <div style={{ display: "flex", gap: "10px", justifyContent: "center" }}>
+    <div className="fp-otp-grid">
       {digits.map((digit, idx) => (
         <input
           key={idx}
@@ -65,77 +497,81 @@ const OTPInput = ({ value, onChange, disabled }) => {
           onChange={(e) => handleChange(idx, e)}
           onKeyDown={(e) => handleKeyDown(idx, e)}
           onPaste={handlePaste}
-          style={{
-            width: "48px",
-            height: "56px",
-            textAlign: "center",
-            fontSize: "22px",
-            fontWeight: "700",
-            border: `2px solid ${digit ? "#2563eb" : "#d1d5db"}`,
-            borderRadius: "10px",
-            outline: "none",
-            background: digit ? "#eff6ff" : "#f9fafb",
-            color: "#1e40af",
-            transition: "all 0.2s",
-            cursor: disabled ? "not-allowed" : "text",
-            opacity: disabled ? 0.6 : 1,
-          }}
+          className={`fp-otp-cell${digit ? " filled" : ""}`}
         />
       ))}
     </div>
   );
 };
 
-// ─── PASSWORD STRENGTH ───────────────────────────────────────────────────────
+/* ─── PASSWORD STRENGTH ──────────────────────────────────────────────────── */
 const PasswordStrength = ({ password }) => {
   const checks = [
-    { label: "6+ characters", ok: password.length >= 6 },
-    { label: "8+ characters", ok: password.length >= 8 },
-    { label: "Special char (!@#$)", ok: /[!@#$%^&*]/.test(password) },
+    { ok: password.length >= 6 },
+    { ok: password.length >= 8 },
+    { ok: /[!@#$%^&*]/.test(password) },
   ];
   const score = checks.filter((c) => c.ok).length;
-  const colors = ["#ef4444", "#f59e0b", "#22c55e"];
-  const labels = ["Weak", "Good", "Strong"];
+  const colors = ["#e05555", "#d4af37", "#3ecf8e"];
+  const labels = ["Weak", "Fair", "Strong"];
+  const color = score > 0 ? colors[score - 1] : "transparent";
+
   return (
-    <div style={{ marginTop: "8px" }}>
-      <div style={{ display: "flex", gap: "6px", marginBottom: "4px" }}>
+    <div className="fp-strength">
+      <div className="fp-strength-bars">
         {checks.map((_, i) => (
           <div
             key={i}
-            style={{
-              flex: 1,
-              height: "4px",
-              borderRadius: "2px",
-              background: i < score ? colors[score - 1] : "#e5e7eb",
-              transition: "background 0.3s",
-            }}
+            className="fp-strength-bar"
+            style={{ background: i < score ? color : undefined }}
           />
         ))}
       </div>
       {score > 0 && (
-        <p style={{ fontSize: "11px", color: colors[score - 1], margin: 0 }}>
+        <span className="fp-strength-label" style={{ color }}>
           {labels[score - 1]} password
-        </p>
+        </span>
       )}
     </div>
   );
 };
 
-// ─── MAIN COMPONENT ──────────────────────────────────────────────────────────
+/* ─── STEP TRACKER ───────────────────────────────────────────────────────── */
+const StepTracker = ({ step }) => {
+  const steps = [STEP_EMAIL, STEP_OTP, STEP_RESET];
+  const labels = ["1", "2", "3"];
+  return (
+    <div className="fp-steps">
+      {steps.map((s, i) => (
+        <React.Fragment key={s}>
+          <div className="fp-step-item">
+            <div
+              className={`fp-step-dot${step === s ? " active" : ""}${step > s ? " done" : ""}`}
+            >
+              {step > s ? "✓" : labels[i]}
+            </div>
+          </div>
+          {i < steps.length - 1 && (
+            <div className={`fp-step-line${step > s ? " done" : ""}`} />
+          )}
+        </React.Fragment>
+      ))}
+    </div>
+  );
+};
+
+/* ─── MAIN ───────────────────────────────────────────────────────────────── */
 const ForgotPassword = () => {
   const navigate = useNavigate();
 
-  // Shared state
   const [step, setStep] = useState(STEP_EMAIL);
   const [email, setEmail] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  // OTP step
   const [otp, setOtp] = useState("");
   const [countdown, setCountdown] = useState(0);
 
-  // Reset step
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showNew, setShowNew] = useState(false);
@@ -148,15 +584,12 @@ const ForgotPassword = () => {
     }
   }, [countdown]);
 
-  // ── Step 1: Send OTP ──────────────────────────────────────────────────────
   const handleSendOtp = async (e) => {
     e?.preventDefault();
     setError("");
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!email) return setError("Email is required");
-    if (!emailRegex.test(email))
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
       return setError("Please enter a valid email address");
-
     setIsLoading(true);
     try {
       const res = await fetch(
@@ -178,13 +611,11 @@ const ForgotPassword = () => {
     }
   };
 
-  // ── Step 2: Verify OTP ────────────────────────────────────────────────────
   const handleVerifyOtp = async (e) => {
     e?.preventDefault();
     setError("");
     if (otp.length < 6)
       return setError("Please enter the complete 6-digit OTP");
-
     setIsLoading(true);
     try {
       const res = await fetch("http://localhost:5000/api/user/verify-otp", {
@@ -202,7 +633,6 @@ const ForgotPassword = () => {
     }
   };
 
-  // ── Step 3: Reset Password ────────────────────────────────────────────────
   const handleResetPassword = async (e) => {
     e?.preventDefault();
     setError("");
@@ -211,7 +641,6 @@ const ForgotPassword = () => {
       return setError("Password must be at least 6 characters");
     if (newPassword !== confirmPassword)
       return setError("Passwords do not match");
-
     setIsLoading(true);
     try {
       const res = await fetch("http://localhost:5000/api/user/reset-password", {
@@ -230,157 +659,66 @@ const ForgotPassword = () => {
     }
   };
 
-  // ── Shared styles ─────────────────────────────────────────────────────────
-  const s = {
-    page: {
-      minHeight: "100vh",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      background:
-        "linear-gradient(135deg, #dbeafe 0%, #eff6ff 50%, #e0e7ff 100%)",
-      padding: "24px",
-      fontFamily: "'Segoe UI', system-ui, sans-serif",
+  const slideVariants = {
+    enter: { opacity: 0, x: 28, filter: "blur(4px)" },
+    center: {
+      opacity: 1,
+      x: 0,
+      filter: "blur(0px)",
+      transition: { duration: 0.38, ease: [0.16, 1, 0.3, 1] },
     },
-    card: {
-      background: "white",
-      borderRadius: "20px",
-      boxShadow: "0 20px 60px rgba(37,99,235,0.12)",
-      padding: "40px 36px",
-      width: "100%",
-      maxWidth: "420px",
+    exit: {
+      opacity: 0,
+      x: -28,
+      filter: "blur(4px)",
+      transition: { duration: 0.22 },
     },
-    title: {
-      fontSize: "28px",
-      fontWeight: "800",
-      color: "#1e40af",
-      margin: "0 0 4px",
-      textAlign: "center",
-    },
-    subtitle: {
-      fontSize: "17px",
-      fontWeight: "600",
-      color: "#374151",
-      margin: "0 0 8px",
-      textAlign: "center",
-    },
-    desc: {
-      fontSize: "13px",
-      color: "#6b7280",
-      textAlign: "center",
-      margin: "0 0 28px",
-      lineHeight: "1.5",
-    },
-    label: {
-      display: "block",
-      fontSize: "13px",
-      fontWeight: "600",
-      color: "#374151",
-      marginBottom: "6px",
-    },
-    input: {
-      width: "100%",
-      padding: "12px 16px",
-      border: "2px solid #e5e7eb",
-      borderRadius: "10px",
-      fontSize: "14px",
-      outline: "none",
-      transition: "border-color 0.2s",
-      boxSizing: "border-box",
-      fontFamily: "inherit",
-    },
-    btn: {
-      width: "100%",
-      padding: "13px",
-      background: "#2563eb",
-      color: "white",
-      border: "none",
-      borderRadius: "10px",
-      fontSize: "15px",
-      fontWeight: "600",
-      cursor: "pointer",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      gap: "8px",
-      transition: "background 0.2s, transform 0.1s",
-    },
-    errorBox: {
-      background: "#fef2f2",
-      border: "1px solid #fecaca",
-      borderRadius: "8px",
-      padding: "10px 14px",
-      display: "flex",
-      alignItems: "center",
-      gap: "8px",
-      marginBottom: "16px",
-    },
-    stepBar: {
-      display: "flex",
-      justifyContent: "center",
-      gap: "8px",
-      marginBottom: "28px",
-    },
-    stepDot: (active, done) => ({
-      width: active ? "28px" : "10px",
-      height: "10px",
-      borderRadius: "5px",
-      background: done ? "#22c55e" : active ? "#2563eb" : "#e5e7eb",
-      transition: "all 0.3s",
-    }),
   };
 
-  const steps = [STEP_EMAIL, STEP_OTP, STEP_RESET];
-
   return (
-    <div style={s.page}>
-      <motion.div
-        initial={{ opacity: 0, y: 24 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4 }}
-        style={s.card}
-      >
-        {/* App name */}
-        <p style={s.title}>SkyJet</p>
+    <>
+      <style>{css}</style>
+      <div className="fp-root">
+        <div className="fp-corner fp-corner-tl" />
+        <div className="fp-corner fp-corner-br" />
 
-        {/* Step indicator */}
-        {step < STEP_SUCCESS && (
-          <div style={s.stepBar}>
-            {steps.map((s_num, i) => (
-              <div key={i} style={s.stepDot(step === s_num, step > s_num)} />
-            ))}
+        <motion.div
+          className="fp-card"
+          initial={{ opacity: 0, y: 32, scale: 0.97 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
+        >
+          {/* Brand */}
+          <div className="fp-brand">
+            <div className="fp-brand-mark">✈</div>
+            <span className="fp-brand-name">Skyjet</span>
           </div>
-        )}
 
-        <AnimatePresence mode="wait">
-          {/* ── STEP 1: Email ─────────────────────────────────────────────── */}
-          {step === STEP_EMAIL && (
-            <motion.div
-              key="email"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-            >
-              <p style={s.subtitle}>Forgot Password?</p>
-              <p style={s.desc}>
-                Enter your registered email. We'll send a 6-digit OTP to verify
-                it's you.
-              </p>
+          {/* Step tracker */}
+          {step < STEP_SUCCESS && <StepTracker step={step} />}
 
-              <form onSubmit={handleSendOtp}>
-                <div style={{ marginBottom: "20px" }}>
-                  <label style={s.label}>Email Address</label>
-                  <div style={{ position: "relative" }}>
-                    <Mail
-                      size={16}
-                      style={{
-                        position: "absolute",
-                        left: "14px",
-                        top: "50%",
-                        transform: "translateY(-50%)",
-                        color: "#9ca3af",
-                      }}
-                    />
+          <AnimatePresence mode="wait">
+            {/* ── Step 1: Email ── */}
+            {step === STEP_EMAIL && (
+              <motion.div
+                key="email"
+                variants={slideVariants}
+                initial="enter"
+                animate="center"
+                exit="exit"
+              >
+                <h1 className="fp-heading">
+                  Forgot your <em>password?</em>
+                </h1>
+                <p className="fp-desc">
+                  Enter your registered email address and we'll send you a
+                  verification code.
+                </p>
+
+                <form onSubmit={handleSendOtp}>
+                  <label className="fp-label">Email Address</label>
+                  <div className="fp-input-wrap">
+                    <Mail size={15} className="fp-input-icon" />
                     <input
                       type="email"
                       value={email}
@@ -390,92 +728,68 @@ const ForgotPassword = () => {
                       }}
                       placeholder="your@email.com"
                       disabled={isLoading}
-                      style={{ ...s.input, paddingLeft: "42px" }}
-                      onFocus={(e) => (e.target.style.borderColor = "#2563eb")}
-                      onBlur={(e) => (e.target.style.borderColor = "#e5e7eb")}
+                      className="fp-input has-icon"
                     />
                   </div>
-                </div>
 
-                {error && (
-                  <div style={s.errorBox}>
-                    <AlertCircle size={16} color="#ef4444" />
-                    <span style={{ fontSize: "13px", color: "#dc2626" }}>
-                      {error}
-                    </span>
-                  </div>
-                )}
-
-                <button
-                  type="submit"
-                  disabled={isLoading}
-                  style={{ ...s.btn, opacity: isLoading ? 0.7 : 1 }}
-                >
-                  {isLoading ? (
-                    <>
-                      <Loader size={16} className="spin" />
-                      <span>Sending OTP...</span>
-                    </>
-                  ) : (
-                    <>
-                      <Mail size={16} />
-                      <span>Send OTP</span>
-                    </>
+                  {error && (
+                    <div className="fp-error">
+                      <AlertCircle size={15} />
+                      <span>{error}</span>
+                    </div>
                   )}
-                </button>
-              </form>
 
-              <div style={{ textAlign: "center", marginTop: "20px" }}>
-                <button
-                  onClick={() => navigate("/login")}
-                  style={{
-                    background: "none",
-                    border: "none",
-                    color: "#2563eb",
-                    cursor: "pointer",
-                    fontSize: "13px",
-                    fontWeight: "600",
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: "4px",
-                  }}
-                >
-                  <ArrowLeft size={14} /> Back to Login
-                </button>
-              </div>
-            </motion.div>
-          )}
+                  <button type="submit" disabled={isLoading} className="fp-btn">
+                    {isLoading ? (
+                      <>
+                        <Loader size={15} className="spin" /> Sending…
+                      </>
+                    ) : (
+                      <>
+                        <Mail size={15} /> Send Verification Code
+                      </>
+                    )}
+                  </button>
+                </form>
 
-          {/* ── STEP 2: OTP ──────────────────────────────────────────────── */}
-          {step === STEP_OTP && (
-            <motion.div
-              key="otp"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-            >
-              <div style={{ textAlign: "center", marginBottom: "8px" }}>
                 <div
-                  style={{
-                    display: "inline-flex",
-                    background: "#eff6ff",
-                    borderRadius: "50%",
-                    padding: "16px",
-                    marginBottom: "12px",
-                  }}
+                  className="fp-row-btns"
+                  style={{ justifyContent: "center", marginTop: 20 }}
                 >
-                  <ShieldCheck size={28} color="#2563eb" />
+                  <button
+                    onClick={() => navigate("/login")}
+                    className="fp-link muted"
+                  >
+                    <ArrowLeft size={13} /> Back to Login
+                  </button>
                 </div>
-              </div>
-              <p style={s.subtitle}>Enter OTP</p>
-              <p style={s.desc}>
-                We sent a 6-digit OTP to
-                <br />
-                <strong style={{ color: "#1e40af" }}>{email}</strong>
-              </p>
+              </motion.div>
+            )}
 
-              <form onSubmit={handleVerifyOtp}>
-                <div style={{ marginBottom: "20px" }}>
+            {/* ── Step 2: OTP ── */}
+            {step === STEP_OTP && (
+              <motion.div
+                key="otp"
+                variants={slideVariants}
+                initial="enter"
+                animate="center"
+                exit="exit"
+              >
+                <div className="fp-icon-ring">
+                  <ShieldCheck size={26} color="var(--gold)" />
+                </div>
+                <h1 className="fp-heading" style={{ textAlign: "center" }}>
+                  <em>Verify</em> your
+                  <br />
+                  identity
+                </h1>
+                <p className="fp-desc">
+                  A 6-digit code was sent to
+                  <br />
+                  <strong>{email}</strong>
+                </p>
+
+                <form onSubmit={handleVerifyOtp}>
                   <OTPInput
                     value={otp}
                     onChange={(v) => {
@@ -488,122 +802,93 @@ const ForgotPassword = () => {
                     style={{
                       textAlign: "center",
                       fontSize: "11px",
-                      color: "#9ca3af",
-                      marginTop: "8px",
+                      color: "var(--cream-muted)",
+                      marginBottom: 18,
                     }}
                   >
-                    OTP expires in 10 minutes
+                    Code expires in 10 minutes
                   </p>
-                </div>
 
-                {error && (
-                  <div style={s.errorBox}>
-                    <AlertCircle size={16} color="#ef4444" />
-                    <span style={{ fontSize: "13px", color: "#dc2626" }}>
-                      {error}
-                    </span>
-                  </div>
-                )}
+                  {error && (
+                    <div className="fp-error">
+                      <AlertCircle size={15} />
+                      <span>{error}</span>
+                    </div>
+                  )}
 
-                <button
-                  type="submit"
-                  disabled={isLoading || otp.length < 6}
-                  style={{
-                    ...s.btn,
-                    opacity: isLoading || otp.length < 6 ? 0.6 : 1,
-                  }}
-                >
-                  {isLoading ? (
+                  <button
+                    type="submit"
+                    disabled={isLoading || otp.length < 6}
+                    className="fp-btn"
+                  >
+                    {isLoading ? (
+                      <>
+                        <Loader size={15} className="spin" /> Verifying…
+                      </>
+                    ) : (
+                      <>
+                        <ShieldCheck size={15} /> Verify Code
+                      </>
+                    )}
+                  </button>
+                </form>
+
+                <div className="fp-countdown">
+                  {countdown > 0 ? (
                     <>
-                      <Loader size={16} />
-                      <span>Verifying...</span>
+                      Resend code in <strong>{countdown}s</strong>
                     </>
                   ) : (
-                    <>
-                      <ShieldCheck size={16} />
-                      <span>Verify OTP</span>
-                    </>
+                    <button onClick={handleSendOtp} className="fp-link">
+                      Resend Code
+                    </button>
                   )}
-                </button>
-              </form>
-
-              <div style={{ textAlign: "center", marginTop: "16px" }}>
-                {countdown > 0 ? (
-                  <p style={{ fontSize: "13px", color: "#9ca3af" }}>
-                    Resend OTP in <strong>{countdown}s</strong>
-                  </p>
-                ) : (
-                  <button
-                    onClick={handleSendOtp}
-                    style={{
-                      background: "none",
-                      border: "none",
-                      color: "#2563eb",
-                      cursor: "pointer",
-                      fontSize: "13px",
-                      fontWeight: "600",
-                    }}
-                  >
-                    Resend OTP
-                  </button>
-                )}
-              </div>
-
-              <div style={{ textAlign: "center", marginTop: "12px" }}>
-                <button
-                  onClick={() => {
-                    setStep(STEP_EMAIL);
-                    setOtp("");
-                    setError("");
-                  }}
-                  style={{
-                    background: "none",
-                    border: "none",
-                    color: "#6b7280",
-                    cursor: "pointer",
-                    fontSize: "13px",
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: "4px",
-                  }}
-                >
-                  <ArrowLeft size={14} /> Change Email
-                </button>
-              </div>
-            </motion.div>
-          )}
-
-          {/* ── STEP 3: New Password ──────────────────────────────────────── */}
-          {step === STEP_RESET && (
-            <motion.div
-              key="reset"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-            >
-              <div style={{ textAlign: "center", marginBottom: "8px" }}>
-                <div
-                  style={{
-                    display: "inline-flex",
-                    background: "#eff6ff",
-                    borderRadius: "50%",
-                    padding: "16px",
-                    marginBottom: "12px",
-                  }}
-                >
-                  <Lock size={28} color="#2563eb" />
                 </div>
-              </div>
-              <p style={s.subtitle}>Create New Password</p>
-              <p style={s.desc}>
-                Your identity is verified. Set a new strong password.
-              </p>
 
-              <form onSubmit={handleResetPassword}>
-                {/* New Password */}
-                <div style={{ marginBottom: "16px" }}>
-                  <label style={s.label}>New Password</label>
-                  <div style={{ position: "relative" }}>
+                <div
+                  className="fp-row-btns"
+                  style={{ justifyContent: "center", marginTop: 12 }}
+                >
+                  <button
+                    onClick={() => {
+                      setStep(STEP_EMAIL);
+                      setOtp("");
+                      setError("");
+                    }}
+                    className="fp-link muted"
+                  >
+                    <ArrowLeft size={13} /> Change Email
+                  </button>
+                </div>
+              </motion.div>
+            )}
+
+            {/* ── Step 3: Reset Password ── */}
+            {step === STEP_RESET && (
+              <motion.div
+                key="reset"
+                variants={slideVariants}
+                initial="enter"
+                animate="center"
+                exit="exit"
+              >
+                <div className="fp-icon-ring">
+                  <Lock size={24} color="var(--gold)" />
+                </div>
+                <h1 className="fp-heading" style={{ textAlign: "center" }}>
+                  Set new
+                  <br />
+                  <em>password</em>
+                </h1>
+                <p className="fp-desc">
+                  Identity confirmed. Choose a strong new password for your
+                  account.
+                </p>
+
+                <form onSubmit={handleResetPassword}>
+                  {/* New password */}
+                  <label className="fp-label">New Password</label>
+                  <div className="fp-input-wrap" style={{ marginBottom: 6 }}>
                     <input
                       type={showNew ? "text" : "password"}
                       value={newPassword}
@@ -611,36 +896,24 @@ const ForgotPassword = () => {
                         setNewPassword(e.target.value);
                         setError("");
                       }}
-                      placeholder="Enter new password"
+                      placeholder="Create a strong password"
                       disabled={isLoading}
-                      style={{ ...s.input, paddingRight: "42px" }}
-                      onFocus={(e) => (e.target.style.borderColor = "#2563eb")}
-                      onBlur={(e) => (e.target.style.borderColor = "#e5e7eb")}
+                      className="fp-input has-toggle"
                     />
                     <button
                       type="button"
+                      className="fp-toggle-btn"
                       onClick={() => setShowNew((v) => !v)}
-                      style={{
-                        position: "absolute",
-                        right: "12px",
-                        top: "50%",
-                        transform: "translateY(-50%)",
-                        background: "none",
-                        border: "none",
-                        cursor: "pointer",
-                        color: "#9ca3af",
-                      }}
                     >
-                      {showNew ? <EyeOff size={16} /> : <Eye size={16} />}
+                      {showNew ? <EyeOff size={15} /> : <Eye size={15} />}
                     </button>
                   </div>
                   {newPassword && <PasswordStrength password={newPassword} />}
-                </div>
+                  <div style={{ marginBottom: 16 }} />
 
-                {/* Confirm Password */}
-                <div style={{ marginBottom: "20px" }}>
-                  <label style={s.label}>Confirm Password</label>
-                  <div style={{ position: "relative" }}>
+                  {/* Confirm password */}
+                  <label className="fp-label">Confirm Password</label>
+                  <div className="fp-input-wrap" style={{ marginBottom: 4 }}>
                     <input
                       type={showConfirm ? "text" : "password"}
                       value={confirmPassword}
@@ -648,163 +921,119 @@ const ForgotPassword = () => {
                         setConfirmPassword(e.target.value);
                         setError("");
                       }}
-                      placeholder="Re-enter new password"
+                      placeholder="Re-enter your password"
                       disabled={isLoading}
-                      style={{
-                        ...s.input,
-                        paddingRight: "42px",
-                        borderColor:
-                          confirmPassword && newPassword !== confirmPassword
-                            ? "#ef4444"
-                            : confirmPassword && newPassword === confirmPassword
-                              ? "#22c55e"
-                              : "#e5e7eb",
-                      }}
-                      onFocus={(e) => (e.target.style.borderColor = "#2563eb")}
-                      onBlur={(e) => {
-                        e.target.style.borderColor =
-                          confirmPassword && newPassword !== confirmPassword
-                            ? "#ef4444"
-                            : confirmPassword && newPassword === confirmPassword
-                              ? "#22c55e"
-                              : "#e5e7eb";
-                      }}
+                      className={`fp-input has-toggle${
+                        confirmPassword
+                          ? newPassword !== confirmPassword
+                            ? " err"
+                            : " ok"
+                          : ""
+                      }`}
                     />
                     <button
                       type="button"
+                      className="fp-toggle-btn"
                       onClick={() => setShowConfirm((v) => !v)}
-                      style={{
-                        position: "absolute",
-                        right: "12px",
-                        top: "50%",
-                        transform: "translateY(-50%)",
-                        background: "none",
-                        border: "none",
-                        cursor: "pointer",
-                        color: "#9ca3af",
-                      }}
                     >
-                      {showConfirm ? <EyeOff size={16} /> : <Eye size={16} />}
+                      {showConfirm ? <EyeOff size={15} /> : <Eye size={15} />}
                     </button>
                   </div>
                   {confirmPassword && newPassword !== confirmPassword && (
                     <p
-                      style={{
-                        fontSize: "11px",
-                        color: "#ef4444",
-                        marginTop: "4px",
-                      }}
+                      className="fp-note"
+                      style={{ color: "var(--error)", marginBottom: 14 }}
                     >
                       Passwords do not match
                     </p>
                   )}
                   {confirmPassword && newPassword === confirmPassword && (
                     <p
-                      style={{
-                        fontSize: "11px",
-                        color: "#22c55e",
-                        marginTop: "4px",
-                      }}
+                      className="fp-note"
+                      style={{ color: "var(--success)", marginBottom: 14 }}
                     >
                       ✓ Passwords match
                     </p>
                   )}
-                </div>
+                  {!confirmPassword && <div style={{ marginBottom: 18 }} />}
 
-                {error && (
-                  <div style={s.errorBox}>
-                    <AlertCircle size={16} color="#ef4444" />
-                    <span style={{ fontSize: "13px", color: "#dc2626" }}>
-                      {error}
-                    </span>
-                  </div>
-                )}
-
-                <button
-                  type="submit"
-                  disabled={isLoading}
-                  style={{ ...s.btn, opacity: isLoading ? 0.7 : 1 }}
-                >
-                  {isLoading ? (
-                    <>
-                      <Loader size={16} />
-                      <span>Resetting...</span>
-                    </>
-                  ) : (
-                    <>
-                      <Lock size={16} />
-                      <span>Reset Password</span>
-                    </>
+                  {error && (
+                    <div className="fp-error">
+                      <AlertCircle size={15} />
+                      <span>{error}</span>
+                    </div>
                   )}
-                </button>
-              </form>
-            </motion.div>
-          )}
 
-          {/* ── STEP 4: Success ───────────────────────────────────────────── */}
-          {step === STEP_SUCCESS && (
-            <motion.div
-              key="success"
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              style={{ textAlign: "center" }}
-            >
-              <motion.div
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                transition={{ type: "spring", stiffness: 200, delay: 0.2 }}
-                style={{
-                  display: "inline-flex",
-                  background: "#dcfce7",
-                  borderRadius: "50%",
-                  padding: "20px",
-                  marginBottom: "20px",
-                }}
-              >
-                <CheckCircle size={40} color="#16a34a" />
+                  <button type="submit" disabled={isLoading} className="fp-btn">
+                    {isLoading ? (
+                      <>
+                        <Loader size={15} className="spin" /> Updating…
+                      </>
+                    ) : (
+                      <>
+                        <Lock size={15} /> Reset Password
+                      </>
+                    )}
+                  </button>
+                </form>
               </motion.div>
-              <p style={{ ...s.subtitle, color: "#15803d" }}>
-                Password Reset Successful!
-              </p>
-              <p style={s.desc}>
-                Your password has been updated. Redirecting you to login...
-              </p>
-              <div
-                style={{
-                  width: "100%",
-                  height: "4px",
-                  background: "#e5e7eb",
-                  borderRadius: "2px",
-                  overflow: "hidden",
-                  marginTop: "20px",
-                }}
+            )}
+
+            {/* ── Step 4: Success ── */}
+            {step === STEP_SUCCESS && (
+              <motion.div
+                key="success"
+                initial={{ opacity: 0, scale: 0.92 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
+                style={{ textAlign: "center" }}
               >
                 <motion.div
-                  initial={{ width: "0%" }}
-                  animate={{ width: "100%" }}
-                  transition={{ duration: 3, ease: "linear" }}
-                  style={{
-                    height: "100%",
-                    background: "#22c55e",
-                    borderRadius: "2px",
-                  }}
-                />
-              </div>
-              <p
-                style={{ fontSize: "12px", color: "#9ca3af", marginTop: "8px" }}
-              >
-                Redirecting in 3 seconds...
-              </p>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </motion.div>
+                  className="fp-success-ring"
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ type: "spring", stiffness: 220, delay: 0.18 }}
+                >
+                  <CheckCircle size={34} color="var(--success)" />
+                </motion.div>
 
-      <style>{`
-        @keyframes spin { to { transform: rotate(360deg); } }
-        .spin { animation: spin 0.8s linear infinite; }
-      `}</style>
-    </div>
+                <h1
+                  className="fp-heading"
+                  style={{ textAlign: "center", marginBottom: 8 }}
+                >
+                  Password
+                  <br />
+                  <em>reset!</em>
+                </h1>
+                <p className="fp-desc">
+                  Your password has been updated successfully.
+                  <br />
+                  Redirecting you to login…
+                </p>
+
+                <div className="fp-progress-track">
+                  <motion.div
+                    className="fp-progress-fill"
+                    initial={{ width: "0%" }}
+                    animate={{ width: "100%" }}
+                    transition={{ duration: 3, ease: "linear" }}
+                  />
+                </div>
+                <p
+                  style={{
+                    fontSize: "11px",
+                    color: "var(--cream-muted)",
+                    marginTop: 8,
+                  }}
+                >
+                  Redirecting in 3 seconds…
+                </p>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </motion.div>
+      </div>
+    </>
   );
 };
 

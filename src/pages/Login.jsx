@@ -220,7 +220,7 @@ const Login = () => {
           display: block;
           font-size: 0.67rem;
           font-weight: 600;
-          color: #3a4e68;
+          color: #e8ebf0;
           letter-spacing: 1.2px;
           text-transform: uppercase;
           margin-bottom: 5px; /* ↓ reduced from 7px */
@@ -341,7 +341,7 @@ const Login = () => {
         .lg-footer-note {
           text-align: center;
           font-size: 0.78rem;
-          color: #2a3a52;
+          color: #eaeef3;
         }
         .lg-footer-note button {
           background: none; border: none;

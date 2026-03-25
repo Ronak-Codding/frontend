@@ -14,6 +14,7 @@ import {
   ChevronRight,
   Moon,
   Sun,
+  Ban,
 } from "lucide-react";
 import "./UserLayout.css";
 
@@ -80,6 +81,7 @@ const UserLayout = () => {
     { path: "/user/dashboard", label: "Dashboard", icon: LayoutDashboard },
     { path: "/user/bookings", label: "My Bookings", icon: Ticket },
     { path: "/user/payments", label: "Payment History", icon: CreditCard },
+    { path: "/user/cancellation", label: " Cancellation & Refund", icon: Ban },
     { path: "/user/search", label: "Search Flights", icon: Search },
     { path: "/user/profile", label: "Profile", icon: User },
   ];

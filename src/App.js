@@ -39,6 +39,7 @@ import UserBookings from "./user/UserBookings";
 import UserPayments from "./user/UserPayments";
 import UserProfile from "./user/Userprofile";
 import UserSearch from "./user/UserSearch";
+import CancellationRefund from "./user/Cancellationrefund";
 
 export default function App() {
   return (
@@ -132,6 +133,7 @@ export default function App() {
           <Route path="dashboard" element={<UserDashboard />} />
           <Route path="bookings" element={<UserBookings />} />
           <Route path="payments" element={<UserPayments />} />
+          <Route path="cancellation" element={<CancellationRefund />} />
           <Route path="profile" element={<UserProfile />} />
           <Route path="search" element={<UserSearch />} />
         </Route>

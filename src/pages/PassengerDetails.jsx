@@ -109,7 +109,7 @@ function PassengerForm({ index, data, onChange, seat }) {
             <Calendar className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <input
               type="date"
-              value={data.dob || ""}
+              value={data.dob ? data.dob.split("T")[0] : ""}
               onChange={(e) => handleChange("dob", e.target.value)}
               className="w-full rounded-xl border border-border bg-secondary/50 py-3 pl-10 pr-4 text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
             />
@@ -166,7 +166,9 @@ function PassengerForm({ index, data, onChange, seat }) {
             <Calendar className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <input
               type="date"
-              value={data.passportExpiry || ""}
+              value={
+                data.passportExpiry ? data.passportExpiry.split("T")[0] : ""
+              }
               onChange={(e) => handleChange("passportExpiry", e.target.value)}
               className="w-full rounded-xl border border-border bg-secondary/50 py-3 pl-10 pr-4 text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
             />
@@ -223,7 +225,6 @@ function GSTBreakdownCard({ basePrice }) {
 
   return (
     <div className="rounded-2xl border border-border/50 bg-card/80 p-5 backdrop-blur-xl shadow-md">
-      {/* Title */}
       <div className="mb-4 flex items-center gap-2">
         <Receipt className="h-4 w-4 text-primary" />
         <h3 className="text-sm font-semibold text-foreground uppercase tracking-wider">
@@ -232,34 +233,23 @@ function GSTBreakdownCard({ basePrice }) {
       </div>
 
       <div className="flex flex-col gap-2 text-sm">
-        {/* Base Fare */}
         <div className="flex items-center justify-between text-muted-foreground">
           <span>Base Fare</span>
           <span className="font-medium text-foreground">{fmt(base)}</span>
         </div>
-
-        {/* CGST */}
         <div className="flex items-center justify-between text-muted-foreground">
           <span>CGST (9%)</span>
           <span className="font-medium text-foreground">{fmt(cgst)}</span>
         </div>
-
-        {/* SGST */}
         <div className="flex items-center justify-between text-muted-foreground">
           <span>SGST (9%)</span>
           <span className="font-medium text-foreground">{fmt(sgst)}</span>
         </div>
-
-        {/* GST note */}
         <div className="flex items-center justify-between text-xs text-muted-foreground/70 pb-1">
           <span>Total GST (18%)</span>
           <span>{fmt(gst)}</span>
         </div>
-
-        {/* Divider */}
         <div className="border-t border-border/60 my-1" />
-
-        {/* Total */}
         <div className="flex items-center justify-between">
           <span className="font-semibold text-foreground">
             Total Payable{" "}
@@ -271,7 +261,6 @@ function GSTBreakdownCard({ basePrice }) {
         </div>
       </div>
 
-      {/* GST badge */}
       <div className="mt-3 rounded-lg bg-yellow-500/10 border border-yellow-500/20 px-3 py-2 text-xs text-yellow-600 dark:text-yellow-400">
         🧾 GST of 18% (CGST 9% + SGST 9%) is applicable on base fare as per
         Govt. regulations.
@@ -295,6 +284,9 @@ export default function PassengerDetails() {
   const passengers = parseInt(searchParams.get("passengers") || "1");
   const date = searchParams.get("date") || "";
 
+  // ── Pending booking ke liye existing bookingId ──
+  const existingBookingId = searchParams.get("bookingId") || null;
+
   const { base, gst, total } = calcGST(price);
 
   const [forms, setForms] = useState(
@@ -303,14 +295,56 @@ export default function PassengerDetails() {
     })),
   );
   const [loading, setLoading] = useState(false);
+  const [prefilling, setPrefilling] = useState(false);
   const [error, setError] = useState(null);
 
-  // ── Auto-fill Passenger 1 from logged-in user profile ──
+  // ── Agar existingBookingId hai → existing passengers fetch karo ──
   useEffect(() => {
+    if (!existingBookingId) return;
+
+    const fetchExistingPassengers = async () => {
+      setPrefilling(true);
+      try {
+        const res = await fetch(
+          `http://localhost:5000/api/passenger/onepassenger/${existingBookingId}`,
+        );
+        if (!res.ok) throw new Error("Passengers fetch failed");
+        const data = await res.json();
+
+        if (data?.length) {
+          setForms(
+            data.map((p, i) => ({
+              fullName: p.fullName || "",
+              gender: p.gender || "",
+              dob: p.dob || "",
+              nationality: p.nationality || "",
+              passportNumber: p.passportNumber || "",
+              passportExpiry: p.passportExpiry || "",
+              email: i === 0 ? p.email || "" : "",
+              phone: i === 0 ? p.phone || "" : "",
+              seat: p.seat || seats[i] || "",
+            })),
+          );
+        }
+      } catch (err) {
+        console.error("Existing passenger fetch failed:", err);
+        // Silent fail — user manually fill karega
+      } finally {
+        setPrefilling(false);
+      }
+    };
+
+    fetchExistingPassengers();
+  }, [existingBookingId]);
+
+  // ── Naya booking ho (no existingBookingId) → auto-fill from user profile ──
+  useEffect(() => {
+    if (existingBookingId) return; // Skip — existing passengers already fetched
+
     const fetchAndFill = async () => {
       try {
         const stored = localStorage.getItem("user");
-        if (!stored) return; // Guest user — skip
+        if (!stored) return;
 
         const userData = JSON.parse(stored);
         const userId = userData?.id;
@@ -323,34 +357,30 @@ export default function PassengerDetails() {
 
         const user = await res.json();
 
-        // Full name banavo
         const nameParts = [user.firstName, user.middleName, user.lastName]
           .filter(Boolean)
           .join(" ")
           .trim();
 
-        // Sirf Passenger 1 (index 0) auto-fill karo
         setForms((prev) =>
-          prev.map(
-            (f, i) =>
-              i === 0
-                ? {
-                    ...f,
-                    fullName: nameParts,
-                    email: user.email || "",
-                    phone: user.phone || "",
-                  }
-                : f, // Passenger 2, 3... blank raheshe
+          prev.map((f, i) =>
+            i === 0
+              ? {
+                  ...f,
+                  fullName: nameParts,
+                  email: user.email || "",
+                  phone: user.phone || "",
+                }
+              : f,
           ),
         );
       } catch (err) {
         console.error("Auto-fill failed:", err);
-        // Silent fail — user manually bharashe
       }
     };
 
     fetchAndFill();
-  }, []); // Sirf ek vaar — mount thay tyare
+  }, []);
 
   const handleChange = (index, data) => {
     setForms((prev) => prev.map((f, i) => (i === index ? data : f)));
@@ -384,26 +414,32 @@ export default function PassengerDetails() {
     setError(null);
 
     try {
-      // Step 1: Booking save
-      const bookingRes = await fetch("http://localhost:5000/api/booking/", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          flightNumber: flight,
-          from,
-          to,
-          date,
-          seats: forms.map((f) => f.seat || ""),
-          totalPrice: total,
-          passengers: forms,
-        }),
-      });
+      let finalBookingId = existingBookingId;
 
-      const bookingData = await bookingRes.json();
-      if (!bookingRes.ok)
-        throw new Error(bookingData.error || "Booking save failed");
+      if (!existingBookingId) {
+        // ── Naya booking: pehle booking save karo ──
+        const bookingRes = await fetch("http://localhost:5000/api/booking/", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            flightNumber: flight,
+            from,
+            to,
+            date,
+            seats: forms.map((f) => f.seat || ""),
+            totalPrice: total,
+            passengers: forms,
+          }),
+        });
 
-      // Step 2: PayU initiate
+        const bookingData = await bookingRes.json();
+        if (!bookingRes.ok)
+          throw new Error(bookingData.error || "Booking save failed");
+
+        finalBookingId = bookingData.bookingId;
+      }
+
+      // ── PayU initiate (existing ya naya dono ke liye) ──
       const payuRes = await fetch(
         "http://localhost:5000/api/payment/payu-initiate",
         {
@@ -414,7 +450,7 @@ export default function PassengerDetails() {
             name: forms[0].fullName,
             email: forms[0].email,
             phone: forms[0].phone,
-            bookingId: bookingData.bookingId,
+            bookingId: finalBookingId,
             from,
             to,
             flight,
@@ -430,7 +466,7 @@ export default function PassengerDetails() {
       const payuData = await payuRes.json();
       if (!payuData.success) throw new Error("PayU initiate failed");
 
-      // Step 3: Hidden form → PayU submit
+      // ── Hidden form → PayU submit ──
       const form = document.createElement("form");
       form.method = "POST";
       form.action = payuData.payuUrl;
@@ -466,55 +502,75 @@ export default function PassengerDetails() {
             {seats.length > 0 && ` · Seats: ${seats.join(", ")}`}
             {date && ` · ${date}`}
           </span>
+          {/* Pending booking badge */}
+          {existingBookingId && (
+            <span className="ml-auto text-xs font-semibold bg-yellow-500/15 text-yellow-600 border border-yellow-500/30 px-3 py-1 rounded-full">
+              ⏳ Completing Pending Payment
+            </span>
+          )}
         </div>
 
-        {/* ── Passenger Forms ── */}
-        <div className="flex flex-col gap-6">
-          {forms.map((data, index) => (
-            <PassengerForm
-              key={index}
-              index={index}
-              data={data}
-              onChange={handleChange}
-              seat={seats[index] || ""}
-            />
-          ))}
-        </div>
-
-        {/* ── GST Breakdown Card ── */}
-        <div className="mt-6">
-          <GSTBreakdownCard basePrice={price} />
-        </div>
-
-        {/* ── Error ── */}
-        {error && (
-          <div className="mt-4 rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-400">
-            {error}
+        {/* ── Prefilling loader ── */}
+        {prefilling ? (
+          <div className="flex items-center justify-center py-16 text-muted-foreground text-sm gap-3">
+            <div className="h-5 w-5 rounded-full border-2 border-primary border-t-transparent animate-spin" />
+            Loading your passenger details...
           </div>
+        ) : (
+          <>
+            {/* ── Passenger Forms ── */}
+            <div className="flex flex-col gap-6">
+              {forms.map((data, index) => (
+                <PassengerForm
+                  key={index}
+                  index={index}
+                  data={data}
+                  onChange={handleChange}
+                  seat={seats[index] || data.seat || ""}
+                />
+              ))}
+            </div>
+
+            {/* ── GST Breakdown Card ── */}
+            <div className="mt-6">
+              <GSTBreakdownCard basePrice={price} />
+            </div>
+
+            {/* ── Error ── */}
+            {error && (
+              <div className="mt-4 rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-400">
+                {error}
+              </div>
+            )}
+
+            {/* ── Bottom Bar ── */}
+            <div className="mt-6 flex items-center justify-between rounded-2xl border border-border/50 bg-card/80 p-4 backdrop-blur-xl">
+              <div>
+                <p className="text-xs text-muted-foreground">
+                  Base {fmt(base)} + GST {fmt(gst)}
+                </p>
+                <p className="text-xl font-bold text-primary">
+                  {fmt(total)}
+                  <span className="ml-1 text-xs font-normal text-muted-foreground">
+                    incl. GST
+                  </span>
+                </p>
+              </div>
+              <button
+                onClick={handleSubmit}
+                disabled={loading}
+                className="flex items-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground disabled:opacity-50 hover:opacity-90 transition-all"
+              >
+                {loading
+                  ? "Processing..."
+                  : existingBookingId
+                    ? "💳 Pay Now"
+                    : "Proceed to Payment"}
+                <ChevronRight className="h-4 w-4" />
+              </button>
+            </div>
+          </>
         )}
-
-        {/* ── Bottom Bar ── */}
-        <div className="mt-6 flex items-center justify-between rounded-2xl border border-border/50 bg-card/80 p-4 backdrop-blur-xl">
-          <div>
-            <p className="text-xs text-muted-foreground">
-              Base {fmt(base)} + GST {fmt(gst)}
-            </p>
-            <p className="text-xl font-bold text-primary">
-              {fmt(total)}
-              <span className="ml-1 text-xs font-normal text-muted-foreground">
-                incl. GST
-              </span>
-            </p>
-          </div>
-          <button
-            onClick={handleSubmit}
-            disabled={loading}
-            className="flex items-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground disabled:opacity-50 hover:opacity-90 transition-all"
-          >
-            {loading ? "Saving..." : "Proceed to Payment"}
-            <ChevronRight className="h-4 w-4" />
-          </button>
-        </div>
       </div>
     </div>
   );

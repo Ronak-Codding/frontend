@@ -28,28 +28,52 @@ export default function BookingConfirmation() {
   const [downloading, setDownloading] = useState(false);
 
   useEffect(() => {
-    async function fetchBooking() {
+    async function fetchAndConfirm() {
       try {
         if (!bookingId) return;
+
+        // Step 1: Booking fetch karo
         const res = await fetch(
           `http://localhost:5000/api/booking/${bookingId}`,
         );
         const data = await res.json();
         if (res.ok) setBooking(data);
+
+        // Step 2: Agar booking pending hai toh confirm karo
+        if (data.status === "pending") {
+          await fetch(
+            `http://localhost:5000/api/booking/confirm-payment/${bookingId}`,
+            {
+              method: "PATCH",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                transactionId: data.transactionId || "",
+                paymentMethod: data.paymentMethod || "card",
+              }),
+            },
+          );
+
+          // Step 3: Updated booking fetch
+          const updated = await fetch(
+            `http://localhost:5000/api/booking/${bookingId}`,
+          );
+          const updatedData = await updated.json();
+          if (updated.ok) setBooking(updatedData);
+        }
       } catch (err) {
-        console.error("Booking fetch error:", err);
+        console.error("Booking fetch/confirm error:", err);
       }
     }
-    fetchBooking();
+    fetchAndConfirm();
   }, [bookingId]);
 
   // ── Download Boarding Pass PDF ──
   const downloadBoardingPass = async () => {
     if (!bookingId) return;
 
-    // Booking data load na thay hoy to wait karo
+    // Booking data load
     if (!booking?.passengers?.length) {
-      alert("Booking data load નથી થઈ, થોડી વાર રાહ જુઓ અને ફરી try કરો.");
+      alert("Booking data load.");
       return;
     }
 

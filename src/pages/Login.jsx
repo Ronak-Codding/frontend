@@ -70,6 +70,23 @@ const Login = () => {
           position: relative;
         }
 
+          .rc-back {
+    position: fixed;
+    top: 16px; left: 16px;
+    z-index: 50;
+    display: flex; align-items: center; gap: 7px;
+    background:rgba(246, 245, 243, 0.23);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-family: 'Outfit', sans-serif;
+    font-size: 13px;
+    padding: 7px 14px;
+    border-radius: 100px;
+    cursor: pointer;
+    backdrop-filter: blur(14px);
+    transition: all .22s ease;
+  }
+   .rc-back:hover { background: rgba(202, 166, 21, 0.77); color: var(--accent); transform: translateX(-2px); }
         .lg-bg-grid {
           position: absolute;
           inset: 0;
@@ -187,12 +204,14 @@ const Login = () => {
           font-size: 1.65rem; /* ↓ slightly reduced */
           font-weight: 800;
           color: #f0e8d0;
+          text-align: center;
           letter-spacing: -0.4px;
           margin-bottom: 3px; /* ↓ reduced from 5px */
         }
         .lg-subtitle {
           font-size: 0.83rem;
-          color: #3a4e68;
+          color: #e8ecf1;
+          text-align: center;
           margin-bottom: 18px; /* ↓ reduced from 26px */
         }
 
@@ -274,8 +293,8 @@ const Login = () => {
         }
 
         .lg-forgot {
-          text-align: right;
-          margin: -2px 0 14px; /* ↓ reduced from 20px */
+          text-align: center;
+          margin: 10px 0 14px; /* ↓ reduced from 20px */
         }
         .lg-forgot button {
           background: none; border: none;
@@ -288,6 +307,7 @@ const Login = () => {
 
         .lg-submit {
           width: 100%;
+          margin-top: 20px;
           padding: 11px; /* ↓ reduced from 12px */
           background: linear-gradient(135deg, #c8a227 0%, #e8c547 50%, #c8a227 100%);
           background-size: 200% 100%;
@@ -359,6 +379,10 @@ const Login = () => {
       `}</style>
 
       <div className="lg-root">
+        {/* Back Button */}
+        <button className="rc-back" onClick={() => navigate("/")}>
+          ← Back to Home
+        </button>
         <div className="lg-bg-grid" />
         <div className="lg-blob lg-blob-1" />
         <div className="lg-blob lg-blob-2" />
@@ -370,13 +394,13 @@ const Login = () => {
             </div>
             <div>
               <div className="lg-brand-name">SkyJet Airlines</div>
-              <div className="lg-brand-sub">User Portal</div>
+              {/* <div className="lg-brand-sub">User Portal</div> */}
             </div>
           </div>
 
-          <div className="lg-badge">
+          {/* <div className="lg-badge">
             <span className="lg-badge-dot" /> Secure User Access
-          </div>
+          </div> */}
 
           <h2 className="lg-title">Welcome back</h2>
           <p className="lg-subtitle">Sign in to your account</p>
@@ -436,14 +460,7 @@ const Login = () => {
               )}
             </div>
 
-            <div className="lg-forgot">
-              <button
-                type="button"
-                onClick={() => navigate("/forgot-password")}
-              >
-                Forgot password?
-              </button>
-            </div>
+           
 
             <button className="lg-submit" type="submit" disabled={loading}>
               {loading ? (
@@ -454,6 +471,14 @@ const Login = () => {
                 <>Sign In</>
               )}
             </button>
+             <div className="lg-forgot">
+              <button
+                type="button"
+                onClick={() => navigate("/forgot-password")}
+              >
+                Forgot password?
+              </button>
+            </div>
           </form>
 
           <div className="lg-divider">

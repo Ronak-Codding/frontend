@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Ticket,
   Search,
@@ -14,6 +15,7 @@ import "./UserLayout.css";
 import "./UserPages.css";
 
 const UserBookings = () => {
+  const navigate = useNavigate();
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -352,78 +354,302 @@ const UserBookings = () => {
           </div>
         </div>
       ) : (
-        <div className="ub-list">
+        <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
           {current.map((b, i) => (
-            <div key={b._id || i} className="ub-card">
-              <div className="ub-card-left">
-                <div className="ub-plane-icon">
-                  <Plane size={18} />
-                </div>
-                <div className="ub-card-info">
-                  <div className="ub-card-route">
-                    <span className="ub-route-city">{b.from || "—"}</span>
-                    <span className="ub-route-arrow">→</span>
-                    <span className="ub-route-city">{b.to || "—"}</span>
-                  </div>
-                  <div className="ub-card-meta">
-                    <span>{b.bookingId || b._id?.slice(-8).toUpperCase()}</span>
-                    <span>·</span>
-                    <span>{b.flightNumber || "—"}</span>
-                    <span>·</span>
-                    <span>
-                      {b.passengers?.length || 1} passenger
-                      {(b.passengers?.length || 1) > 1 ? "s" : ""}
-                    </span>
-                  </div>
-                </div>
-              </div>
+            <div
+              key={b._id || i}
+              style={{
+                background: "var(--card-bg, #fff)",
+                borderRadius: "1rem",
+                boxShadow:
+                  "0 4px 24px rgba(99,102,241,0.10), 0 1.5px 6px rgba(0,0,0,0.06)",
+                border: "1px solid var(--border-color, #e5e7eb)",
+                overflow: "hidden",
+                transition: "box-shadow 0.2s, transform 0.2s",
+              }}
+              onMouseEnter={(e) =>
+                (e.currentTarget.style.transform = "translateY(-2px)")
+              }
+              onMouseLeave={(e) =>
+                (e.currentTarget.style.transform = "translateY(0)")
+              }
+            >
+              {/* Top stripe by status */}
+              <div
+                style={{
+                  height: 4,
+                  background:
+                    b.status === "confirmed" || b.status === "Confirmed"
+                      ? "linear-gradient(90deg, #10b981, #34d399)"
+                      : b.status === "cancelled" || b.status === "Cancelled"
+                        ? "linear-gradient(90deg, #ef4444, #f87171)"
+                        : "linear-gradient(90deg, #f59e0b, #fbbf24)",
+                }}
+              />
 
-              <div className="ub-card-right">
-                <div style={{ textAlign: "right" }}>
-                  <p className="ub-card-price">
-                    ₹{b.totalPrice?.toLocaleString("en-IN") || "—"}
-                  </p>
-                  <p className="ub-card-date">{formatDate(b.createdAt)}</p>
-                </div>
-                <span
-                  className={`up-badge ${STATUS_CLASS[b.status] || "up-badge-pending"}`}
+              <div style={{ padding: "1.25rem 1.5rem" }}>
+                {/* Row 1: Route + Status + Price */}
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    flexWrap: "wrap",
+                    gap: "0.5rem",
+                    marginBottom: "1rem",
+                  }}
                 >
-                  {b.status}
-                </span>
-                <div className="ub-actions">
+                  {/* Route */}
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "0.75rem",
+                    }}
+                  >
+                    <div
+                      style={{
+                        width: 42,
+                        height: 42,
+                        borderRadius: "0.75rem",
+                        background: "rgba(99,102,241,0.1)",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        flexShrink: 0,
+                      }}
+                    >
+                      <Plane size={20} color="#6366f1" />
+                    </div>
+                    <div>
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "0.5rem",
+                        }}
+                      >
+                        <span
+                          style={{
+                            fontSize: "1.2rem",
+                            fontWeight: 700,
+                            color: "var(--text-primary, #0f172a)",
+                          }}
+                        >
+                          {b.from || "—"}
+                        </span>
+                        <span
+                          style={{
+                            color: "#6366f1",
+                            fontWeight: 700,
+                            fontSize: "1.1rem",
+                          }}
+                        >
+                          →
+                        </span>
+                        <span
+                          style={{
+                            fontSize: "1.2rem",
+                            fontWeight: 700,
+                            color: "var(--text-primary, #0f172a)",
+                          }}
+                        >
+                          {b.to || "—"}
+                        </span>
+                      </div>
+                      <p
+                        style={{
+                          margin: 0,
+                          fontSize: "0.78rem",
+                          color: "var(--text-secondary, #64748b)",
+                          marginTop: 2,
+                        }}
+                      >
+                        {b.flightNumber || "—"} &nbsp;·&nbsp;{" "}
+                        {b.bookingId || b._id?.slice(-8).toUpperCase()}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Status + Price */}
+                  <div style={{ textAlign: "right" }}>
+                    <span
+                      className={`up-badge ${STATUS_CLASS[b.status] || "up-badge-pending"}`}
+                      style={{ marginBottom: 4, display: "inline-block" }}
+                    >
+                      {b.status}
+                    </span>
+                    <p
+                      style={{
+                        margin: 0,
+                        fontSize: "1.15rem",
+                        fontWeight: 700,
+                        color: "#6366f1",
+                      }}
+                    >
+                      ₹{b.totalPrice?.toLocaleString("en-IN") || "—"}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Divider */}
+                <div
+                  style={{
+                    borderTop: "1px dashed var(--border-color, #e5e7eb)",
+                    margin: "0 0 1rem",
+                  }}
+                />
+
+                {/* Row 2: Detail chips */}
+                <div
+                  style={{
+                    display: "flex",
+                    flexWrap: "wrap",
+                    gap: "0.6rem",
+                    marginBottom: "1rem",
+                  }}
+                >
+                  {[
+                    {
+                      label: "Booking ID",
+                      value: b.bookingId || b._id?.slice(-8).toUpperCase(),
+                    },
+                    {
+                      label: "Passengers",
+                      value: `${b.passengers?.length || 1} passenger${(b.passengers?.length || 1) > 1 ? "s" : ""}`,
+                    },
+                    { label: "Booked On", value: formatDate(b.createdAt) },
+                    {
+                      label: "Class",
+                      value: b.seatClass || b.class || "Economy",
+                    },
+                  ].map(({ label, value }) => (
+                    <div
+                      key={label}
+                      style={{
+                        background: "var(--bg-secondary, #f8fafc)",
+                        border: "1px solid var(--border-color, #e5e7eb)",
+                        borderRadius: "0.5rem",
+                        padding: "0.35rem 0.75rem",
+                        fontSize: "0.78rem",
+                      }}
+                    >
+                      <span
+                        style={{
+                          color: "var(--text-secondary, #64748b)",
+                          marginRight: 4,
+                        }}
+                      >
+                        {label}:
+                      </span>
+                      <span
+                        style={{
+                          fontWeight: 600,
+                          color: "var(--text-primary, #0f172a)",
+                        }}
+                      >
+                        {value}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Row 3: Actions */}
+                <div
+                  style={{
+                    display: "flex",
+                    gap: "0.5rem",
+                    flexWrap: "wrap",
+                    justifyContent: "flex-end",
+                  }}
+                >
                   {/* View */}
                   <button
-                    className="ub-action-btn ub-view-btn"
                     onClick={() => setViewBooking(b)}
-                    title="View Details"
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "0.35rem",
+                      padding: "0.45rem 0.9rem",
+                      borderRadius: "0.6rem",
+                      border: "1px solid var(--border-color, #e5e7eb)",
+                      background: "var(--bg-secondary, #f8fafc)",
+                      color: "var(--text-primary, #0f172a)",
+                      cursor: "pointer",
+                      fontSize: "0.8rem",
+                      fontWeight: 500,
+                    }}
                   >
-                    <Eye size={15} />
+                    <Eye size={14} /> View Details
                   </button>
+
+                  {/* ── Complete Payment — pending booking ke liye ── */}
+                  {(b.status === "pending" || b.status === "Pending") && (
+                    <button
+                      onClick={() =>
+                        navigate(
+                          `/passengers?flight=${b.flightNumber}&from=${b.from}&to=${b.to}&price=${b.totalPrice}&passengers=${b.passengers?.length || 1}&bookingId=${b._id}`,
+                        )
+                      }
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "0.35rem",
+                        padding: "0.45rem 0.9rem",
+                        borderRadius: "0.6rem",
+                        border: "1px solid rgba(245,158,11,0.4)",
+                        background: "rgba(245,158,11,0.1)",
+                        color: "#d97706",
+                        cursor: "pointer",
+                        fontSize: "0.8rem",
+                        fontWeight: 600,
+                      }}
+                    >
+                      💳 Complete Payment
+                    </button>
+                  )}
 
                   {/* Download Boarding Pass */}
                   {(b.status === "confirmed" || b.status === "Confirmed") && (
                     <button
-                      className="ub-action-btn"
                       onClick={() => downloadBoardingPass(b)}
-                      title="Download Boarding Pass"
                       style={{
-                        background: "rgba(108,99,255,0.1)",
-                        color: "#6c63ff",
-                        border: "1px solid rgba(108,99,255,0.3)",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "0.35rem",
+                        padding: "0.45rem 0.9rem",
+                        borderRadius: "0.6rem",
+                        border: "1px solid rgba(99,102,241,0.35)",
+                        background: "rgba(99,102,241,0.08)",
+                        color: "#6366f1",
+                        cursor: "pointer",
+                        fontSize: "0.8rem",
+                        fontWeight: 600,
                       }}
                     >
-                      <Download size={15} />
+                      <Download size={14} /> Boarding Pass
                     </button>
                   )}
 
                   {/* Cancel */}
                   {(b.status === "confirmed" || b.status === "Confirmed") && (
                     <button
-                      className="ub-action-btn ub-cancel-btn"
                       onClick={() => handleCancel(b._id)}
-                      title="Cancel Booking"
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "0.35rem",
+                        padding: "0.45rem 0.9rem",
+                        borderRadius: "0.6rem",
+                        border: "1px solid rgba(239,68,68,0.3)",
+                        background: "rgba(239,68,68,0.08)",
+                        color: "#ef4444",
+                        cursor: "pointer",
+                        fontSize: "0.8rem",
+                        fontWeight: 600,
+                      }}
                     >
-                      <XCircle size={15} />
+                      <XCircle size={14} /> Cancel
                     </button>
                   )}
                 </div>

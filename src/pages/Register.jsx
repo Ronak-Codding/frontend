@@ -871,7 +871,7 @@ const Register = ({ onRegister }) => {
                   />
                   <label htmlFor="rc-terms" className="rc-terms-text">
                     I agree to the{" "}
-                    <Link to="/terms">Terms &amp; Conditions</Link> and{" "}
+                    <Link to="/termofservice">Terms &amp; Conditions</Link> and{" "}
                     <Link to="/privacy">Privacy Policy</Link>
                   </label>
                 </div>

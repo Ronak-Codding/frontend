@@ -1,7 +1,155 @@
-import React, { useState, useEffect } from "react";
-import { User, Lock, Save, Eye, EyeOff, Hash, Shield, UserCircle2 } from "lucide-react";
+import React, { useState, useEffect, useRef } from "react";
+import {
+  User,
+  Lock,
+  Save,
+  Eye,
+  EyeOff,
+  Shield,
+  UserCircle2,
+  Camera,
+} from "lucide-react";
 import "./UserLayout.css";
 import "./UserPages.css";
+
+// ─── UploadableAvatar (same as Navbar) ───────────────────────────────────────
+function UploadableAvatar({ src, fallbackUrl, letter, onUpload, size = "lg" }) {
+  const fileRef = useRef(null);
+  const [hover, setHover] = useState(false);
+  const dim = size === "lg" ? "96px" : "72px";
+  const imgSrc = src || fallbackUrl;
+
+  const handleFile = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 2 * 1024 * 1024) {
+      alert("Image must be smaller than 2 MB.");
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => onUpload(reader.result);
+    reader.readAsDataURL(file);
+    e.target.value = "";
+  };
+
+  return (
+    <>
+      <input
+        ref={fileRef}
+        type="file"
+        accept="image/*"
+        style={{ display: "none" }}
+        onChange={handleFile}
+      />
+      <button
+        type="button"
+        onClick={() => fileRef.current?.click()}
+        onMouseEnter={() => setHover(true)}
+        onMouseLeave={() => setHover(false)}
+        title="Change profile photo"
+        style={{
+          position: "relative",
+          width: dim,
+          height: dim,
+          borderRadius: "50%",
+          border: "none",
+          padding: 0,
+          cursor: "pointer",
+          flexShrink: 0,
+          background: "none",
+        }}
+      >
+        {/* Avatar circle */}
+        <div
+          style={{
+            width: dim,
+            height: dim,
+            borderRadius: "50%",
+            overflow: "hidden",
+            border: "2.5px solid var(--primary-color, #d4a853)",
+            boxSizing: "border-box",
+          }}
+        >
+          {imgSrc ? (
+            <img
+              src={imgSrc}
+              alt="Profile"
+              style={{ width: "100%", height: "100%", objectFit: "cover" }}
+            />
+          ) : (
+            <div
+              className="uprof-avatar"
+              style={{
+                width: "100%",
+                height: "100%",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                borderRadius: "50%",
+                fontSize: size === "lg" ? "2rem" : "1.5rem",
+              }}
+            >
+              {letter}
+            </div>
+          )}
+        </div>
+
+        {/* Hover dark overlay — Instagram style */}
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            borderRadius: "50%",
+            background: "rgba(0,0,0,0.55)",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: "2px",
+            opacity: hover ? 1 : 0,
+            transition: "opacity 0.2s",
+            pointerEvents: "none",
+          }}
+        >
+          <Camera size={18} color="#fff" />
+          <span
+            style={{
+              fontSize: "9px",
+              fontWeight: 700,
+              letterSpacing: "0.08em",
+              textTransform: "uppercase",
+              color: "#fff",
+            }}
+          >
+            Change
+          </span>
+        </div>
+
+        {/* Small gold camera badge — always visible */}
+        <div
+          style={{
+            position: "absolute",
+            bottom: 2,
+            right: 2,
+            width: 22,
+            height: 22,
+            borderRadius: "50%",
+            background: "var(--primary-color, #d4a853)",
+            border: "2px solid var(--card-bg, #fff)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            pointerEvents: "none",
+          }}
+        >
+          <Camera size={11} color="#fff" />
+        </div>
+      </button>
+    </>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 
 const UserProfile = () => {
   const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
@@ -36,6 +184,27 @@ const UserProfile = () => {
     confirmPassword: "",
   });
 
+  // ── Profile photo — per-user localStorage key (same as Navbar) ────────────
+  const storageKey = storedUser.email
+    ? `profilePhoto_${storedUser.email}`
+    : null;
+  const [profilePhoto, setProfilePhoto] = useState(() =>
+    storageKey ? localStorage.getItem(storageKey) || null : null,
+  );
+
+  const handlePhotoUpload = (base64) => {
+    if (!storageKey) return;
+    try {
+      localStorage.setItem(storageKey, base64);
+      setProfilePhoto(base64);
+      // Notify Navbar to re-read photo
+      window.dispatchEvent(new Event("userUpdated"));
+    } catch {
+      alert("Could not save image. Try a smaller file.");
+    }
+  };
+  // ──────────────────────────────────────────────────────────────────────────
+
   const showNotification = (message, type = "success") => {
     setNotification({ show: true, message, type });
     setTimeout(
@@ -54,9 +223,7 @@ const UserProfile = () => {
       try {
         const res = await fetch(
           `http://localhost:5000/api/user/oneUser/${userId}`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          },
+          { headers: { Authorization: `Bearer ${token}` } },
         );
         if (res.ok) {
           const data = await res.json();
@@ -68,7 +235,6 @@ const UserProfile = () => {
             phone: data.phone || "",
           });
         } else {
-          // Fallback to localStorage
           fallbackToStored();
         }
       } catch {
@@ -154,7 +320,6 @@ const UserProfile = () => {
   };
 
   // ── Change Password ──
-  // Uses /api/user/changePassword/:id which verifies old password first
   const handlePasswordChange = async (e) => {
     e.preventDefault();
     if (!pwForm.oldPassword) {
@@ -251,12 +416,31 @@ const UserProfile = () => {
 
   const d = userData || {};
 
+  // DiceBear fallback (same logic as Navbar)
+  const fullName =
+    `${d.firstName || ""} ${d.lastName || ""}`.trim() ||
+    storedUser.fullname ||
+    "";
+  const fallbackAvatarUrl = fullName
+    ? `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(
+        fullName,
+      )}&backgroundColor=d4a853&textColor=ffffff&fontSize=40&fontWeight=700`
+    : null;
+
+  const avatarLetter = (d.firstName || storedUser.fullname || "U")
+    .charAt(0)
+    .toUpperCase();
+
   return (
     <div>
       {/* Notification */}
       {notification.show && (
         <div
-          className={`up-notification ${notification.type === "error" ? "up-notification-error" : "up-notification-success"}`}
+          className={`up-notification ${
+            notification.type === "error"
+              ? "up-notification-error"
+              : "up-notification-success"
+          }`}
         >
           {notification.message}
         </div>
@@ -272,17 +456,19 @@ const UserProfile = () => {
       <div className="up-grid-2">
         {/* ── LEFT ── */}
         <div>
-          {/* Avatar Card */}
+          {/* Avatar Card — now with UploadableAvatar */}
           <div className="up-card" style={{ marginBottom: "1.25rem" }}>
             <div
               className="up-card-body"
               style={{ display: "flex", alignItems: "center", gap: "1.25rem" }}
             >
-              <div className="uprof-avatar">
-                {(d.firstName || storedUser.fullname)
-                  ?.charAt(0)
-                  ?.toUpperCase() || "U"}
-              </div>
+              <UploadableAvatar
+                src={profilePhoto}
+                fallbackUrl={fallbackAvatarUrl}
+                letter={avatarLetter}
+                onUpload={handlePhotoUpload}
+                size="lg"
+              />
               <div>
                 <p
                   style={{
@@ -306,6 +492,16 @@ const UserProfile = () => {
                 <span className="uprof-role-badge">
                   {d.role || storedUser.role || "user"}
                 </span>
+                <p
+                  style={{
+                    fontSize: "0.75rem",
+                    color: "var(--text-secondary)",
+                    marginTop: "0.3rem",
+                    opacity: 0.7,
+                  }}
+                >
+                  Click photo to change
+                </p>
               </div>
             </div>
           </div>
@@ -319,7 +515,6 @@ const UserProfile = () => {
             </div>
             <div className="up-card-body">
               <form onSubmit={handleProfileSave}>
-                {/* First + Last Name */}
                 <div className="up-form-grid-2">
                   <div className="up-form-group">
                     <label className="up-form-label">First Name *</label>
@@ -352,7 +547,6 @@ const UserProfile = () => {
                   </div>
                 </div>
 
-                {/* Username */}
                 <div className="up-form-group">
                   <label className="up-form-label">Username</label>
                   <div style={{ position: "relative" }}>
@@ -378,7 +572,6 @@ const UserProfile = () => {
                   </p>
                 </div>
 
-                {/* Phone */}
                 <div className="up-form-group">
                   <label className="up-form-label">Phone Number</label>
                   <input
@@ -392,7 +585,6 @@ const UserProfile = () => {
                   />
                 </div>
 
-                {/* Email — read only */}
                 <div className="up-form-group">
                   <label className="up-form-label">Email</label>
                   <div className="uprof-readonly-field">

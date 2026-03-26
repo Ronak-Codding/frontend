@@ -15,6 +15,7 @@ import {
   Moon,
   Sun,
   Ban,
+  HomeIcon,
 } from "lucide-react";
 import "./UserLayout.css";
 
@@ -32,14 +33,24 @@ const UserLayout = () => {
     JSON.parse(localStorage.getItem("user") || "{}"),
   );
 
-  // ── Listen for localStorage "user" changes from any page ──
+  // ── Profile photo — read same key as Navbar & UserProfile ────────────────
+  const storageKey = user.email ? `profilePhoto_${user.email}` : null;
+  const [profilePhoto, setProfilePhoto] = useState(() =>
+    storageKey ? localStorage.getItem(storageKey) || null : null,
+  );
+
+  // ── Listen for localStorage "user" / photo changes from any page ─────────
   useEffect(() => {
     const handleStorageChange = () => {
       const updated = JSON.parse(localStorage.getItem("user") || "{}");
       setUser(updated);
+
+      // Re-read photo for updated user
+      const key = updated.email ? `profilePhoto_${updated.email}` : null;
+      setProfilePhoto(key ? localStorage.getItem(key) || null : null);
     };
 
-    // Custom event — fired from UserProfile after save
+    // Custom event — fired from UserProfile after save / photo upload
     window.addEventListener("userUpdated", handleStorageChange);
     // Native storage event — fires when another tab updates
     window.addEventListener("storage", handleStorageChange);
@@ -77,16 +88,89 @@ const UserLayout = () => {
     .charAt(0)
     .toUpperCase();
 
+  // DiceBear fallback
+  const fallbackAvatarUrl = displayName
+    ? `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(
+        displayName,
+      )}&backgroundColor=d4a853&textColor=ffffff&fontSize=40&fontWeight=700`
+    : null;
+
   const NAV_ITEMS = [
+    { path: "/", label: "Home", icon: HomeIcon },
     { path: "/user/dashboard", label: "Dashboard", icon: LayoutDashboard },
+    { path: "/user/search", label: "Search Flights", icon: Search },
     { path: "/user/bookings", label: "My Bookings", icon: Ticket },
     { path: "/user/payments", label: "Payment History", icon: CreditCard },
     { path: "/user/cancellation", label: " Cancellation & Refund", icon: Ban },
-    { path: "/user/search", label: "Search Flights", icon: Search },
     { path: "/user/profile", label: " My Profile", icon: User },
   ];
 
   const isActive = (path) => location.pathname === path;
+
+  // ── Sidebar avatar: photo > DiceBear > letter ────────────────────────────
+  const SidebarAvatar = () => {
+    const imgSrc = profilePhoto || fallbackAvatarUrl;
+    return (
+      <div
+        className="ul-user-avatar"
+        style={{
+          overflow: "hidden",
+          padding: 0,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        {imgSrc ? (
+          <img
+            src={imgSrc}
+            alt={displayName}
+            style={{
+              width: "100%",
+              height: "100%",
+              objectFit: "cover",
+              borderRadius: "50%",
+            }}
+          />
+        ) : (
+          avatarLetter
+        )}
+      </div>
+    );
+  };
+
+  // ── Topbar avatar: photo > DiceBear > letter ──────────────────────────────
+  const TopbarAvatar = () => {
+    const imgSrc = profilePhoto || fallbackAvatarUrl;
+    return (
+      <div
+        className="ul-topbar-avatar"
+        title={displayName}
+        style={{
+          overflow: "hidden",
+          padding: 0,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        {imgSrc ? (
+          <img
+            src={imgSrc}
+            alt={displayName}
+            style={{
+              width: "100%",
+              height: "100%",
+              objectFit: "cover",
+              borderRadius: "50%",
+            }}
+          />
+        ) : (
+          avatarLetter
+        )}
+      </div>
+    );
+  };
 
   return (
     <div className="ul-root">
@@ -97,7 +181,9 @@ const UserLayout = () => {
 
       {/* ── Sidebar ── */}
       <aside
-        className={`ul-sidebar ${sidebarOpen ? "ul-sidebar-open" : ""} ${sidebarCollapsed ? "ul-sidebar-collapsed" : ""}`}
+        className={`ul-sidebar ${sidebarOpen ? "ul-sidebar-open" : ""} ${
+          sidebarCollapsed ? "ul-sidebar-collapsed" : ""
+        }`}
       >
         {/* Logo */}
         <div className="ul-sidebar-logo">
@@ -113,9 +199,9 @@ const UserLayout = () => {
           </button>
         </div>
 
-        {/* User Card */}
+        {/* User Card — with profile photo */}
         <div className="ul-user-card">
-          <div className="ul-user-avatar">{avatarLetter}</div>
+          <SidebarAvatar />
           <div className="ul-user-info">
             <p className="ul-user-name">{displayName}</p>
             <p className="ul-user-email">{user.email}</p>
@@ -129,7 +215,9 @@ const UserLayout = () => {
             <Link
               key={path}
               to={path}
-              className={`ul-nav-item ${isActive(path) ? "ul-nav-item-active" : ""}`}
+              className={`ul-nav-item ${
+                isActive(path) ? "ul-nav-item-active" : ""
+              }`}
               onClick={() => setSidebarOpen(false)}
             >
               <Icon size={18} />
@@ -185,10 +273,8 @@ const UserLayout = () => {
             <button className="ul-icon-btn">
               <Bell size={18} />
             </button>
-            {/* Avatar shows updated letter */}
-            <div className="ul-topbar-avatar" title={displayName}>
-              {avatarLetter}
-            </div>
+            {/* Topbar avatar — shows updated photo instantly */}
+            <TopbarAvatar />
           </div>
         </header>
 

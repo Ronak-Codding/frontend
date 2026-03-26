@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   Search,
   Download,
@@ -18,14 +18,43 @@ import {
   AlertCircle,
   CheckSquare,
   Square,
+  BadgeCheck,
+  Ban,
+  MessageSquareText,
+  Info,
 } from "lucide-react";
 import "./AdminTables.css";
+
+const API_BASE = "http://localhost:5000/api/payment";
+const GST_RATE = 0.18;
+
+const fmtINR = (n) =>
+  new Intl.NumberFormat("en-IN", {
+    style: "currency",
+    currency: "INR",
+    maximumFractionDigits: 0,
+  }).format(n || 0);
+
+const calcNetRefund = (totalAmount) => {
+  const base = totalAmount / (1 + GST_RATE);
+  const gst = totalAmount - base;
+  return {
+    base: Math.round(base),
+    gst: Math.round(gst),
+    net: Math.round(base),
+  };
+};
 
 const STATUS_CONFIG = {
   success: { label: "Success", className: "badge-success", icon: CheckCircle },
   failed: { label: "Failed", className: "badge-failed", icon: XCircle },
   pending: { label: "Pending", className: "badge-pending", icon: Clock },
   refunded: { label: "Refunded", className: "badge-refunded", icon: RefreshCw },
+  refund_requested: {
+    label: "Refund Requested",
+    className: "badge-refund-requested",
+    icon: MessageSquareText,
+  },
 };
 
 const METHOD_CONFIG = {
@@ -59,6 +88,12 @@ const STAT_CARDS = (totalRevenue, total, payments) => [
     icon: CheckCircle,
   },
   {
+    label: "Refund Requests",
+    value: payments.filter((p) => p.status === "refund_requested").length,
+    color: "#f97316",
+    icon: MessageSquareText,
+  },
+  {
     label: "Refunded",
     value: payments.filter((p) => p.status === "refunded").length,
     color: "#fb923c",
@@ -66,6 +101,178 @@ const STAT_CARDS = (totalRevenue, total, payments) => [
   },
 ];
 
+// ── Reason Tooltip — position:fixed so it never gets clipped by table overflow ──
+function ReasonTooltip({ reason }) {
+  const [tooltipStyle, setTooltipStyle] = useState(null);
+  const iconRef = useRef(null);
+
+  const handleMouseEnter = () => {
+    if (!iconRef.current) return;
+    const rect = iconRef.current.getBoundingClientRect();
+    setTooltipStyle({
+      position: "fixed",
+      top: rect.bottom + 8, // 8px below the icon
+      left: rect.left + rect.width / 2, // horizontally centered
+      transform: "translateX(-50%)",
+      zIndex: 99999,
+    });
+  };
+
+  const handleMouseLeave = () => setTooltipStyle(null);
+
+  if (!reason) return null;
+
+  return (
+    <>
+      <span
+        ref={iconRef}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+        style={{
+          display: "inline-flex",
+          alignItems: "center",
+          marginLeft: 5,
+          cursor: "pointer",
+          flexShrink: 0,
+        }}
+      >
+        <Info size={13} style={{ color: "#f97316" }} />
+      </span>
+
+      {tooltipStyle && (
+        <div
+          style={{
+            ...tooltipStyle,
+            background: "#1a1a2e",
+            border: "1px solid rgba(249,115,22,0.45)",
+            borderRadius: 10,
+            padding: "10px 14px",
+            minWidth: 160,
+            maxWidth: 230,
+            boxShadow: "0 8px 28px rgba(0,0,0,0.55)",
+            pointerEvents: "none",
+          }}
+        >
+          {/* Upward arrow */}
+          <div
+            style={{
+              position: "absolute",
+              top: -7,
+              left: "50%",
+              transform: "translateX(-50%)",
+              width: 0,
+              height: 0,
+              borderLeft: "7px solid transparent",
+              borderRight: "7px solid transparent",
+              borderBottom: "7px solid rgba(249,115,22,0.45)",
+            }}
+          />
+          <p
+            style={{
+              margin: "0 0 4px",
+              fontSize: 10,
+              fontWeight: 700,
+              color: "#f97316",
+              textTransform: "uppercase",
+              letterSpacing: "0.06em",
+            }}
+          >
+            📋 Cancellation Reason
+          </p>
+          <p
+            style={{
+              margin: 0,
+              fontSize: 13,
+              color: "#fdba74",
+              lineHeight: 1.5,
+            }}
+          >
+            {reason}
+          </p>
+        </div>
+      )}
+    </>
+  );
+}
+
+// ── GST Breakdown ──
+function RefundBreakdown({ amount }) {
+  const { gst, net } = calcNetRefund(amount);
+  return (
+    <div
+      style={{
+        background: "rgba(16,185,129,0.06)",
+        border: "0.5px solid rgba(16,185,129,0.25)",
+        borderRadius: 10,
+        padding: "14px 16px",
+        marginTop: 12,
+      }}
+    >
+      <p
+        style={{
+          margin: "0 0 10px",
+          fontSize: 11,
+          fontWeight: 600,
+          textTransform: "uppercase",
+          letterSpacing: "0.05em",
+          color: "#065f46",
+        }}
+      >
+        Refund Breakdown
+      </p>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          fontSize: 13,
+          marginBottom: 5,
+          color: "var(--color-text-secondary)",
+        }}
+      >
+        <span>Total Paid (GST incl.)</span>
+        <span>{fmtINR(amount)}</span>
+      </div>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          fontSize: 13,
+          marginBottom: 5,
+          color: "#ef4444",
+        }}
+      >
+        <span>GST Deducted (18%)</span>
+        <span>− {fmtINR(gst)}</span>
+      </div>
+      <div
+        style={{
+          borderTop: "0.5px solid rgba(16,185,129,0.3)",
+          paddingTop: 8,
+          marginTop: 4,
+          display: "flex",
+          justifyContent: "space-between",
+          fontSize: 15,
+          fontWeight: 600,
+          color: "#10b981",
+        }}
+      >
+        <span>Net Refund to User</span>
+        <span>{fmtINR(net)}</span>
+      </div>
+      <p
+        style={{
+          margin: "8px 0 0",
+          fontSize: 11,
+          color: "var(--color-text-tertiary)",
+        }}
+      >
+        * GST is a government tax and is non-refundable per policy.
+      </p>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────
 export default function AdminPayments({ token }) {
   const [payments, setPayments] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -76,15 +283,18 @@ export default function AdminPayments({ token }) {
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("all");
   const [method, setMethod] = useState("all");
+  const [exportFormat, setExportFormat] = useState("csv");
   const [refundModal, setRefundModal] = useState(null);
   const [refundReason, setRefundReason] = useState("");
-
-  // ── Bulk selection state ──
+  const [approveModal, setApproveModal] = useState(null);
+  const [rejectModal, setRejectModal] = useState(null);
+  const [rejectReason, setRejectReason] = useState("");
+  const [actionLoading, setActionLoading] = useState(false);
   const [selectedPayments, setSelectedPayments] = useState([]);
   const [selectAll, setSelectAll] = useState(false);
 
-  // ── Export format state ──
-  const [exportFormat, setExportFormat] = useState("csv");
+  const approveInProgress = useRef(false);
+  const rejectInProgress = useRef(false);
 
   const authHeaders = {
     "Content-Type": "application/json",
@@ -92,10 +302,9 @@ export default function AdminPayments({ token }) {
   };
 
   useEffect(() => {
-    fetchPayments();
+    const t = setTimeout(() => fetchPayments(), 300);
+    return () => clearTimeout(t);
   }, [page, status, method, search]);
-
-  // Reset selection whenever payments list changes
   useEffect(() => {
     setSelectedPayments([]);
     setSelectAll(false);
@@ -111,23 +320,21 @@ export default function AdminPayments({ token }) {
         status,
         method,
       });
-      const res = await fetch(
-        `http://localhost:5000/api/admin/payments?${params}`,
-        { headers: authHeaders },
-      );
+      const res = await fetch(`${API_BASE}?${params}`, {
+        headers: authHeaders,
+      });
       const data = await res.json();
       setPayments(data.payments || []);
       setTotal(data.total || 0);
       setPages(data.pages || 1);
       setTotalRevenue(data.totalRevenue || 0);
     } catch (err) {
-      console.error(err);
+      console.error("fetchPayments error:", err);
     } finally {
       setLoading(false);
     }
   };
 
-  // ── Checkbox handlers ──
   const handleSelectAll = () => {
     if (selectAll) {
       setSelectedPayments([]);
@@ -137,14 +344,11 @@ export default function AdminPayments({ token }) {
       setSelectAll(true);
     }
   };
-
-  const toggleSelect = (id) => {
+  const toggleSelect = (id) =>
     setSelectedPayments((prev) =>
       prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
     );
-  };
 
-  // ── Bulk delete ──
   const handleBulkDelete = async () => {
     if (!window.confirm(`Delete ${selectedPayments.length} payment record(s)?`))
       return;
@@ -152,7 +356,7 @@ export default function AdminPayments({ token }) {
     try {
       await Promise.all(
         selectedPayments.map((id) =>
-          fetch(`http://localhost:5000/api/admin/payments/${id}`, {
+          fetch(`${API_BASE}/${id}`, {
             method: "DELETE",
             headers: authHeaders,
           }),
@@ -169,15 +373,17 @@ export default function AdminPayments({ token }) {
   };
 
   const handleRefund = async () => {
+    const { net, gst } = calcNetRefund(refundModal.amount);
     try {
-      await fetch(
-        `http://localhost:5000/api/admin/payments/refund/${refundModal._id}`,
-        {
-          method: "PATCH",
-          headers: authHeaders,
-          body: JSON.stringify({ reason: refundReason }),
-        },
-      );
+      await fetch(`${API_BASE}/refund/${refundModal._id}`, {
+        method: "PATCH",
+        headers: authHeaders,
+        body: JSON.stringify({
+          reason: refundReason || "Admin initiated refund",
+          netRefundAmount: net,
+          gstDeducted: gst,
+        }),
+      });
       setRefundModal(null);
       setRefundReason("");
       fetchPayments();
@@ -186,10 +392,60 @@ export default function AdminPayments({ token }) {
     }
   };
 
+  const handleApproveRefund = async () => {
+    if (approveInProgress.current) return;
+    approveInProgress.current = true;
+    setActionLoading(true);
+    const { net, gst } = calcNetRefund(approveModal.amount);
+    try {
+      const res = await fetch(`${API_BASE}/refund/${approveModal._id}`, {
+        method: "PATCH",
+        headers: authHeaders,
+        body: JSON.stringify({
+          reason: approveModal.refundReason || "Approved by admin",
+          netRefundAmount: net,
+          gstDeducted: gst,
+        }),
+      });
+      if (res.ok) {
+        setApproveModal(null);
+        fetchPayments();
+      } else console.error("Approve failed:", await res.json());
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setActionLoading(false);
+      approveInProgress.current = false;
+    }
+  };
+
+  const handleRejectRefund = async () => {
+    if (!rejectReason.trim() || rejectInProgress.current) return;
+    rejectInProgress.current = true;
+    setActionLoading(true);
+    try {
+      const res = await fetch(`${API_BASE}/refund-reject/${rejectModal._id}`, {
+        method: "PATCH",
+        headers: authHeaders,
+        body: JSON.stringify({ rejectReason }),
+      });
+      if (res.ok) {
+        setRejectModal(null);
+        setRejectReason("");
+        fetchPayments();
+      } else console.error("Reject failed:", await res.json());
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setActionLoading(false);
+      rejectInProgress.current = false;
+    }
+  };
+
   const handleDelete = async (id) => {
     if (!window.confirm("Delete this payment record?")) return;
     try {
-      await fetch(`http://localhost:5000/api/admin/payments/${id}`, {
+      await fetch(`${API_BASE}/${id}`, {
         method: "DELETE",
         headers: authHeaders,
       });
@@ -199,19 +455,16 @@ export default function AdminPayments({ token }) {
     }
   };
 
-  // ── Export (CSV + JSON) ──
-  const exportPayments = async () => {
+  const exportPayments = () => {
     if (exportFormat === "csv") {
-      window.open(
-        "http://localhost:5000/api/admin/payments/export/csv",
-        "_blank",
-      );
+      window.open(`${API_BASE}/export/csv`, "_blank");
     } else {
-      const blob = new Blob([JSON.stringify(payments, null, 2)], {
-        type: "application/json",
-      });
       const a = document.createElement("a");
-      a.href = URL.createObjectURL(blob);
+      a.href = URL.createObjectURL(
+        new Blob([JSON.stringify(payments, null, 2)], {
+          type: "application/json",
+        }),
+      );
       a.download = `payments_${new Date().toISOString().split("T")[0]}.json`;
       a.click();
     }
@@ -228,16 +481,19 @@ export default function AdminPayments({ token }) {
         })
       : "—";
 
+  const pendingRefundCount = payments.filter(
+    (p) => p.status === "refund_requested",
+  ).length;
+
   return (
     <div>
-      {/* ── Header ── */}
+      {/* Header */}
       <div className="admin-page-header">
         <div>
           <h1 className="admin-page-title">Payments</h1>
           <p className="admin-page-subtitle">Total: {total} transactions</p>
         </div>
         <div className="admin-header-actions">
-          {/* Export Format Select */}
           <select
             className="btn-export-select"
             value={exportFormat}
@@ -246,16 +502,44 @@ export default function AdminPayments({ token }) {
             <option value="csv">CSV</option>
             <option value="json">JSON</option>
           </select>
-
-          {/* Export Button */}
           <button className="btn-export" onClick={exportPayments}>
             <Download size={16} /> Export
           </button>
         </div>
       </div>
 
-      {/* ── Stats Cards ── */}
-      <div className="admin-stats-grid">
+      {/* Alert Banner */}
+      {pendingRefundCount > 0 && (
+        <div className="ap-refund-alert">
+          <div className="ap-refund-alert-left">
+            <MessageSquareText size={18} color="#f97316" />
+            <div>
+              <p className="ap-refund-alert-title">
+                {pendingRefundCount} Pending Refund Request
+                {pendingRefundCount > 1 ? "s" : ""}
+              </p>
+              <p className="ap-refund-alert-sub">
+                Users have submitted refund requests awaiting your approval.
+              </p>
+            </div>
+          </div>
+          <button
+            className="ap-refund-alert-btn"
+            onClick={() => {
+              setStatus("refund_requested");
+              setPage(1);
+            }}
+          >
+            Review Requests →
+          </button>
+        </div>
+      )}
+
+      {/* Stats */}
+      <div
+        className="admin-stats-grid"
+        style={{ gridTemplateColumns: "repeat(5, 1fr)" }}
+      >
         {STAT_CARDS(totalRevenue, total, payments).map(
           ({ label, value, color, icon: Icon }) => (
             <div key={label} className="admin-stat-card">
@@ -271,22 +555,21 @@ export default function AdminPayments({ token }) {
         )}
       </div>
 
-      {/* ── Filters ── */}
+      {/* Filters */}
       <div className="admin-filters">
         <div className="admin-search-wrapper">
-            <Search size={16} className="admin-search-icon" />
-            <input
-              type="text"
-              placeholder="Search by TXN ID, Name, Email, Flight..."
-              value={search}
-              onChange={(e) => {
-                setSearch(e.target.value);
-                setPage(1);
-              }}
-              className="admin-input admin-input-search"
-            />
-          </div>
-
+          <Search size={16} className="admin-search-icon" />
+          <input
+            type="text"
+            placeholder="Search by TXN ID, Name, Email, Flight..."
+            value={search}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setPage(1);
+            }}
+            className="admin-input admin-input-search"
+          />
+        </div>
         <select
           className="admin-select"
           value={status}
@@ -300,8 +583,8 @@ export default function AdminPayments({ token }) {
           <option value="failed">Failed</option>
           <option value="pending">Pending</option>
           <option value="refunded">Refunded</option>
+          <option value="refund_requested">Refund Requested</option>
         </select>
-
         <select
           className="admin-select"
           value={method}
@@ -318,7 +601,7 @@ export default function AdminPayments({ token }) {
         </select>
       </div>
 
-      {/* ── Bulk Action Bar ── */}
+      {/* Bulk Bar */}
       {selectedPayments.length > 0 && (
         <div className="users-bulk-bar">
           <span className="users-bulk-count">
@@ -344,13 +627,12 @@ export default function AdminPayments({ token }) {
         </div>
       )}
 
-      {/* ── Table ── */}
+      {/* Table */}
       <div className="admin-table-container">
         <div className="admin-table-scroll">
           <table className="admin-table">
             <thead>
               <tr>
-                {/* ── Select All checkbox ── */}
                 <th>
                   <button
                     onClick={handleSelectAll}
@@ -409,17 +691,22 @@ export default function AdminPayments({ token }) {
                   const StatusIcon = statusConfig.icon;
                   const MethodIcon = methodConfig.icon;
                   const isSelected = selectedPayments.includes(p._id);
+                  const isRefundReq = p.status === "refund_requested";
 
                   return (
                     <tr
                       key={p._id}
                       style={
-                        isSelected
-                          ? { background: "rgba(102,126,234,0.08)" }
-                          : {}
+                        isRefundReq
+                          ? {
+                              background: "rgba(249,115,22,0.05)",
+                              borderLeft: "3px solid #f97316",
+                            }
+                          : isSelected
+                            ? { background: "rgba(102,126,234,0.08)" }
+                            : {}
                       }
                     >
-                      {/* ── Row checkbox ── */}
                       <td>
                         <button
                           onClick={() => toggleSelect(p._id)}
@@ -438,8 +725,6 @@ export default function AdminPayments({ token }) {
                           )}
                         </button>
                       </td>
-
-                      {/* Transaction ID */}
                       <td>
                         <p className="cell-accent">{p.transactionId}</p>
                         <p
@@ -449,59 +734,73 @@ export default function AdminPayments({ token }) {
                           BK{p.bookingId?.toString().slice(-6).toUpperCase()}
                         </p>
                       </td>
-
-                      {/* Passenger */}
                       <td>
-                        <div className="admin-avatar-cell">
-                          <div className="admin-avatar-info">
-                            <p className="admin-avatar-name">
-                              {p.passengerName || "—"}
-                            </p>
-                            <p className="admin-avatar-sub">{p.email || "—"}</p>
-                          </div>
-                        </div>
+                        <p className="admin-avatar-name">
+                          {p.passengerName || "—"}
+                        </p>
+                        <p className="admin-avatar-sub">{p.email || "—"}</p>
                       </td>
-
-                      {/* Flight */}
                       <td>{p.flightNumber || "—"}</td>
-
-                      {/* Route */}
                       <td>
                         {p.from} → {p.to}
                       </td>
-
-                      {/* Amount */}
                       <td className="cell-success">
                         ₹{p.amount?.toLocaleString("en-IN")}
                       </td>
-
-                      {/* Method */}
                       <td>
                         <div className={methodConfig.className}>
-                          <MethodIcon size={14} />
-                          {methodConfig.label}
+                          <MethodIcon size={14} /> {methodConfig.label}
                         </div>
                       </td>
 
-                      {/* Status */}
+                      {/* ✅ STATUS COLUMN — clean badge + fixed-position tooltip */}
                       <td>
-                        <span className={statusConfig.className}>
-                          <StatusIcon size={12} />
-                          {statusConfig.label}
-                        </span>
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 4,
+                          }}
+                        >
+                          <span
+                            className={statusConfig.className}
+                            style={{ whiteSpace: "nowrap" }}
+                          >
+                            <StatusIcon size={12} /> {statusConfig.label}
+                          </span>
+                          {isRefundReq && p.refundReason && (
+                            <ReasonTooltip reason={p.refundReason} />
+                          )}
+                        </div>
                       </td>
 
-                      {/* Date */}
                       <td
                         className="cell-muted"
                         style={{ fontSize: "0.75rem" }}
                       >
                         {formatDate(p.createdAt)}
                       </td>
-
-                      {/* Actions */}
                       <td>
                         <div className="cell-actions">
+                          {isRefundReq && (
+                            <>
+                              <button
+                                className="ap-approve-btn"
+                                onClick={() => setApproveModal(p)}
+                              >
+                                <BadgeCheck size={13} /> Approve
+                              </button>
+                              <button
+                                className="ap-reject-btn"
+                                onClick={() => {
+                                  setRejectModal(p);
+                                  setRejectReason("");
+                                }}
+                              >
+                                <Ban size={13} /> Reject
+                              </button>
+                            </>
+                          )}
                           {p.status === "success" && (
                             <button
                               className="btn-warning"
@@ -510,12 +809,15 @@ export default function AdminPayments({ token }) {
                               <RefreshCw size={12} /> Refund
                             </button>
                           )}
-                          <button
-                            className="btn-danger"
-                            onClick={() => handleDelete(p._id)}
-                          >
-                            <Trash2 size={12} />
-                          </button>
+                          {/* DELETE button — refund_requested status mein hide */}
+                          {p.status !== "refund_requested" && (
+                            <button
+                              className="btn-danger"
+                              onClick={() => handleDelete(p._id)}
+                            >
+                              <Trash2 size={12} />
+                            </button>
+                          )}
                         </div>
                       </td>
                     </tr>
@@ -527,7 +829,7 @@ export default function AdminPayments({ token }) {
         </div>
       </div>
 
-      {/* ── Pagination ── */}
+      {/* Pagination */}
       <div className="admin-pagination">
         <p className="admin-pagination-info">
           Showing {Math.min((page - 1) * 10 + 1, total)}–
@@ -562,10 +864,176 @@ export default function AdminPayments({ token }) {
         </div>
       </div>
 
-      {/* ── Refund Modal ── */}
+      {/* ════ APPROVE MODAL ════ */}
+      {approveModal && (
+        <div
+          className="admin-modal-overlay"
+          onClick={() => setApproveModal(null)}
+        >
+          <div
+            className="admin-modal admin-modal-sm"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="admin-modal-header">
+              <div>
+                <h2 className="admin-modal-title">Approve Refund Request</h2>
+                <p className="admin-modal-subtitle">
+                  TXN: {approveModal.transactionId}
+                </p>
+              </div>
+            </div>
+            <div className="admin-modal-body">
+              <div className="ap-modal-info-row">
+                <span>Passenger</span>
+                <strong>{approveModal.passengerName || "—"}</strong>
+              </div>
+              <div className="ap-modal-info-row">
+                <span>Route</span>
+                <strong>
+                  {approveModal.from} → {approveModal.to}
+                </strong>
+              </div>
+              {approveModal.refundReason && (
+                <div className="ap-reason-box">
+                  <p className="ap-reason-label">
+                    <MessageSquareText size={13} /> Cancellation Reason
+                  </p>
+                  <p className="ap-reason-text">
+                    "{approveModal.refundReason}"
+                  </p>
+                </div>
+              )}
+              <RefundBreakdown amount={approveModal.amount} />
+              <div className="ap-confirm-box" style={{ marginTop: 12 }}>
+                <BadgeCheck size={16} color="#10b981" />
+                Approving will mark as <strong>Refunded</strong> and email user
+                the net refund amount.
+              </div>
+            </div>
+            <div className="admin-modal-footer">
+              <button
+                className="btn-secondary"
+                onClick={() => setApproveModal(null)}
+              >
+                Cancel
+              </button>
+              <button
+                className="ap-approve-modal-btn"
+                onClick={handleApproveRefund}
+                disabled={actionLoading}
+              >
+                {actionLoading ? (
+                  <>
+                    <RefreshCw size={14} className="cr-spin" /> Processing...
+                  </>
+                ) : (
+                  <>
+                    <BadgeCheck size={14} /> Approve &amp; Refund
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ════ REJECT MODAL ════ */}
+      {rejectModal && (
+        <div
+          className="admin-modal-overlay"
+          onClick={() => setRejectModal(null)}
+        >
+          <div
+            className="admin-modal admin-modal-sm"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="admin-modal-header">
+              <div>
+                <h2 className="admin-modal-title">Reject Refund Request</h2>
+                <p className="admin-modal-subtitle">
+                  TXN: {rejectModal.transactionId}
+                </p>
+              </div>
+            </div>
+            <div className="admin-modal-body">
+              <div className="ap-modal-info-row">
+                <span>Passenger</span>
+                <strong>{rejectModal.passengerName || "—"}</strong>
+              </div>
+              <div className="ap-modal-info-row">
+                <span>Amount</span>
+                <strong>₹{rejectModal.amount?.toLocaleString("en-IN")}</strong>
+              </div>
+              {rejectModal.refundReason && (
+                <div className="ap-reason-box">
+                  <p className="ap-reason-label">
+                    <MessageSquareText size={13} /> User's Cancellation Reason
+                  </p>
+                  <p className="ap-reason-text">"{rejectModal.refundReason}"</p>
+                </div>
+              )}
+              <div
+                className="admin-form-group"
+                style={{ marginTop: "0.75rem" }}
+              >
+                <label className="admin-form-label">
+                  Rejection Reason <span style={{ color: "#ef4444" }}>*</span>
+                </label>
+                <textarea
+                  value={rejectReason}
+                  onChange={(e) => setRejectReason(e.target.value)}
+                  placeholder="Why is this refund being rejected?"
+                  rows={3}
+                  className="admin-input"
+                  style={{ resize: "vertical" }}
+                />
+              </div>
+              <div className="ap-reject-warn-box">
+                <AlertCircle size={15} color="#ef4444" />
+                Rejecting will revert the payment back to{" "}
+                <strong>Success</strong> status.
+              </div>
+            </div>
+            <div className="admin-modal-footer">
+              <button
+                className="btn-secondary"
+                onClick={() => setRejectModal(null)}
+              >
+                Cancel
+              </button>
+              <button
+                className="ap-reject-modal-btn"
+                onClick={handleRejectRefund}
+                disabled={actionLoading || !rejectReason.trim()}
+              >
+                {actionLoading ? (
+                  <>
+                    <RefreshCw size={14} className="cr-spin" /> Processing...
+                  </>
+                ) : (
+                  <>
+                    <Ban size={14} /> Reject Request
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ════ DIRECT REFUND MODAL ════ */}
       {refundModal && (
-        <div className="admin-modal-overlay">
-          <div className="admin-modal admin-modal-sm">
+        <div
+          className="admin-modal-overlay"
+          onClick={() => {
+            setRefundModal(null);
+            setRefundReason("");
+          }}
+        >
+          <div
+            className="admin-modal admin-modal-sm"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="admin-modal-header">
               <div>
                 <h2 className="admin-modal-title">Initiate Refund</h2>
@@ -574,13 +1042,12 @@ export default function AdminPayments({ token }) {
                 </p>
               </div>
             </div>
-
             <div className="admin-modal-body">
-              <div className="admin-warning-box">
-                <AlertCircle size={16} />
-                Refund Amount: ₹{refundModal.amount?.toLocaleString("en-IN")}
-              </div>
-              <div className="admin-form-group">
+              <RefundBreakdown amount={refundModal.amount} />
+              <div
+                className="admin-form-group"
+                style={{ marginTop: "0.75rem" }}
+              >
                 <label className="admin-form-label">Refund Reason</label>
                 <textarea
                   value={refundReason}
@@ -592,7 +1059,6 @@ export default function AdminPayments({ token }) {
                 />
               </div>
             </div>
-
             <div className="admin-modal-footer">
               <button
                 className="btn-secondary"

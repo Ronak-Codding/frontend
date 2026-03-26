@@ -533,7 +533,6 @@
   color: #10b981;
 }
 
-
 /* Scheduled — Blue */
 .badge-scheduled {
   display: inline-block;
@@ -707,11 +706,12 @@
   inset: 0;
   z-index: 50;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
   background: rgba(0, 0, 0, 0.6);
   backdrop-filter: blur(4px);
   padding: 1rem;
+  overflow-y: auto;  
   animation: fadeIn 0.2s ease;
 }
 
@@ -723,6 +723,10 @@
   background: var(--card-bg);
   box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
   animation: slideUp 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  max-height: 88vh;
+  margin: 4rem auto 1rem;
 }
 
 .admin-modal-sm {
@@ -735,6 +739,7 @@
   justify-content: space-between;
   padding: 1.5rem;
   border-bottom: 1px solid var(--border-color);
+  flex-shrink: 0;
 }
 
 .admin-modal-title {
@@ -766,7 +771,7 @@
 
 .admin-modal-body {
   padding: 1.5rem;
-  max-height: 70vh;
+  flex: 1;
   overflow-y: auto;
 }
 
@@ -782,6 +787,7 @@
   gap: 0.75rem;
   padding: 1.5rem;
   border-top: 1px solid var(--border-color);
+  flex-shrink: 0;
 }
 
 /* ── Form Fields ── */
@@ -853,5 +859,234 @@
 @media (max-width: 480px) {
   .admin-stats-grid {
     grid-template-columns: 1fr;
+  }
+}
+
+/* ═══════════════════════════════════════════════════
+   ADMIN PAYMENTS  —  Refund Approve/Reject styles
+   Append to AdminTables.css
+   ═══════════════════════════════════════════════════ */
+
+/* ── Refund-Requested badge ── */
+.badge-refund-requested {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 10px;
+  border-radius: 99px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  background: rgba(249, 115, 22, 0.12);
+  color: #f97316;
+}
+
+/* ── Orange alert banner ── */
+.ap-refund-alert {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  background: linear-gradient(135deg, #fff7ed, #ffedd5);
+  border: 1.5px solid #fed7aa;
+  border-radius: 14px;
+  padding: 14px 20px;
+  margin-bottom: 20px;
+}
+.ap-refund-alert-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.ap-refund-alert-title {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #c2410c;
+  margin: 0 0 3px;
+}
+.ap-refund-alert-sub {
+  font-size: 0.75rem;
+  color: #ea580c;
+  margin: 0;
+}
+.ap-refund-alert-btn {
+  background: #f97316;
+  color: #fff;
+  border: none;
+  border-radius: 9px;
+  padding: 8px 16px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.18s;
+}
+.ap-refund-alert-btn:hover {
+  background: #ea580c;
+}
+
+/* ── Table action buttons ── */
+.ap-approve-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 10px;
+  border-radius: 7px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  background: rgba(16, 185, 129, 0.12);
+  color: #10b981;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  cursor: pointer;
+  transition: all 0.18s;
+}
+.ap-approve-btn:hover {
+  background: #10b981;
+  color: #fff;
+}
+
+.ap-reject-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 10px;
+  border-radius: 7px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  cursor: pointer;
+  transition: all 0.18s;
+}
+.ap-reject-btn:hover {
+  background: #ef4444;
+  color: #fff;
+}
+
+/* ── Modal info rows ── */
+.ap-modal-info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 7px 0;
+  border-bottom: 1px solid var(--border-color, #e5e7eb);
+  font-size: 0.82rem;
+}
+.ap-modal-info-row:last-of-type {
+  border-bottom: none;
+}
+.ap-modal-info-row span {
+  color: var(--text-secondary, #64748b);
+}
+
+/* ── User's reason box ── */
+.ap-reason-box {
+  background: rgba(249, 115, 22, 0.06);
+  border: 1px solid rgba(249, 115, 22, 0.2);
+  border-radius: 10px;
+  padding: 12px 14px;
+  margin-top: 12px;
+}
+.ap-reason-label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #f97316;
+  margin: 0 0 6px;
+}
+.ap-reason-text {
+  font-size: 0.8rem;
+  color: var(--text-primary, #1e293b);
+  font-style: italic;
+  margin: 0;
+}
+
+/* ── Approve confirmation box ── */
+.ap-confirm-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(16, 185, 129, 0.07);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 0.78rem;
+  color: #065f46;
+  margin-top: 14px;
+}
+
+/* ── Reject warning box ── */
+.ap-reject-warn-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(239, 68, 68, 0.05);
+  border: 1px solid rgba(239, 68, 68, 0.18);
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 0.78rem;
+  color: #b91c1c;
+  margin-top: 12px;
+}
+
+/* ── Modal action buttons ── */
+.ap-approve-modal-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0.625rem 1.25rem;
+  border-radius: 0.75rem;
+  background: #10b981;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+.ap-approve-modal-btn:hover:not(:disabled) {
+  background: #059669;
+  transform: translateY(-1px);
+}
+.ap-approve-modal-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.ap-reject-modal-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0.625rem 1.25rem;
+  border-radius: 0.75rem;
+  background: #ef4444;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+.ap-reject-modal-btn:hover:not(:disabled) {
+  background: #dc2626;
+  transform: translateY(-1px);
+}
+.ap-reject-modal-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* ── Spin for loading ── */
+.cr-spin {
+  animation: ap-spin 1s linear infinite;
+}
+@keyframes ap-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
   }
 }

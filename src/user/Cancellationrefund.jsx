@@ -12,7 +12,6 @@ import {
 } from "lucide-react";
 import "./UserPages.css";
 
-// ─── constants ───────────────────────────────────────────────────
 const CANCEL_REASONS = [
   "— Select a reason —",
   "Change of plans",
@@ -23,7 +22,6 @@ const CANCEL_REASONS = [
 ];
 const CANCEL_FEE_RATE = 0.21;
 
-// ─── helpers ─────────────────────────────────────────────────────
 const fmtDate = (d) =>
   d
     ? new Date(d).toLocaleDateString("en-IN", {
@@ -34,14 +32,12 @@ const fmtDate = (d) =>
     : "—";
 const fmtCur = (n) => `₹${Number(n).toLocaleString("en-IN")}`;
 
-// ─── CancellationRefund ───────────────────────────────────────
 const CancellationRefund = () => {
   const navigate = useNavigate();
   const user = JSON.parse(localStorage.getItem("user") || "{}");
 
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
-
   const [step, setStep] = useState(1);
   const [selected, setSelected] = useState(null);
   const [reason, setReason] = useState("");
@@ -51,7 +47,6 @@ const CancellationRefund = () => {
   const [refundAmt, setRefundAmt] = useState(0);
   const [cancelFee, setCancelFee] = useState(0);
 
-  // fetch confirmed bookings
   useEffect(() => {
     const load = async () => {
       if (!user.email) return;
@@ -94,7 +89,8 @@ const CancellationRefund = () => {
   const handleConfirmCancel = async () => {
     setProcessing(true);
     try {
-      const res = await fetch(
+      // Step 1: Cancel the booking
+      const cancelRes = await fetch(
         `http://localhost:5000/api/booking/cancel/${selected._id}`,
         {
           method: "PUT",
@@ -102,11 +98,67 @@ const CancellationRefund = () => {
           body: JSON.stringify({ reason }),
         },
       );
-      if (res.ok) {
-        setCancelledBooking(selected);
-        setBookings((prev) => prev.filter((b) => b._id !== selected._id));
-        setStep(3);
+
+      if (!cancelRes.ok) throw new Error("Booking cancel failed");
+
+      // Step 2: Find payment by user email, then match by bookingId
+      // Using email filter for reliable lookup instead of search query
+      try {
+        const payRes = await fetch(
+          `http://localhost:5000/api/payment?email=${encodeURIComponent(user.email)}&limit=50`,
+          { headers: { "Content-Type": "application/json" } },
+        );
+
+        if (payRes.ok) {
+          const payData = await payRes.json();
+
+          // Match payment by bookingId and only pick successful ones
+          const payment = payData.payments?.find(
+            (p) =>
+              p.bookingId?.toString() === selected._id?.toString() &&
+              p.status === "success",
+          );
+
+          if (payment?._id) {
+            const refundRes = await fetch(
+              `http://localhost:5000/api/payment/refund-request/${payment._id}`,
+              {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  reason: reason, // cancellation reason sent as refund reason
+                  requestedBy: user.email,
+                }),
+              },
+            );
+
+            if (refundRes.ok) {
+              console.log(
+                "✅ Refund request submitted for payment:",
+                payment.transactionId,
+              );
+            } else {
+              const errData = await refundRes.json();
+              console.warn("⚠️ Refund request API error:", errData);
+            }
+          } else {
+            console.warn(
+              "⚠️ No matching successful payment found for bookingId:",
+              selected._id,
+            );
+          }
+        }
+      } catch (payErr) {
+        // Non-critical — booking is cancelled, refund request is best-effort
+        console.warn(
+          "⚠️ Payment refund-request failed (non-critical):",
+          payErr.message,
+        );
       }
+
+      setCancelledBooking(selected);
+      setBookings((prev) => prev.filter((b) => b._id !== selected._id));
+      setStep(3);
     } catch (e) {
       console.error(e);
     } finally {
@@ -125,10 +177,8 @@ const CancellationRefund = () => {
   const progressPct = step === 1 ? 33 : step === 2 ? 67 : 100;
   const canProceed = selected && reason && reason !== CANCEL_REASONS[0];
 
-  // ── render ──────────────────────────────────────────────────────
   return (
     <div className="crp-page">
-      {/* ── Page Header ── */}
       <div className="up-header">
         <div className="crp-page-title-row">
           <button className="crp-back-btn" onClick={() => navigate(-1)}>
@@ -143,7 +193,6 @@ const CancellationRefund = () => {
         </div>
       </div>
 
-      {/* ── Confirm Modal ── */}
       {showModal && (
         <div className="cr-overlay" onClick={() => setShowModal(false)}>
           <div className="cr-modal" onClick={(e) => e.stopPropagation()}>
@@ -187,7 +236,6 @@ const CancellationRefund = () => {
         </div>
       )}
 
-      {/* ── Main Panel ── */}
       <div className="crp-main-card">
         {/* Progress Bar */}
         <div className="crp-progress-wrap">
@@ -212,14 +260,12 @@ const CancellationRefund = () => {
           </div>
         </div>
 
-        {/* ─── STEP 1: Select ─── */}
+        {/* STEP 1 */}
         {step === 1 && (
           <div className="crp-step-body">
             <div className="crp-two-col">
-              {/* Left: Booking list */}
               <div className="crp-col">
                 <p className="cr-section-label">Select Booking to Cancel</p>
-
                 {loading ? (
                   <div className="up-empty">
                     <div className="up-spinner" style={{ margin: "0 auto" }} />
@@ -267,7 +313,6 @@ const CancellationRefund = () => {
                   })
                 )}
 
-                {/* Reason */}
                 <p className="cr-section-label" style={{ marginTop: "1.2rem" }}>
                   Cancellation Reason
                 </p>
@@ -297,7 +342,6 @@ const CancellationRefund = () => {
                 </button>
               </div>
 
-              {/* Right: Info panel */}
               <div className="crp-col crp-info-col">
                 <div className="crp-info-card">
                   <p className="crp-info-title">💡 Before You Cancel</p>
@@ -316,7 +360,6 @@ const CancellationRefund = () => {
                     <li>Medical emergencies may qualify for full refund</li>
                   </ul>
                 </div>
-
                 <div className="crp-policy-card">
                   <p className="crp-info-title">📋 Refund Policy</p>
                   <div className="crp-policy-row">
@@ -343,11 +386,10 @@ const CancellationRefund = () => {
           </div>
         )}
 
-        {/* ─── STEP 2: Review ─── */}
+        {/* STEP 2 */}
         {step === 2 && selected && (
           <div className="crp-step-body">
             <div className="crp-two-col">
-              {/* Left: Refund breakdown */}
               <div className="crp-col">
                 <p className="cr-section-label">
                   <ReceiptText size={13} /> Refund Calculation
@@ -421,7 +463,6 @@ const CancellationRefund = () => {
                 </div>
               </div>
 
-              {/* Right: Timeline */}
               <div className="crp-col">
                 <p className="cr-section-label">Refund Timeline</p>
                 <div className="crp-timeline-card">
@@ -468,7 +509,6 @@ const CancellationRefund = () => {
                     </div>
                   ))}
                 </div>
-
                 <div className="crp-refund-summary">
                   <p className="crp-rs-label">You will receive</p>
                   <p className="crp-rs-amt">{fmtCur(refundAmt)}</p>
@@ -476,7 +516,11 @@ const CancellationRefund = () => {
                     Est. by{" "}
                     {new Date(Date.now() + 7 * 86400000).toLocaleDateString(
                       "en-IN",
-                      { day: "numeric", month: "short", year: "numeric" },
+                      {
+                        day: "numeric",
+                        month: "short",
+                        year: "numeric",
+                      },
                     )}
                   </p>
                 </div>
@@ -485,7 +529,7 @@ const CancellationRefund = () => {
           </div>
         )}
 
-        {/* ─── STEP 3: Done ─── */}
+        {/* STEP 3 */}
         {step === 3 && (
           <div className="crp-step-body crp-success-body">
             <div className="crp-success-card">
@@ -502,7 +546,6 @@ const CancellationRefund = () => {
                 ({cancelledBooking?.from} → {cancelledBooking?.to}) has been
                 successfully cancelled.
               </p>
-
               <div className="crp-refund-big">
                 <p className="crp-rb-label">Refund Initiated</p>
                 <p className="crp-rb-amt">{fmtCur(refundAmt)}</p>
@@ -510,7 +553,11 @@ const CancellationRefund = () => {
                   Expected by{" "}
                   {new Date(Date.now() + 7 * 86400000).toLocaleDateString(
                     "en-IN",
-                    { day: "numeric", month: "short", year: "numeric" },
+                    {
+                      day: "numeric",
+                      month: "short",
+                      year: "numeric",
+                    },
                   )}
                 </p>
               </div>
@@ -538,7 +585,7 @@ const CancellationRefund = () => {
                   {
                     dot: "pending",
                     title: "Refund Processing",
-                    desc: "Airline processing in progress",
+                    desc: "Admin reviewing refund request",
                   },
                   {
                     dot: "future",

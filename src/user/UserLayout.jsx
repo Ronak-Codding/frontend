@@ -83,7 +83,7 @@ const UserLayout = () => {
     { path: "/user/payments", label: "Payment History", icon: CreditCard },
     { path: "/user/cancellation", label: " Cancellation & Refund", icon: Ban },
     { path: "/user/search", label: "Search Flights", icon: Search },
-    { path: "/user/profile", label: "Profile", icon: User },
+    { path: "/user/profile", label: " My Profile", icon: User },
   ];
 
   const isActive = (path) => location.pathname === path;

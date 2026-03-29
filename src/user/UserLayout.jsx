@@ -164,6 +164,7 @@ const UserLayout = () => {
               objectFit: "cover",
               borderRadius: "50%",
             }}
+            onClick={() => navigate("/user/profile")}
           />
         ) : (
           avatarLetter

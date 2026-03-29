@@ -297,12 +297,12 @@ export default function Navbar() {
                     fullName={fullName}
                     size="sm"
                   />
-                  <span className="text-sm font-medium text-white/90">{displayName}</span>
-                  <ChevronDown
+                  {/* <span className="text-sm font-medium text-white/90">{displayName}</span> */}
+                  {/* <ChevronDown
                     className={`h-3.5 w-3.5 text-white/50 transition-transform duration-200 ${
                       isProfileOpen ? "rotate-180" : ""
                     }`}
-                  />
+                  /> */}
                 </button>
 
                 {/* Dropdown panel */}

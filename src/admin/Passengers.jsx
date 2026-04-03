@@ -910,7 +910,11 @@ export default function AdminPassengers({ token }) {
                       {p.from} → {p.to}
                     </td>
                     <td className="cell-muted" style={{ fontSize: "0.75rem" }}>
-                      {p.email || "—"}
+                      {p.email ||
+                        filteredPassengers.find(
+                          (x) => x.bookingRef === p.bookingRef && x.email,
+                        )?.email ||
+                        "—"}
                     </td>
                     <td className="cell-muted" style={{ fontSize: "0.75rem" }}>
                       {formatDate(p.createdAt)}

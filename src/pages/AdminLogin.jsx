@@ -170,12 +170,14 @@ const AdminLogin = () => {
           color: #fff;
           letter-spacing: -0.5px;
           margin-bottom: 6px;
+          text-align: center;
         }
 
         .al-form-subtitle {
           font-size: 0.875rem;
-          color: #4a5070;
+          color: #f7f7fa;
           margin-bottom: 20px;
+          text-align: center;
         }
 
         .al-field {
@@ -186,7 +188,7 @@ const AdminLogin = () => {
           display: block;
           font-size: 0.72rem;
           font-weight: 600;
-          color: #6a7090;
+          color: #f9fafe;
           letter-spacing: 1px;
           text-transform: uppercase;
           margin-bottom: 8px;
@@ -323,13 +325,13 @@ const AdminLogin = () => {
             </div>
             <div>
               <div className="al-brand-name">SkyJet Airlines</div>
-              <div className="al-brand-sub">Control Tower</div>
+              {/* <div className="al-brand-sub">Control Tower</div> */}
             </div>
           </div>
 
-          <div className="al-form-badge">
+          {/* <div className="al-form-badge">
             <Shield size={11} /> Secure Admin Access
-          </div>
+          </div> */}
           <h2 className="al-form-title">Welcome back</h2>
           <p className="al-form-subtitle">Sign in to your admin dashboard</p>
 
@@ -379,12 +381,12 @@ const AdminLogin = () => {
             </div>
 
             <div className="al-forgot">
-              <button
+              {/* <button
                 type="button"
                 onClick={() => navigate("/forgot-password")}
               >
                 Forgot password?
-              </button>
+              </button> */}
             </div>
 
             <button className="al-submit" type="submit" disabled={loading}>

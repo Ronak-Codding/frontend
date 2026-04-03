@@ -20,6 +20,13 @@ import CountrySelect from "./CountrySelect";
 import "./AdminTables.css";
 import "./Airlines.css";
 
+// ── Stats Card Config ──
+const STAT_CARDS = [
+  { key: "all", label: "Total Airports", color: "#7F77DD" },
+  { key: "publish", label: "Published", color: "#1D9E75" },
+  { key: "draft", label: "Draft", color: "#EF9F27" },
+];
+
 const Airports = () => {
   const [airports, setAirports] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -89,6 +96,14 @@ const Airports = () => {
     setSelectedAirports([]);
     setSelectAll(false);
   }, [currentPage, searchTerm, filter, advancedFilters]);
+
+  // ── Stats (derived from airports array) ──
+  const stats = {
+    all: airports.length,
+    publish: airports.filter((a) => a.status?.toLowerCase() === "publish")
+      .length,
+    draft: airports.filter((a) => a.status?.toLowerCase() === "draft").length,
+  };
 
   const filteredAirports = () =>
     airports.filter((a) => {
@@ -427,7 +442,7 @@ const Airports = () => {
         </div>
         <div className="admin-header-actions">
           <select
-              className="btn-export-select"
+            className="btn-export-select"
             value={exportFormat}
             onChange={(e) => setExportFormat(e.target.value)}
           >
@@ -441,6 +456,81 @@ const Airports = () => {
             <Plus size={16} /> Add Airport
           </button>
         </div>
+      </div>
+
+      {/* ── Stats Cards ── */}
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(3, 1fr)",
+          gap: "12px",
+          marginBottom: "1.5rem",
+        }}
+      >
+        {STAT_CARDS.map(({ key, label, color }) => (
+          <div
+            key={key}
+            onClick={() => {
+              setFilter(key);
+              setCurrentPage(1);
+            }}
+            style={{
+              background: "var(--secondary, rgba(255,255,255,0.05))",
+              borderRadius: "0.75rem",
+              padding: "1rem 1.25rem",
+              borderLeft: `3px solid ${color}`,
+              cursor: "pointer",
+              transition: "opacity 0.2s",
+              outline:
+                filter === key ? `2px solid ${color}` : "2px solid transparent",
+            }}
+            onMouseEnter={(e) => (e.currentTarget.style.opacity = "0.85")}
+            onMouseLeave={(e) => (e.currentTarget.style.opacity = "1")}
+          >
+            <p
+              style={{
+                fontSize: "12px",
+                color: "var(--text-secondary)",
+                margin: "0 0 6px",
+                fontWeight: 400,
+              }}
+            >
+              {label}
+            </p>
+            <p
+              style={{
+                fontSize: "26px",
+                fontWeight: 500,
+                color,
+                margin: "0 0 4px",
+                lineHeight: 1,
+              }}
+            >
+              {stats[key]}
+            </p>
+            <p
+              style={{
+                fontSize: "11px",
+                color: "var(--text-secondary)",
+                margin: 0,
+                display: "flex",
+                alignItems: "center",
+                gap: "5px",
+              }}
+            >
+              <span
+                style={{
+                  width: 7,
+                  height: 7,
+                  borderRadius: "50%",
+                  background: color,
+                  display: "inline-block",
+                }}
+              />
+              {filter === key ? "Active filter" : "Click to filter"}
+            </p>
+          </div>
+        ))}
       </div>
 
       {/* Filters */}

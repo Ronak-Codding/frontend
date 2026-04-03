@@ -333,6 +333,15 @@ const FlightForm = ({
   </div>
 );
 
+// ── Stats Card Config ──
+const STAT_CARDS = [
+  { key: "all", label: "Total Flights", color: "#7F77DD" },
+  { key: "Scheduled", label: "Scheduled", color: "#378ADD" },
+  { key: "Delayed", label: "Delayed", color: "#EF9F27" },
+  { key: "Cancelled", label: "Cancelled", color: "#E24B4A" },
+  { key: "Completed", label: "Completed", color: "#1D9E75" },
+];
+
 // ── Main Component ──
 const AdminFlights = () => {
   const [flights, setFlights] = useState([]);
@@ -358,6 +367,15 @@ const AdminFlights = () => {
 
   const [selectedFlights, setSelectedFlights] = useState([]);
   const [selectAll, setSelectAll] = useState(false);
+
+  // ── Stats State ──
+  const [stats, setStats] = useState({
+    all: 0,
+    Scheduled: 0,
+    Delayed: 0,
+    Cancelled: 0,
+    Completed: 0,
+  });
 
   // ── Export format state ──
   const [exportFormat, setExportFormat] = useState("csv");
@@ -393,6 +411,24 @@ const AdminFlights = () => {
     }
   };
 
+  // ── Fetch counts for all statuses ──
+  const fetchStats = async () => {
+    try {
+      const res = await fetch(`${API}/flights?limit=1000`);
+      const data = await res.json();
+      const all = data.flights || [];
+      setStats({
+        all: data.total || 0,
+        Scheduled: all.filter((f) => f.status === "Scheduled").length,
+        Delayed: all.filter((f) => f.status === "Delayed").length,
+        Cancelled: all.filter((f) => f.status === "Cancelled").length,
+        Completed: all.filter((f) => f.status === "Completed").length,
+      });
+    } catch {
+      console.error("Stats fetch failed");
+    }
+  };
+
   const fetchDropdowns = async () => {
     try {
       const [aRes, apRes] = await Promise.all([
@@ -410,6 +446,7 @@ const AdminFlights = () => {
 
   useEffect(() => {
     fetchFlights(currentPage);
+    fetchStats();
   }, [currentPage, query, statusFilter]);
 
   useEffect(() => {
@@ -467,6 +504,7 @@ const AdminFlights = () => {
       setShowAdd(false);
       setFormData(EMPTY_FORM);
       fetchFlights(1);
+      fetchStats();
     } catch (err) {
       showNotification(err.message, "error");
     } finally {
@@ -488,6 +526,7 @@ const AdminFlights = () => {
       showNotification("Flight updated successfully!");
       setShowEdit(false);
       fetchFlights(currentPage);
+      fetchStats();
     } catch (err) {
       showNotification(err.message, "error");
     } finally {
@@ -501,6 +540,7 @@ const AdminFlights = () => {
       await fetch(`${API}/flights/${id}`, { method: "DELETE" });
       showNotification("Flight deleted");
       fetchFlights(currentPage);
+      fetchStats();
     } catch {
       showNotification("Delete failed", "error");
     }
@@ -547,6 +587,7 @@ const AdminFlights = () => {
       setSelectAll(false);
       showNotification(`${selectedFlights.length} flights deleted`);
       fetchFlights(currentPage);
+      fetchStats();
     } catch {
       showNotification("Bulk delete failed", "error");
     } finally {
@@ -573,6 +614,7 @@ const AdminFlights = () => {
         `${selectedFlights.length} flights updated to ${admin_status}`,
       );
       fetchFlights(currentPage);
+      fetchStats();
     } catch {
       showNotification("Bulk update failed", "error");
     } finally {
@@ -619,7 +661,6 @@ const AdminFlights = () => {
         showNotification("Export failed", "error");
       }
     } else {
-      // JSON export — current fetched flights data
       const blob = new Blob([JSON.stringify(flights, null, 2)], {
         type: "application/json",
       });
@@ -764,7 +805,6 @@ const AdminFlights = () => {
           </p>
         </div>
         <div className="admin-header-actions">
-          {/* Export Format Select */}
           <select
             className="btn-export-select"
             value={exportFormat}
@@ -773,13 +813,9 @@ const AdminFlights = () => {
             <option value="csv">CSV</option>
             <option value="json">JSON</option>
           </select>
-
-          {/* Export Button */}
           <button className="btn-export" onClick={exportFlights}>
             <Download size={16} /> Export
           </button>
-
-          {/* Add Flight Button */}
           <button
             className="btn-add-user"
             onClick={() => {
@@ -790,6 +826,83 @@ const AdminFlights = () => {
             <Plus size={16} /> Add Flight
           </button>
         </div>
+      </div>
+
+      {/* ── Stats Cards ── */}
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(5, 1fr)",
+          gap: "12px",
+          marginBottom: "1.5rem",
+        }}
+      >
+        {STAT_CARDS.map(({ key, label, color }) => (
+          <div
+            key={key}
+            onClick={() => {
+              setStatusFilter(key);
+              setCurrentPage(1);
+            }}
+            style={{
+              background: "var(--secondary, rgba(255,255,255,0.05))",
+              borderRadius: "0.75rem",
+              padding: "1rem 1.25rem",
+              borderLeft: `3px solid ${color}`,
+              cursor: "pointer",
+              transition: "opacity 0.2s",
+              outline:
+                statusFilter === key
+                  ? `2px solid ${color}`
+                  : "2px solid transparent",
+            }}
+            onMouseEnter={(e) => (e.currentTarget.style.opacity = "0.85")}
+            onMouseLeave={(e) => (e.currentTarget.style.opacity = "1")}
+          >
+            <p
+              style={{
+                fontSize: "12px",
+                color: "var(--text-secondary)",
+                margin: "0 0 6px",
+                fontWeight: 400,
+              }}
+            >
+              {label}
+            </p>
+            <p
+              style={{
+                fontSize: "26px",
+                fontWeight: 500,
+                color,
+                margin: "0 0 4px",
+                lineHeight: 1,
+              }}
+            >
+              {stats[key]}
+            </p>
+            <p
+              style={{
+                fontSize: "11px",
+                color: "var(--text-secondary)",
+                margin: 0,
+                display: "flex",
+                alignItems: "center",
+                gap: "5px",
+              }}
+            >
+              <span
+                style={{
+                  width: 7,
+                  height: 7,
+                  borderRadius: "50%",
+                  background: color,
+                  display: "inline-block",
+                }}
+              />
+              {statusFilter === key ? "Active filter" : "Click to filter"}
+            </p>
+          </div>
+        ))}
       </div>
 
       {/* Filters */}
@@ -872,7 +985,6 @@ const AdminFlights = () => {
           <table className="admin-table">
             <thead>
               <tr>
-                {/* Select All Checkbox */}
                 <th>
                   <button
                     onClick={handleSelectAll}
@@ -920,7 +1032,6 @@ const AdminFlights = () => {
                           : {}
                       }
                     >
-                      {/* Row Checkbox */}
                       <td>
                         <button
                           onClick={() => toggleFlightSelection(f._id)}

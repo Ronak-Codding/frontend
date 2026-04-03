@@ -68,37 +68,14 @@ const METHOD_CONFIG = {
   wallet: { label: "Wallet", icon: Wallet, className: "badge-wallet" },
 };
 
-const STAT_CARDS = (totalRevenue, total, payments) => [
-  {
-    label: "Total Revenue",
-    value: `₹${totalRevenue.toLocaleString("en-IN")}`,
-    color: "#10b981",
-    icon: IndianRupee,
-  },
-  {
-    label: "Total Transactions",
-    value: total,
-    color: "#60a5fa",
-    icon: CreditCard,
-  },
-  {
-    label: "Success",
-    value: payments.filter((p) => p.status === "success").length,
-    color: "#34d399",
-    icon: CheckCircle,
-  },
-  {
-    label: "Refund Requests",
-    value: payments.filter((p) => p.status === "refund_requested").length,
-    color: "#f97316",
-    icon: MessageSquareText,
-  },
-  {
-    label: "Refunded",
-    value: payments.filter((p) => p.status === "refunded").length,
-    color: "#fb923c",
-    icon: RefreshCw,
-  },
+// ── Stats Card Config ──
+const STAT_CARDS = [
+  { key: "all", label: "Total Transactions", color: "#7F77DD" },
+  { key: "success", label: "Success", color: "#1D9E75" },
+  { key: "pending", label: "Pending", color: "#EF9F27" },
+  { key: "failed", label: "Failed", color: "#E24B4A" },
+  { key: "refund_requested", label: "Refund Requests", color: "#f97316" },
+  { key: "refunded", label: "Refunded", color: "#60a5fa" },
 ];
 
 // ── Reason Tooltip — position:fixed so it never gets clipped by table overflow ──
@@ -111,8 +88,8 @@ function ReasonTooltip({ reason }) {
     const rect = iconRef.current.getBoundingClientRect();
     setTooltipStyle({
       position: "fixed",
-      top: rect.bottom + 8, // 8px below the icon
-      left: rect.left + rect.width / 2, // horizontally centered
+      top: rect.bottom + 8,
+      left: rect.left + rect.width / 2,
       transform: "translateX(-50%)",
       zIndex: 99999,
     });
@@ -153,7 +130,6 @@ function ReasonTooltip({ reason }) {
             pointerEvents: "none",
           }}
         >
-          {/* Upward arrow */}
           <div
             style={{
               position: "absolute",
@@ -293,6 +269,16 @@ export default function AdminPayments({ token }) {
   const [selectedPayments, setSelectedPayments] = useState([]);
   const [selectAll, setSelectAll] = useState(false);
 
+  // ── Stats State ──
+  const [stats, setStats] = useState({
+    all: 0,
+    success: 0,
+    pending: 0,
+    failed: 0,
+    refund_requested: 0,
+    refunded: 0,
+  });
+
   const approveInProgress = useRef(false);
   const rejectInProgress = useRef(false);
 
@@ -309,6 +295,32 @@ export default function AdminPayments({ token }) {
     setSelectedPayments([]);
     setSelectAll(false);
   }, [payments]);
+
+  // ── Fetch counts for all statuses ──
+  const fetchStats = async () => {
+    try {
+      const res = await fetch(`${API_BASE}?limit=10000`, {
+        headers: authHeaders,
+      });
+      const data = await res.json();
+      const all = data.payments || [];
+      setStats({
+        all: data.total || 0,
+        success: all.filter((p) => p.status === "success").length,
+        pending: all.filter((p) => p.status === "pending").length,
+        failed: all.filter((p) => p.status === "failed").length,
+        refund_requested: all.filter((p) => p.status === "refund_requested")
+          .length,
+        refunded: all.filter((p) => p.status === "refunded").length,
+      });
+    } catch {
+      console.error("Stats fetch failed");
+    }
+  };
+
+  useEffect(() => {
+    fetchStats();
+  }, []);
 
   const fetchPayments = async () => {
     setLoading(true);
@@ -365,6 +377,7 @@ export default function AdminPayments({ token }) {
       setSelectedPayments([]);
       setSelectAll(false);
       fetchPayments();
+      fetchStats();
     } catch (err) {
       console.error(err);
     } finally {
@@ -387,6 +400,7 @@ export default function AdminPayments({ token }) {
       setRefundModal(null);
       setRefundReason("");
       fetchPayments();
+      fetchStats();
     } catch (err) {
       console.error(err);
     }
@@ -410,6 +424,7 @@ export default function AdminPayments({ token }) {
       if (res.ok) {
         setApproveModal(null);
         fetchPayments();
+        fetchStats();
       } else console.error("Approve failed:", await res.json());
     } catch (err) {
       console.error(err);
@@ -433,6 +448,7 @@ export default function AdminPayments({ token }) {
         setRejectModal(null);
         setRejectReason("");
         fetchPayments();
+        fetchStats();
       } else console.error("Reject failed:", await res.json());
     } catch (err) {
       console.error(err);
@@ -450,6 +466,7 @@ export default function AdminPayments({ token }) {
         headers: authHeaders,
       });
       fetchPayments();
+      fetchStats();
     } catch (err) {
       console.error(err);
     }
@@ -481,9 +498,7 @@ export default function AdminPayments({ token }) {
         })
       : "—";
 
-  const pendingRefundCount = payments.filter(
-    (p) => p.status === "refund_requested",
-  ).length;
+  const pendingRefundCount = stats.refund_requested;
 
   return (
     <div>
@@ -491,7 +506,12 @@ export default function AdminPayments({ token }) {
       <div className="admin-page-header">
         <div>
           <h1 className="admin-page-title">Payments</h1>
-          <p className="admin-page-subtitle">Total: {total} transactions</p>
+          <p className="admin-page-subtitle">
+            Total: {total} transactions &nbsp;|&nbsp; Revenue:{" "}
+            <strong style={{ color: "#10b981" }}>
+              ₹{totalRevenue.toLocaleString("en-IN")}
+            </strong>
+          </p>
         </div>
         <div className="admin-header-actions">
           <select
@@ -535,24 +555,81 @@ export default function AdminPayments({ token }) {
         </div>
       )}
 
-      {/* Stats */}
+      {/* ── Stats Cards ── */}
       <div
-        className="admin-stats-grid"
-        style={{ gridTemplateColumns: "repeat(5, 1fr)" }}
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(6, 1fr)",
+          gap: "12px",
+          marginBottom: "1.5rem",
+        }}
       >
-        {STAT_CARDS(totalRevenue, total, payments).map(
-          ({ label, value, color, icon: Icon }) => (
-            <div key={label} className="admin-stat-card">
-              <div className="admin-stat-card-header">
-                <p className="admin-stat-label">{label}</p>
-                <Icon size={16} style={{ color }} />
-              </div>
-              <p className="admin-stat-value" style={{ color }}>
-                {value}
-              </p>
-            </div>
-          ),
-        )}
+        {STAT_CARDS.map(({ key, label, color }) => (
+          <div
+            key={key}
+            onClick={() => {
+              setStatus(key);
+              setPage(1);
+            }}
+            style={{
+              background: "var(--secondary, rgba(255,255,255,0.05))",
+              borderRadius: "0.75rem",
+              padding: "1rem 1.25rem",
+              borderLeft: `3px solid ${color}`,
+              cursor: "pointer",
+              transition: "opacity 0.2s",
+              outline:
+                status === key ? `2px solid ${color}` : "2px solid transparent",
+            }}
+            onMouseEnter={(e) => (e.currentTarget.style.opacity = "0.85")}
+            onMouseLeave={(e) => (e.currentTarget.style.opacity = "1")}
+          >
+            <p
+              style={{
+                fontSize: "12px",
+                color: "var(--text-secondary)",
+                margin: "0 0 6px",
+                fontWeight: 400,
+              }}
+            >
+              {label}
+            </p>
+            <p
+              style={{
+                fontSize: "26px",
+                fontWeight: 500,
+                color,
+                margin: "0 0 4px",
+                lineHeight: 1,
+              }}
+            >
+              {key === "all"
+                ? `₹${totalRevenue.toLocaleString("en-IN")}`
+                : stats[key]}
+            </p>
+            <p
+              style={{
+                fontSize: "11px",
+                color: "var(--text-secondary)",
+                margin: 0,
+                display: "flex",
+                alignItems: "center",
+                gap: "5px",
+              }}
+            >
+              <span
+                style={{
+                  width: 7,
+                  height: 7,
+                  borderRadius: "50%",
+                  background: color,
+                  display: "inline-block",
+                }}
+              />
+              {status === key ? "Active filter" : "Click to filter"}
+            </p>
+          </div>
+        ))}
       </div>
 
       {/* Filters */}
@@ -752,8 +829,6 @@ export default function AdminPayments({ token }) {
                           <MethodIcon size={14} /> {methodConfig.label}
                         </div>
                       </td>
-
-                      {/* ✅ STATUS COLUMN — clean badge + fixed-position tooltip */}
                       <td>
                         <div
                           style={{
@@ -773,7 +848,6 @@ export default function AdminPayments({ token }) {
                           )}
                         </div>
                       </td>
-
                       <td
                         className="cell-muted"
                         style={{ fontSize: "0.75rem" }}
@@ -809,7 +883,6 @@ export default function AdminPayments({ token }) {
                               <RefreshCw size={12} /> Refund
                             </button>
                           )}
-                          {/* DELETE button — refund_requested status mein hide */}
                           {p.status !== "refund_requested" && (
                             <button
                               className="btn-danger"

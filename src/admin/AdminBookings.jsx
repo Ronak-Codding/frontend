@@ -27,6 +27,14 @@ const BOOKING_STATUS_CLASS = {
   Pending: "badge-pending",
 };
 
+// ── Stats Card Config ──
+const STAT_CARDS = [
+  { key: "all", label: "Total Bookings", color: "#7F77DD" },
+  { key: "confirmed", label: "Confirmed", color: "#1D9E75" },
+  { key: "pending", label: "Pending", color: "#EF9F27" },
+  { key: "cancelled", label: "Cancelled", color: "#E24B4A" },
+];
+
 const AdminBookings = () => {
   const [bookings, setBookings] = useState([]);
   const [showAdd, setShowAdd] = useState(false);
@@ -48,6 +56,14 @@ const AdminBookings = () => {
   const [selectedBookings, setSelectedBookings] = useState([]);
   const [selectAll, setSelectAll] = useState(false);
   const [exportFormat, setExportFormat] = useState("csv");
+
+  // ── Stats State ──
+  const [stats, setStats] = useState({
+    all: 0,
+    confirmed: 0,
+    pending: 0,
+    cancelled: 0,
+  });
 
   const showNotification = (message, type = "success") => {
     setNotification({ show: true, message, type });
@@ -84,8 +100,29 @@ const AdminBookings = () => {
     }
   };
 
+  // ── Fetch counts for all statuses ──
+  const fetchStats = async () => {
+    try {
+      const res = await fetch(`http://localhost:5000/api/booking?limit=10000`);
+      const data = await res.json();
+      const all = data.bookings || [];
+      setStats({
+        all: data.total || 0,
+        confirmed: all.filter((b) => b.status?.toLowerCase() === "confirmed")
+          .length,
+        pending: all.filter((b) => b.status?.toLowerCase() === "pending")
+          .length,
+        cancelled: all.filter((b) => b.status?.toLowerCase() === "cancelled")
+          .length,
+      });
+    } catch {
+      console.error("Stats fetch failed");
+    }
+  };
+
   useEffect(() => {
     fetchBookings(currentPage);
+    fetchStats();
   }, [currentPage, query, statusFilter, dateRange]);
 
   const deleteBooking = async (id) => {
@@ -97,6 +134,7 @@ const AdminBookings = () => {
       });
       showNotification("Booking deleted");
       fetchBookings(currentPage);
+      fetchStats();
     } catch {
       showNotification("Failed to delete", "error");
     } finally {
@@ -136,6 +174,7 @@ const AdminBookings = () => {
       setSelectAll(false);
       showNotification(`${selectedBookings.length} bookings deleted`);
       fetchBookings(currentPage);
+      fetchStats();
     } catch {
       showNotification("Bulk delete failed", "error");
     } finally {
@@ -161,6 +200,7 @@ const AdminBookings = () => {
         `${selectedBookings.length} bookings updated to ${status}`,
       );
       fetchBookings(currentPage);
+      fetchStats();
     } catch {
       showNotification("Bulk update failed", "error");
     } finally {
@@ -381,10 +421,87 @@ const AdminBookings = () => {
           <button className="btn-export" onClick={exportBookings}>
             <Download size={16} /> Export
           </button>
-          <button className="btn-add-user" onClick={() => setShowAdd(true)}>
+          {/* <button className="btn-add-user" onClick={() => setShowAdd(true)}>
             <Plus size={16} /> Add Booking
-          </button>
+          </button> */}
         </div>
+      </div>
+
+      {/* ── Stats Cards ── */}
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(4, 1fr)",
+          gap: "12px",
+          marginBottom: "1.5rem",
+        }}
+      >
+        {STAT_CARDS.map(({ key, label, color }) => (
+          <div
+            key={key}
+            onClick={() => {
+              setStatusFilter(key);
+              setCurrentPage(1);
+            }}
+            style={{
+              background: "var(--secondary, rgba(255,255,255,0.05))",
+              borderRadius: "0.75rem",
+              padding: "1rem 1.25rem",
+              borderLeft: `3px solid ${color}`,
+              cursor: "pointer",
+              transition: "opacity 0.2s",
+              outline:
+                statusFilter === key
+                  ? `2px solid ${color}`
+                  : "2px solid transparent",
+            }}
+            onMouseEnter={(e) => (e.currentTarget.style.opacity = "0.85")}
+            onMouseLeave={(e) => (e.currentTarget.style.opacity = "1")}
+          >
+            <p
+              style={{
+                fontSize: "12px",
+                color: "var(--text-secondary)",
+                margin: "0 0 6px",
+                fontWeight: 400,
+              }}
+            >
+              {label}
+            </p>
+            <p
+              style={{
+                fontSize: "26px",
+                fontWeight: 500,
+                color,
+                margin: "0 0 4px",
+                lineHeight: 1,
+              }}
+            >
+              {stats[key]}
+            </p>
+            <p
+              style={{
+                fontSize: "11px",
+                color: "var(--text-secondary)",
+                margin: 0,
+                display: "flex",
+                alignItems: "center",
+                gap: "5px",
+              }}
+            >
+              <span
+                style={{
+                  width: 7,
+                  height: 7,
+                  borderRadius: "50%",
+                  background: color,
+                  display: "inline-block",
+                }}
+              />
+              {statusFilter === key ? "Active filter" : "Click to filter"}
+            </p>
+          </div>
+        ))}
       </div>
 
       {/* ── Filters ── */}
@@ -584,7 +701,6 @@ const AdminBookings = () => {
                       >
                         {b.date || "—"}
                       </td>
-                      {/* ✅ Seats column — new model se aata hai */}
                       <td
                         className="cell-muted"
                         style={{ fontSize: "0.75rem" }}
@@ -688,6 +804,7 @@ const AdminBookings = () => {
           onClose={() => setShowAdd(false)}
           onSuccess={() => {
             fetchBookings(1);
+            fetchStats();
             showNotification("Booking added successfully");
           }}
         />

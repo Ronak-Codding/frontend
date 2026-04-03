@@ -6,9 +6,9 @@ const css = `
   @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600&family=Outfit:wght@300;400;500;600&display=swap');
 
   :root {
-    --bg:        #040d21;
-    --surface:   rgba(8,18,48,0.75);
-    --border:    rgba(212,175,55,0.2);
+    --bg:        #040d21 !important;
+    --surface:   rgba(8,18,48,0.75) !important;
+    --border:    rgba(212,175,55,0.2) !important;
     --accent:    #d4af37;
     --accent2:   #f0c040;
     --text:      #f5eedc;

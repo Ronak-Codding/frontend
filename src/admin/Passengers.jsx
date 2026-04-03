@@ -19,6 +19,14 @@ import {
 import "./AdminTables.css";
 import "./AdminPassengers.css";
 
+// ── Stats Card Config ──
+const STAT_CARDS = [
+  { key: "all", label: "Total Passengers", color: "#7F77DD" },
+  { key: "Male", label: "Male", color: "#378ADD" },
+  { key: "Female", label: "Female", color: "#E24B4A" },
+  { key: "Other", label: "Other", color: "#EF9F27" },
+];
+
 export default function AdminPassengers({ token }) {
   const [filteredPassengers, setFilteredPassengers] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -43,6 +51,14 @@ export default function AdminPassengers({ token }) {
     direction: "asc",
   });
   const [exportFormat, setExportFormat] = useState("csv");
+
+  // ── Stats State ──
+  const [stats, setStats] = useState({
+    all: 0,
+    Male: 0,
+    Female: 0,
+    Other: 0,
+  });
 
   const [formData, setFormData] = useState({
     fullName: "",
@@ -75,9 +91,6 @@ export default function AdminPassengers({ token }) {
     return () => clearTimeout(t);
   }, [searchTerm, gender]);
 
-  // ══════════════════════════════════════════════════════════
-  // ✅ Fetch — new route /api/passenger/allpassengers
-  // ══════════════════════════════════════════════════════════
   const fetchPassengers = async () => {
     setLoading(true);
     try {
@@ -100,6 +113,29 @@ export default function AdminPassengers({ token }) {
       setLoading(false);
     }
   };
+
+  // ── Fetch counts for all genders ──
+  const fetchStats = async () => {
+    try {
+      const res = await fetch(
+        `http://localhost:5000/api/passenger/allpassengers?limit=10000`,
+      );
+      const data = await res.json();
+      const all = data.passengers || [];
+      setStats({
+        all: data.total || 0,
+        Male: all.filter((p) => p.gender === "Male").length,
+        Female: all.filter((p) => p.gender === "Female").length,
+        Other: all.filter((p) => p.gender === "Other").length,
+      });
+    } catch {
+      console.error("Stats fetch failed");
+    }
+  };
+
+  useEffect(() => {
+    fetchStats();
+  }, []);
 
   const requestSort = (key) => {
     const dir =
@@ -137,9 +173,6 @@ export default function AdminPassengers({ token }) {
         : " ↓"
       : "";
 
-  // ══════════════════════════════════════════════════════════
-  // ✅ Delete — new route /api/passenger/passengers/:id
-  // ══════════════════════════════════════════════════════════
   const handleDelete = async (id) => {
     if (!window.confirm("Delete this passenger?")) return;
     setLoading(true);
@@ -149,6 +182,7 @@ export default function AdminPassengers({ token }) {
       });
       showNotification("Passenger deleted");
       fetchPassengers();
+      fetchStats();
     } catch {
       showNotification("Failed to delete", "error");
     } finally {
@@ -156,9 +190,6 @@ export default function AdminPassengers({ token }) {
     }
   };
 
-  // ══════════════════════════════════════════════════════════
-  // ✅ Edit — open modal with passenger data
-  // ══════════════════════════════════════════════════════════
   const handleEdit = (p) => {
     setEditData(p);
     setFormData({
@@ -175,9 +206,6 @@ export default function AdminPassengers({ token }) {
     setShowModal(true);
   };
 
-  // ══════════════════════════════════════════════════════════
-  // ✅ Save — new route /api/passenger/passengers/:id
-  // ══════════════════════════════════════════════════════════
   const handleSave = async () => {
     setLoading(true);
     try {
@@ -192,6 +220,7 @@ export default function AdminPassengers({ token }) {
       showNotification("Passenger updated");
       setShowModal(false);
       fetchPassengers();
+      fetchStats();
     } catch {
       showNotification("Update failed", "error");
     } finally {
@@ -211,9 +240,6 @@ export default function AdminPassengers({ token }) {
       prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
     );
 
-  // ══════════════════════════════════════════════════════════
-  // ✅ Bulk Delete — new route uses direct _id
-  // ══════════════════════════════════════════════════════════
   const handleBulkDelete = async () => {
     if (!window.confirm(`Delete ${selectedPassengers.length} passengers?`))
       return;
@@ -230,6 +256,7 @@ export default function AdminPassengers({ token }) {
       setSelectedPassengers([]);
       setSelectAll(false);
       fetchPassengers();
+      fetchStats();
     } catch {
       showNotification("Failed", "error");
     } finally {
@@ -237,9 +264,6 @@ export default function AdminPassengers({ token }) {
     }
   };
 
-  // ══════════════════════════════════════════════════════════
-  // ✅ Bulk Gender Update — new route uses direct _id
-  // ══════════════════════════════════════════════════════════
   const handleBulkGenderUpdate = async (newGender) => {
     if (!newGender) return;
     setLoading(true);
@@ -259,6 +283,7 @@ export default function AdminPassengers({ token }) {
       setSelectedPassengers([]);
       setSelectAll(false);
       fetchPassengers();
+      fetchStats();
     } catch {
       showNotification("Failed to update", "error");
     } finally {
@@ -336,7 +361,6 @@ export default function AdminPassengers({ token }) {
         })
       : "—";
 
-  // ── Form fields for Edit Modal ──
   const FORM_FIELDS = [
     {
       label: "Full Name",
@@ -618,6 +642,84 @@ export default function AdminPassengers({ token }) {
         </div>
       </div>
 
+      {/* ── Stats Cards ── */}
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(4, 1fr)",
+          gap: "12px",
+          marginBottom: "1.5rem",
+        }}
+      >
+        {STAT_CARDS.map(({ key, label, color }) => (
+          <div
+            key={key}
+            onClick={() => {
+              setGender(key === "all" ? "all" : key);
+              setPage(1);
+            }}
+            style={{
+              background: "var(--secondary, rgba(255,255,255,0.05))",
+              borderRadius: "0.75rem",
+              padding: "1rem 1.25rem",
+              borderLeft: `3px solid ${color}`,
+              cursor: "pointer",
+              transition: "opacity 0.2s",
+              outline: (key === "all" ? gender === "all" : gender === key)
+                ? `2px solid ${color}`
+                : "2px solid transparent",
+            }}
+            onMouseEnter={(e) => (e.currentTarget.style.opacity = "0.85")}
+            onMouseLeave={(e) => (e.currentTarget.style.opacity = "1")}
+          >
+            <p
+              style={{
+                fontSize: "12px",
+                color: "var(--text-secondary)",
+                margin: "0 0 6px",
+                fontWeight: 400,
+              }}
+            >
+              {label}
+            </p>
+            <p
+              style={{
+                fontSize: "26px",
+                fontWeight: 500,
+                color,
+                margin: "0 0 4px",
+                lineHeight: 1,
+              }}
+            >
+              {stats[key]}
+            </p>
+            <p
+              style={{
+                fontSize: "11px",
+                color: "var(--text-secondary)",
+                margin: 0,
+                display: "flex",
+                alignItems: "center",
+                gap: "5px",
+              }}
+            >
+              <span
+                style={{
+                  width: 7,
+                  height: 7,
+                  borderRadius: "50%",
+                  background: color,
+                  display: "inline-block",
+                }}
+              />
+              {(key === "all" ? gender === "all" : gender === key)
+                ? "Active filter"
+                : "Click to filter"}
+            </p>
+          </div>
+        ))}
+      </div>
+
       {/* ── Filters ── */}
       <div className="users-filter-card">
         <div className="pax-search-row">
@@ -832,7 +934,6 @@ export default function AdminPassengers({ token }) {
                         >
                           <Edit2 size={12} />
                         </button>
-                        {/* ✅ Direct _id use — no more "bookingId_index" split */}
                         <button
                           className="users-action-btn users-action-delete"
                           title="Delete"

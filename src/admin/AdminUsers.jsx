@@ -17,6 +17,13 @@ import {
 import "./AdminTables.css";
 import "./AdminUsers.css";
 
+// ── Stats Card Config ──
+const STAT_CARDS = [
+  { key: "all", label: "Total Users", color: "#7F77DD" },
+  { key: "active", label: "Active", color: "#22c55e" },
+  { key: "blocked", label: "Blocked", color: "#E24B4A" },
+];
+
 const AdminUsers = () => {
   const [users, setUsers] = useState([]);
   const [showForm, setShowForm] = useState(false);
@@ -39,6 +46,9 @@ const AdminUsers = () => {
   });
   const [exportFormat, setExportFormat] = useState("csv");
   const [advancedFilters, setAdvancedFilters] = useState({ role: "" });
+
+  // ── Stats State ──
+  const [stats, setStats] = useState({ all: 0, active: 0, blocked: 0 });
 
   const usersPerPage = 5;
 
@@ -78,6 +88,15 @@ const AdminUsers = () => {
   useEffect(() => {
     loadUsers();
   }, []);
+
+  // ── Compute stats whenever users change ──
+  useEffect(() => {
+    setStats({
+      all: users.length,
+      active: users.filter((u) => u.status === "active").length,
+      blocked: users.filter((u) => u.status === "blocked").length,
+    });
+  }, [users]);
 
   useEffect(() => {
     setCurrentPage(1);
@@ -545,10 +564,7 @@ const AdminUsers = () => {
               </div>
             </div>
             <div className="admin-modal-footer">
-              <button
-                className="btn-export"
-                onClick={() => setViewUser(null)}
-              >
+              <button className="btn-export" onClick={() => setViewUser(null)}>
                 Close
               </button>
             </div>
@@ -566,7 +582,6 @@ const AdminUsers = () => {
           </p>
         </div>
         <div className="admin-header-actions">
-          {/* Export Format Select */}
           <select
             className="btn-export-select"
             value={exportFormat}
@@ -575,17 +590,94 @@ const AdminUsers = () => {
             <option value="csv">CSV</option>
             <option value="json">JSON</option>
           </select>
-
-          {/* Export Button */}
           <button className="btn-export" onClick={exportUsers}>
             <Download size={16} /> Export
           </button>
-
-          {/* Add New User Button */}
           <button className="btn-add-user" onClick={() => setShowForm(true)}>
             <Plus size={16} /> Add New User
           </button>
         </div>
+      </div>
+
+      {/* ── Stats Cards ── */}
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(3, 1fr)",
+          gap: "12px",
+          marginBottom: "1.5rem",
+        }}
+      >
+        {STAT_CARDS.map(({ key, label, color }) => {
+          const isActive =
+            key === "all" ? statusFilter === "" : statusFilter === key;
+
+          return (
+            <div
+              key={key}
+              onClick={() => {
+                setStatusFilter(key === "all" ? "" : key);
+                setCurrentPage(1);
+              }}
+              style={{
+                background: "var(--secondary, rgba(255,255,255,0.05))",
+                borderRadius: "0.75rem",
+                padding: "1rem 1.25rem",
+                borderLeft: `3px solid ${color}`,
+                cursor: "pointer",
+                transition: "opacity 0.2s",
+                outline: isActive
+                  ? `2px solid ${color}`
+                  : "2px solid transparent",
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.opacity = "0.85")}
+              onMouseLeave={(e) => (e.currentTarget.style.opacity = "1")}
+            >
+              <p
+                style={{
+                  fontSize: "12px",
+                  color: "var(--text-secondary)",
+                  margin: "0 0 6px",
+                  fontWeight: 400,
+                }}
+              >
+                {label}
+              </p>
+              <p
+                style={{
+                  fontSize: "26px",
+                  fontWeight: 500,
+                  color,
+                  margin: "0 0 4px",
+                  lineHeight: 1,
+                }}
+              >
+                {stats[key]}
+              </p>
+              <p
+                style={{
+                  fontSize: "11px",
+                  color: "var(--text-secondary)",
+                  margin: 0,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "5px",
+                }}
+              >
+                <span
+                  style={{
+                    width: 7,
+                    height: 7,
+                    borderRadius: "50%",
+                    background: color,
+                    display: "inline-block",
+                  }}
+                />
+                {isActive ? "Active filter" : "Click to filter"}
+              </p>
+            </div>
+          );
+        })}
       </div>
 
       {/* Filters */}
@@ -668,7 +760,6 @@ const AdminUsers = () => {
           <table className="admin-table">
             <thead>
               <tr>
-                {/* Select All Checkbox */}
                 <th>
                   <button
                     onClick={handleSelectAll}
@@ -731,7 +822,6 @@ const AdminUsers = () => {
                           : {}
                       }
                     >
-                      {/* Row Checkbox */}
                       <td>
                         <button
                           onClick={() => toggleUserSelection(user._id)}

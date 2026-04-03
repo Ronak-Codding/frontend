@@ -16,6 +16,13 @@ import "./AdminTables.css";
 import "./AdminUsers.css";
 import "./AdminContacts.css";
 
+// ── Stats Card Config ──
+const STAT_CARDS = [
+  { key: "", label: "Total Messages", color: "#7F77DD" },
+  { key: "new", label: "New", color: "#EF9F27" },
+  { key: "read", label: "Read", color: "#1D9E75" },
+];
+
 const AdminContacts = () => {
   const [contacts, setContacts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -72,6 +79,13 @@ const AdminContacts = () => {
     setSelectedContacts([]);
     setSelectAll(false);
   }, [currentPage, search, statusFilter, dateRange]);
+
+  // ── Stats (derived from contacts array) ──
+  const stats = {
+    "": contacts.length,
+    new: contacts.filter((c) => c.status === "new").length,
+    read: contacts.filter((c) => c.status === "read").length,
+  };
 
   const filteredContactsData = () =>
     contacts.filter((c) => {
@@ -330,6 +344,83 @@ const AdminContacts = () => {
             <Download size={16} /> Export
           </button>
         </div>
+      </div>
+
+      {/* ── Stats Cards ── */}
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(3, 1fr)",
+          gap: "12px",
+          marginBottom: "1.5rem",
+        }}
+      >
+        {STAT_CARDS.map(({ key, label, color }) => (
+          <div
+            key={key || "all"}
+            onClick={() => {
+              setStatusFilter(key);
+              setCurrentPage(1);
+            }}
+            style={{
+              background: "var(--secondary, rgba(255,255,255,0.05))",
+              borderRadius: "0.75rem",
+              padding: "1rem 1.25rem",
+              borderLeft: `3px solid ${color}`,
+              cursor: "pointer",
+              transition: "opacity 0.2s",
+              outline:
+                statusFilter === key
+                  ? `2px solid ${color}`
+                  : "2px solid transparent",
+            }}
+            onMouseEnter={(e) => (e.currentTarget.style.opacity = "0.85")}
+            onMouseLeave={(e) => (e.currentTarget.style.opacity = "1")}
+          >
+            <p
+              style={{
+                fontSize: "12px",
+                color: "var(--text-secondary)",
+                margin: "0 0 6px",
+                fontWeight: 400,
+              }}
+            >
+              {label}
+            </p>
+            <p
+              style={{
+                fontSize: "26px",
+                fontWeight: 500,
+                color,
+                margin: "0 0 4px",
+                lineHeight: 1,
+              }}
+            >
+              {stats[key]}
+            </p>
+            <p
+              style={{
+                fontSize: "11px",
+                color: "var(--text-secondary)",
+                margin: 0,
+                display: "flex",
+                alignItems: "center",
+                gap: "5px",
+              }}
+            >
+              <span
+                style={{
+                  width: 7,
+                  height: 7,
+                  borderRadius: "50%",
+                  background: color,
+                  display: "inline-block",
+                }}
+              />
+              {statusFilter === key ? "Active filter" : "Click to filter"}
+            </p>
+          </div>
+        ))}
       </div>
 
       {/* Filters */}
